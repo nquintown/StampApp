@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/client'
-import type { Stamp } from '@/lib/types'
+import type { Stamp, Collection } from '@/lib/types'
+
+export type RawCollection = Pick<Collection, 'id' | 'name' | 'createdAt'>
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -123,5 +125,53 @@ export async function updateStamp(
 ): Promise<void> {
   const supabase = createClient()
   const { error } = await supabase.from('stamps').update(updates).eq('id', stampId)
+  if (error) throw error
+}
+
+// ── Collections ───────────────────────────────────────────────────────────────
+
+export async function fetchCollections(): Promise<RawCollection[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('collections')
+    .select('id, name, created_at')
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+
+  return (data ?? []).map((r) => ({
+    id:        r.id,
+    name:      r.name,
+    createdAt: r.created_at,
+  }))
+}
+
+export async function insertCollection(
+  id: string,
+  name: string,
+  userId: string,
+): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('collections').insert({
+    id,
+    user_id:    userId,
+    name,
+    created_at: new Date().toISOString(),
+  })
+  if (error) throw error
+}
+
+export async function deleteCollection(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('collections').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function updateCollection(
+  id: string,
+  updates: { name?: string },
+): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('collections').update(updates).eq('id', id)
   if (error) throw error
 }
