@@ -214,16 +214,103 @@ export default function HomePage() {
             animate="show"
             style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
           >
-            {collections.map((collection) => (
-              <motion.div key={collection.id} variants={itemVariants}>
-                <CollectionCard
-                  collection={collection}
-                  stamps={stamps}
-                  onClick={() => router.push(`/collections/${collection.id}`)}
-                  onStampClick={async (id) => { await preGrantGyroPermission(); router.push(`/stamps/${id}`) }}
-                />
+            {collections.filter((c) => c.id !== 'all').length === 0 ? (
+              /* ── Empty state: no collections yet ── */
+              <motion.div variants={itemVariants}>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => router.push('/collections/new')}
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'transparent',
+                    borderRadius: 20,
+                    padding: '20px 18px',
+                    border: '1.5px dashed var(--border)',
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 14,
+                    fontFamily: 'inherit',
+                    textAlign: 'left',
+                    transition: 'border-color 0.25s ease, opacity 0.2s ease',
+                  }}
+                >
+                  {/* Icon */}
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 13,
+                    backgroundColor: 'var(--surface2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: 'var(--text-secondary)',
+                    transition: 'background-color 0.25s ease',
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path
+                        d="M2 6C2 4.9 2.9 4 4 4H8.5L10.5 6.5H16C17.1 6.5 18 7.4 18 8.5V15C18 16.1 17.1 17 16 17H4C2.9 17 2 16.1 2 15V6Z"
+                        stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"
+                      />
+                      <path d="M10 10.5V13.5M8.5 12H11.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                    </svg>
+                  </div>
+
+                  {/* Text */}
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      margin: '0 0 2px',
+                      letterSpacing: '-0.2px',
+                      transition: 'color 0.25s ease',
+                    }}>
+                      Créer une collection
+                    </p>
+                    <p style={{
+                      fontSize: 13,
+                      color: 'var(--text-secondary)',
+                      margin: 0,
+                      transition: 'color 0.25s ease',
+                    }}>
+                      Organise tes stamps par thème
+                    </p>
+                  </div>
+
+                  {/* Arrow */}
+                  <div style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    backgroundColor: 'var(--surface2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-secondary)',
+                    flexShrink: 0,
+                    transition: 'background-color 0.25s ease',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </motion.button>
               </motion.div>
-            ))}
+            ) : (
+              collections.filter((c) => c.id !== 'all').map((collection) => (
+                <motion.div key={collection.id} variants={itemVariants}>
+                  <CollectionCard
+                    collection={collection}
+                    stamps={stamps}
+                    onClick={() => router.push(`/collections/${collection.id}`)}
+                    onStampClick={async (id) => { await preGrantGyroPermission(); router.push(`/stamps/${id}`) }}
+                  />
+                </motion.div>
+              ))
+            )}
           </motion.div>
         </motion.div>
 
