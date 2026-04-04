@@ -11,13 +11,6 @@ import type { Stamp, StampLocation, PhotoTransform } from '@/lib/types'
 
 type Stage = 'device' | 'adjust' | 'processing' | 'name'
 
-interface PhotoTransform {
-  x: number
-  y: number
-  scale: number
-  rotation: number
-}
-
 // ── Reverse geocode ──────────────────────────────────────
 async function reverseGeocode(lat: number, lng: number): Promise<string> {
   try {
