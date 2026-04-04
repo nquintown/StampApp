@@ -178,7 +178,8 @@ export default function CameraPage() {
       const src = ev.target?.result as string
       setSelectedImage(src)
       setTransform({ x: 0, y: 0, scale: 1, rotation: 0 })
-      setStage('adjust')
+      // Small delay lets iOS fully close its native picker before we animate
+      setTimeout(() => setStage('adjust'), 80)
     }
     reader.readAsDataURL(file)
     e.target.value = '' // allow re-selecting same file

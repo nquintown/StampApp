@@ -44,6 +44,7 @@ export default function CameraStampFrame({
           scale:   { type: 'spring', stiffness: 290, damping: 26 },
           rotateX: { type: 'spring', stiffness: 290, damping: 26, delay: 0.04 },
         }}
+        layoutId="stamp-frame"
         style={{ position: 'relative', width: FW, height: FH, flexShrink: 0 }}
       >
 
