@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm_config_yes=true npx create-next-app \"/Users/nils.quintown/Documents/Claude Code/Patch\" --typescript --tailwind --app --no-src-dir --no-eslint --import-alias \"@/*\")",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"const pkg = require\\(''./node_modules/next/package.json''\\); console.log\\(''next:'', pkg.version\\)\")",
+      "Bash(node -e \"const pkg = require\\(''./node_modules/react/package.json''\\); console.log\\(''react:'', pkg.version\\)\")",
+      "Bash(node -e \"const pkg = require\\(''./node_modules/tailwindcss/package.json''\\); console.log\\(''tailwindcss:'', pkg.version\\)\")",
+      "Bash(node -e \"const pkg = require\\(''./node_modules/zustand/package.json''\\); console.log\\(''zustand:'', pkg.version\\)\")",
+      "Bash(node -e \"const pkg = require\\(''./node_modules/''framer-motion''/package.json''\\); console.log\\(''framer-motion:'', pkg.version\\)\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node -e \":*)",
+      "Bash(xargs kill:*)",
+      "Bash(ffmpeg -i \"/Users/nils.quintown/Desktop/Video-animations.mov\" -vf \"fps=2\" /tmp/frame_%03d.png)",
+      "Bash(/opt/homebrew/bin/pip3 install:*)",
+      "Bash(brew list:*)",
+      "Bash(ffmpeg -i \"/Users/nils.quintown/Desktop/Enregistrement de l''''écran 2026-03-29 à 14.17.22.mov\" -ss 00:00:00.5 -vframes 1 /tmp/frame1.jpg -y)",
+      "Bash(ipconfig getifaddr:*)"
+    ]
+  }
+}

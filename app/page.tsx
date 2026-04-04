@@ -1,0 +1,265 @@
+'use client'
+
+import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { useStore } from '@/lib/store'
+import TopBar, { IconButton } from '@/components/TopBar'
+import CollectionCard from '@/components/CollectionCard'
+import StampCard from '@/components/StampCard'
+import FAB from '@/components/FAB'
+import { preGrantGyroPermission } from '@/lib/gyro'
+
+const containerVariants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 300,
+      damping: 30,
+    },
+  },
+}
+
+// ── Sun icon (light mode indicator) ──────────────────────────
+function SunIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M9 2v1.5M9 14.5V16M2 9h1.5M14.5 9H16M4.1 4.1l1.1 1.1M12.8 12.8l1.1 1.1M4.1 13.9l1.1-1.1M12.8 5.2l1.1-1.1"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+// ── Moon icon (dark mode indicator) ──────────────────────────
+function MoonIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path
+        d="M14.5 10.5A6.5 6.5 0 0 1 7.5 3.5a6.5 6.5 0 1 0 7 7z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export default function HomePage() {
+  const router = useRouter()
+  const { collections, stamps, isDark, toggleDark } = useStore()
+
+  // Group all stamps by month (most recent first)
+  const stampsByMonth: { label: string; key: string; stamps: typeof stamps }[] = []
+  const seen = new Map<string, typeof stamps>()
+  for (const stamp of [...stamps].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )) {
+    const d = new Date(stamp.createdAt)
+    const key = `${d.getFullYear()}-${d.getMonth()}`
+    const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    if (!seen.has(key)) { seen.set(key, []); stampsByMonth.push({ label, key, stamps: seen.get(key)! }) }
+    seen.get(key)!.push(stamp)
+  }
+
+  const handleStampClick = async (id: string) => {
+    await preGrantGyroPermission()
+    router.push(`/stamps/${id}`)
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--bg)',
+        paddingBottom: 100,
+        transition: 'background-color 0.25s ease',
+      }}
+    >
+      <TopBar
+        title="Stampverse"
+        leftSlot={
+          <IconButton
+            label="New Collection"
+            onClick={() => router.push('/collections/new')}
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path
+                d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M9 8.5V11.5M7.5 10H10.5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
+          </IconButton>
+        }
+        rightSlot={
+          <IconButton label="Toggle theme" onClick={toggleDark}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={isDark ? 'moon' : 'sun'}
+                initial={{ opacity: 0, rotate: -30, scale: 0.7 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 30, scale: 0.7 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                style={{ display: 'flex' }}
+              >
+                {isDark ? <MoonIcon /> : <SunIcon />}
+              </motion.span>
+            </AnimatePresence>
+          </IconButton>
+        }
+      />
+
+      <div style={{ padding: '8px 20px 0' }}>
+        {/* Collections section */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+          style={{ marginBottom: 24 }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 14,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                margin: 0,
+              }}
+            >
+              Collections
+            </h2>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: 'var(--text-primary)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 0',
+                fontFamily: 'inherit',
+              }}
+              onClick={() => router.push('/grid')}
+            >
+              See all
+            </motion.button>
+          </div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
+          >
+            {collections.map((collection) => (
+              <motion.div key={collection.id} variants={itemVariants}>
+                <CollectionCard
+                  collection={collection}
+                  stamps={stamps}
+                  onClick={() => router.push(`/collections/${collection.id}`)}
+                  onStampClick={async (id) => { await preGrantGyroPermission(); router.push(`/stamps/${id}`) }}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* All Stamps — grouped by month */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
+              All Stamps
+            </h2>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontFamily: 'inherit' }}
+              onClick={() => router.push('/grid')}
+            >
+              See all
+            </motion.button>
+          </div>
+
+          {/* Month groups — max 3 months */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            {stampsByMonth.slice(0, 3).map(({ label, key, stamps: monthStamps }, groupIdx) => (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.32 + groupIdx * 0.06, duration: 0.38 }}
+              >
+                {/* Month label */}
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+                  {label}
+                </p>
+
+                {/* Stamps grid */}
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}
+                >
+                  {monthStamps.map((stamp) => (
+                    <motion.div key={stamp.id} variants={itemVariants} style={{ display: 'flex', justifyContent: 'center' }}>
+                      <StampCard
+                        stamp={stamp}
+                        size="small"
+                        onClick={() => handleStampClick(stamp.id)}
+                        layoutId={`stamp-card-${stamp.id}`}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      <FAB
+        onCamera={() => router.push('/camera')}
+        onGallery={() => router.push('/create')}
+      />
+    </div>
+  )
+}
