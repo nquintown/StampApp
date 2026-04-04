@@ -7,7 +7,6 @@ import { useStore } from '@/lib/store'
 import CameraStampFrame, { OW, OH, OX, OY, OR, OY_OFFSET } from '@/components/CameraStampFrame'
 import StampShape from '@/components/StampShape'
 import CollectionPickerSheet from '@/components/CollectionPickerSheet'
-import ContextMenuSheet from '@/components/ContextMenuSheet'
 import type { Stamp, StampLocation, PhotoTransform } from '@/lib/types'
 
 type Stage = 'device' | 'adjust' | 'processing' | 'name'
@@ -34,11 +33,7 @@ export default function CameraPage() {
   const router = useRouter()
   const { addStamp, collections } = useStore()
 
-  // Three separate inputs for each source
-  const galleryInputRef = useRef<HTMLInputElement>(null)
-  const cameraInputRef  = useRef<HTMLInputElement>(null)
-  const fileInputRef    = useRef<HTMLInputElement>(null)
-  const [pickerOpen, setPickerOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   // Gesture container
   const gestureRef = useRef<HTMLDivElement>(null)
 
@@ -273,10 +268,7 @@ export default function CameraPage() {
       transition={{ duration: 0.28 }}
       style={{ position: 'fixed', inset: 0, backgroundColor: 'var(--bg)', overflow: 'hidden' }}
     >
-      {/* Three hidden inputs — one per source to avoid native iOS overlay */}
-      <input ref={galleryInputRef} type="file" accept="image/*"                     style={{ display: 'none' }} onChange={handleFileSelect} />
-      <input ref={cameraInputRef}  type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFileSelect} />
-      <input ref={fileInputRef}    type="file" accept="image/*"                     style={{ display: 'none' }} onChange={handleFileSelect} />
+      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
 
       {/* ══ STAGE: DEVICE ════════════════════════════════ */}
       <AnimatePresence>
@@ -311,7 +303,7 @@ export default function CameraPage() {
             {/* Device + tap area */}
             <div
               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-              onClick={() => setPickerOpen(true)}
+              onClick={() => fileInputRef.current?.click()}
             >
               <div style={{ position: 'relative' }}>
                 <CameraStampFrame isProcessing={false} />
@@ -709,43 +701,6 @@ export default function CameraPage() {
         )}
       </AnimatePresence>
 
-      {/* ══ PHOTO SOURCE PICKER (custom — no iOS flicker) ═══ */}
-      <ContextMenuSheet
-        visible={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        items={[
-          {
-            label: 'Photothèque',
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                <rect x="3" y="3" width="18" height="18" rx="3"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="m21 15-5-5L5 21"/>
-              </svg>
-            ),
-            onPress: () => galleryInputRef.current?.click(),
-          },
-          {
-            label: 'Prendre une photo',
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-                <circle cx="12" cy="13" r="3"/>
-              </svg>
-            ),
-            onPress: () => cameraInputRef.current?.click(),
-          },
-          {
-            label: 'Choisir un fichier',
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
-            ),
-            onPress: () => fileInputRef.current?.click(),
-          },
-        ]}
-      />
 
     </motion.div>
   )
