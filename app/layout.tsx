@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import ThemeSync from '@/components/ThemeSync'
+import AuthProvider from '@/components/AuthProvider'
 
 export const metadata: Metadata = {
   title: 'Stampverse',
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeSync />
+        <AuthProvider />
         <div className="app-shell">
           {children}
         </div>

@@ -63,7 +63,7 @@ function MoonIcon() {
 
 export default function HomePage() {
   const router = useRouter()
-  const { collections, stamps, isDark, toggleDark } = useStore()
+  const { collections, stamps, isDark, toggleDark, loading } = useStore()
 
   // Group all stamps by month (most recent first)
   const stampsByMonth: { label: string; key: string; stamps: typeof stamps }[] = []
@@ -81,6 +81,35 @@ export default function HomePage() {
   const handleStampClick = async (id: string) => {
     await preGrantGyroPermission()
     router.push(`/stamps/${id}`)
+  }
+
+  // ── Loading skeleton ────────────────────────────────────
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 100 }}>
+        <TopBar
+          title="Stampverse"
+          leftSlot={<IconButton label="New Collection" onClick={() => {}}><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg></IconButton>}
+          rightSlot={<IconButton label="Toggle theme" onClick={toggleDark}>{isDark ? <MoonIcon /> : <SunIcon />}</IconButton>}
+        />
+        <div style={{ padding: '8px 20px 0' }}>
+          {/* Skeleton pulses */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ height: 13, width: 90, borderRadius: 6, backgroundColor: 'var(--surface2)', marginBottom: 14, animation: 'pulse 1.4s ease-in-out infinite' }} />
+            {[0, 1].map((i) => (
+              <div key={i} style={{ height: 88, borderRadius: 20, backgroundColor: 'var(--surface2)', marginBottom: 10, animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 0.1}s` }} />
+            ))}
+          </div>
+          <div style={{ height: 13, width: 80, borderRadius: 6, backgroundColor: 'var(--surface2)', marginBottom: 20, animation: 'pulse 1.4s ease-in-out infinite' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} style={{ aspectRatio: '1', borderRadius: 16, backgroundColor: 'var(--surface2)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 0.07}s` }} />
+            ))}
+          </div>
+        </div>
+        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
+      </div>
+    )
   }
 
   return (
