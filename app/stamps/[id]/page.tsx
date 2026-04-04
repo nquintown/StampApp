@@ -79,9 +79,9 @@ export default function StampDetailPage() {
 
       if (shadowRef.current) {
         const mag = Math.sqrt(rx * rx + ry * ry)
-        shadowRef.current.style.transform = `translate(${(ry * 1.4).toFixed(1)}px, ${(-rx * 1.4).toFixed(1)}px)`
-        shadowRef.current.style.filter    = `blur(${(14 + mag * 0.85).toFixed(1)}px)`
-        shadowRef.current.style.opacity   = (0.14 + mag * 0.008).toFixed(3)
+        shadowRef.current.style.transform = `translate(${(ry * 2.8).toFixed(1)}px, ${(-rx * 2.8).toFixed(1)}px) scale(${(1 + mag * 0.018).toFixed(3)})`
+        shadowRef.current.style.filter    = `blur(${(18 + mag * 1.4).toFixed(1)}px)`
+        shadowRef.current.style.opacity   = (0.38 + mag * 0.022).toFixed(3)
       }
     }
 
@@ -319,11 +319,11 @@ export default function StampDetailPage() {
               ref={shadowRef}
               style={{
                 position: 'absolute',
-                bottom: -22, left: '16%', right: '16%', height: 48,
-                background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.32) 0%, transparent 70%)',
+                bottom: -28, left: '8%', right: '8%', height: 60,
+                background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 45%, transparent 72%)',
                 pointerEvents: 'none',
                 willChange: 'transform, filter, opacity',
-                opacity: 0.14,
+                opacity: 0.38,
               }}
             />
 
