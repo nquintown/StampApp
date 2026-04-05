@@ -8,6 +8,8 @@ interface MenuItem {
   icon?: React.ReactNode
   onPress?: () => void
   destructive?: boolean
+  /** If true, the sheet won't auto-close when this item is pressed (the handler closes it manually) */
+  noAutoClose?: boolean
 }
 
 interface ContextMenuSheetProps {
@@ -92,7 +94,7 @@ export default function ContextMenuSheet({
                 whileTap={{ backgroundColor: 'var(--surface2)' }}
                 onClick={() => {
                   item.onPress?.()
-                  onClose()
+                  if (!item.noAutoClose) onClose()
                 }}
                 style={{
                   display: 'flex',

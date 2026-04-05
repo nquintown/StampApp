@@ -63,13 +63,16 @@ interface StampStore {
   loading:     boolean
 
   // Actions
-  loadStamps:       () => Promise<void>
-  addStamp:         (stamp: Stamp) => Promise<void>
-  deleteStamp:      (id: string) => Promise<void>
-  moveToCollection: (stampId: string, collectionId: string) => Promise<void>
-  toggleFavorite:   (stampId: string) => Promise<void>
-  addCollection:    (name: string) => Promise<void>
-  toggleDark:       () => void
+  loadStamps:        () => Promise<void>
+  addStamp:          (stamp: Stamp) => Promise<void>
+  deleteStamp:       (id: string) => Promise<void>
+  renameStamp:       (id: string, newTitle: string) => Promise<void>
+  moveToCollection:  (stampId: string, collectionId: string) => Promise<void>
+  toggleFavorite:    (stampId: string) => Promise<void>
+  addCollection:     (name: string) => Promise<void>
+  renameCollection:  (id: string, newName: string) => Promise<void>
+  deleteCollection:  (id: string) => Promise<void>
+  toggleDark:        () => void
 
   // UI
   selectedStampId:  string | null
@@ -191,6 +194,44 @@ export const useStore = create<StampStore>((set, get) => ({
     }))
     try { await db.updateStamp(stampId, { favorite: newVal }) }
     catch (err) { console.error('toggleFavorite error:', err) }
+  },
+
+  // ── Rename stamp ──────────────────────────────────────
+  renameStamp: async (id, newTitle) => {
+    set((s) => ({
+      stamps: s.stamps.map((st) => st.id === id ? { ...st, title: newTitle } : st),
+    }))
+    try { await db.updateStamp(id, { title: newTitle }) }
+    catch (err) { console.error('renameStamp error:', err) }
+  },
+
+  // ── Rename collection ─────────────────────────────────
+  renameCollection: async (id, newName) => {
+    set((s) => ({
+      collections: s.collections.map((c) => c.id === id ? { ...c, name: newName } : c),
+    }))
+    try { await db.updateCollection(id, { name: newName }) }
+    catch (err) { console.error('renameCollection error:', err) }
+  },
+
+  // ── Delete collection + move stamps to default ────────
+  deleteCollection: async (id) => {
+    const { stamps, collections } = get()
+    // Find a fallback collection (first user collection that's not the deleted one)
+    const fallback = collections.find((c) => c.id !== 'all' && c.id !== id)
+    const fallbackId = fallback?.id ?? 'default'
+
+    // Optimistic: remove collection, reassign stamps
+    set((s) => {
+      const updatedStamps = s.stamps.map((st) =>
+        st.collectionId === id ? { ...st, collectionId: fallbackId } : st,
+      )
+      const updatedCols = s.collections.filter((c) => c.id !== id)
+      return { collections: rebuildCollections(updatedCols, updatedStamps), stamps: updatedStamps }
+    })
+
+    try { await db.deleteCollection(id) }
+    catch (err) { console.error('deleteCollection error:', err) }
   },
 
   // ── Add collection → optimistic + insert ─────────────

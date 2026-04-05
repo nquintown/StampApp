@@ -17,18 +17,20 @@ import CollectionPickerSheet from '@/components/CollectionPickerSheet'
 import StampImagePreview from '@/components/StampImagePreview'
 import TagChip from '@/components/TagChip'
 import FriendPickerSheet from '@/components/FriendPickerSheet'
+import RenameSheet from '@/components/RenameSheet'
 
 export default function StampDetailPage() {
   const router = useRouter()
   const params = useParams()
   const id = params?.id as string
-  const { stamps, collections, deleteStamp, moveToCollection, toggleFavorite, user } = useStore()
+  const { stamps, collections, deleteStamp, moveToCollection, toggleFavorite, renameStamp, user } = useStore()
 
   const [menuOpen, setMenuOpen]               = useState(false)
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
   const [isDeleting, setIsDeleting]           = useState(false)
   const [previewOpen, setPreviewOpen]         = useState(false)
   const [shareOpen, setShareOpen]             = useState(false)
+  const [renameOpen, setRenameOpen]           = useState(false)
 
   // ── 3D parallax tilt — refs (DOM updated directly, zero re-renders) ──
   const containerRef = useRef<HTMLDivElement>(null)
@@ -206,7 +208,29 @@ export default function StampDetailPage() {
 
   const menuItems = [
     {
-      label: stamp.favorite ? 'Remove from favorites' : 'Add to favorites',
+      label: 'Renommer',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 12.5V15h2.5l7.37-7.37-2.5-2.5L3 12.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+          <path d="M12.88 4.12a1.77 1.77 0 0 1 2.5 2.5l-1.25-1.25-1.25-1.25Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        </svg>
+      ),
+      noAutoClose: true,
+      onPress: () => { setMenuOpen(false); setTimeout(() => setRenameOpen(true), 220) },
+    },
+    {
+      label: 'Partager',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M12 3L16 7L12 11V8.5C7 8.5 4 10.5 3 15C2.5 11 4 6 12 5.5V3Z"
+            stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        </svg>
+      ),
+      noAutoClose: true,
+      onPress: () => { setMenuOpen(false); setTimeout(() => setShareOpen(true), 200) },
+    },
+    {
+      label: stamp.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
       icon: (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path
@@ -219,7 +243,7 @@ export default function StampDetailPage() {
       onPress: () => toggleFavorite(stamp.id),
     },
     {
-      label: 'Move to collection',
+      label: 'Déplacer',
       icon: (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path
@@ -228,20 +252,11 @@ export default function StampDetailPage() {
           />
         </svg>
       ),
+      noAutoClose: true,
       onPress: () => { setMenuOpen(false); setTimeout(() => setCollectionPickerOpen(true), 200) },
     },
     {
-      label: 'Share stamp',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M12 3L16 7L12 11V8.5C7 8.5 4 10.5 3 15C2.5 11 4 6 12 5.5V3Z"
-            stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-        </svg>
-      ),
-      onPress: () => { setMenuOpen(false); setTimeout(() => setShareOpen(true), 200) },
-    },
-    {
-      label: 'Delete stamp',
+      label: 'Supprimer',
       destructive: true,
       icon: (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -625,6 +640,14 @@ export default function StampDetailPage() {
             userId={user.id}
           />
         )}
+
+        <RenameSheet
+          visible={renameOpen}
+          onClose={() => setRenameOpen(false)}
+          currentName={stamp.title}
+          label="stamp"
+          onConfirm={(newTitle) => renameStamp(stamp.id, newTitle)}
+        />
       </motion.div>
     </AnimatePresence>
   )
