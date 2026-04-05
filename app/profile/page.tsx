@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useCallback, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { IconButton } from '@/components/TopBar'
@@ -124,6 +124,16 @@ function SettingRow({ iconBg, iconEl, label, sublabel, value, badge, rightSlot, 
   )
 }
 
+// ── Username availability status ──────────────────────────
+type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'same'
+
+function validateUsername(u: string): string | null {
+  if (u.length < 3)  return 'Au moins 3 caractères'
+  if (u.length > 20) return '20 caractères maximum'
+  if (!/^[a-z0-9_]+$/.test(u)) return 'Lettres, chiffres et _ uniquement'
+  return null
+}
+
 // ── Notification button state ─────────────────────────────
 type NotifState = 'idle' | 'loading' | 'granted' | 'denied' | 'unsupported'
 
@@ -137,6 +147,15 @@ export default function ProfilePage() {
   const [uploading,   setUploading]   = useState(false)
   const [notifState,  setNotifState]  = useState<NotifState>('idle')
   const [unseenCount, setUnseenCount] = useState(0)
+
+  // ── Username editing ──────────────────────────────────
+  const [editingUsername,  setEditingUsername]  = useState(false)
+  const [usernameInput,    setUsernameInput]    = useState('')
+  const [usernameStatus,   setUsernameStatus]   = useState<UsernameStatus>('idle')
+  const [usernameHint,     setUsernameHint]     = useState<string | null>(null)
+  const [savingUsername,   setSavingUsername]   = useState(false)
+  const usernameDebounce   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const usernameInputRef   = useRef<HTMLInputElement>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -170,6 +189,64 @@ export default function ProfilePage() {
     if (url) setAvatarUrl(`${url}?t=${Date.now()}`)  // cache-bust
     setUploading(false)
     e.target.value = ''  // allow re-selecting same file
+  }
+
+  // ── Username edit: open ───────────────────────────────
+  const openUsernameEdit = () => {
+    setUsernameInput(profile?.username ?? '')
+    setUsernameStatus('same')
+    setUsernameHint(null)
+    setEditingUsername(true)
+    setTimeout(() => usernameInputRef.current?.focus(), 80)
+  }
+
+  // ── Username edit: debounced check ────────────────────
+  useEffect(() => {
+    if (!editingUsername) return
+    if (usernameDebounce.current) clearTimeout(usernameDebounce.current)
+
+    const trimmed = usernameInput.toLowerCase().trim()
+
+    if (!trimmed) {
+      setUsernameStatus('idle')
+      setUsernameHint(null)
+      return
+    }
+    if (trimmed === (profile?.username ?? '').toLowerCase()) {
+      setUsernameStatus('same')
+      setUsernameHint(null)
+      return
+    }
+    const err = validateUsername(trimmed)
+    if (err) {
+      setUsernameStatus('invalid')
+      setUsernameHint(err)
+      return
+    }
+    setUsernameStatus('checking')
+    setUsernameHint(null)
+    usernameDebounce.current = setTimeout(async () => {
+      const available = await profileDb.checkUsernameAvailable(trimmed)
+      setUsernameStatus(available ? 'available' : 'taken')
+      setUsernameHint(available ? null : 'Ce pseudo est déjà pris.')
+    }, 450)
+  }, [usernameInput, editingUsername]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Username edit: save ───────────────────────────────
+  const saveUsername = async () => {
+    if (!user) return
+    const trimmed = usernameInput.toLowerCase().trim()
+    if (usernameStatus === 'taken' || usernameStatus === 'invalid' || usernameStatus === 'checking') return
+    setSavingUsername(true)
+    try {
+      await profileDb.upsertProfile(user.id, { username: trimmed })
+      setProfile((p) => p ? { ...p, username: trimmed } : p)
+      setEditingUsername(false)
+    } catch {
+      setUsernameHint('Erreur lors de la sauvegarde, réessaie.')
+    } finally {
+      setSavingUsername(false)
+    }
   }
 
   // ── Notifications ─────────────────────────────────────
@@ -343,13 +420,141 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* Name & email */}
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', letterSpacing: '-0.5px', transition: 'color 0.25s ease' }}>
-            {displayName}
-          </h2>
+        <div style={{ textAlign: 'center', width: '100%', maxWidth: 300 }}>
+
+          {/* Display name + edit button */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 4 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px', transition: 'color 0.25s ease' }}>
+              {displayName}
+            </h2>
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={openUsernameEdit}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-secondary)', padding: 4, display: 'flex',
+                WebkitTapHighlightColor: 'transparent', flexShrink: 0,
+              }}
+              aria-label="Modifier le pseudo"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z"/>
+              </svg>
+            </motion.button>
+          </div>
+
           <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0, transition: 'color 0.25s ease' }}>
             {user?.email}
           </p>
+
+          {/* Inline username editor */}
+          <AnimatePresence>
+            {editingUsername && (
+              <motion.div
+                key="username-editor"
+                initial={{ opacity: 0, y: -6, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -6, height: 0 }}
+                transition={{ duration: 0.22 }}
+                style={{ overflow: 'hidden', marginTop: 14 }}
+              >
+                {/* Input row */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  backgroundColor: 'var(--surface)', border: '1.5px solid var(--border)',
+                  borderRadius: 12, padding: '0 12px',
+                  transition: 'border-color 0.2s ease',
+                }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)', flexShrink: 0 }}>@</span>
+                  <input
+                    ref={usernameInputRef}
+                    value={usernameInput}
+                    onChange={(e) => setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') saveUsername(); if (e.key === 'Escape') setEditingUsername(false) }}
+                    placeholder="ton_pseudo"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    style={{
+                      flex: 1, border: 'none', background: 'none', outline: 'none',
+                      fontSize: 15, fontFamily: 'inherit', color: 'var(--text-primary)',
+                      padding: '11px 0',
+                    }}
+                  />
+                  {/* Status icon */}
+                  <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', width: 18 }}>
+                    {usernameStatus === 'checking' && (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                          <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/>
+                        </path>
+                      </svg>
+                    )}
+                    {usernameStatus === 'available' && (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 6 9 17l-5-5"/>
+                      </svg>
+                    )}
+                    {usernameStatus === 'taken' && (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                      </svg>
+                    )}
+                  </div>
+                </div>
+
+                {/* Hint text */}
+                <AnimatePresence>
+                  {usernameHint && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      style={{
+                        fontSize: 12, margin: '5px 4px 0', textAlign: 'left',
+                        color: usernameStatus === 'taken' ? '#EF4444' : 'var(--text-secondary)',
+                      }}
+                    >
+                      {usernameHint}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setEditingUsername(false)}
+                    style={{
+                      flex: 1, padding: '10px 0', borderRadius: 10,
+                      background: 'var(--surface2)', border: '1px solid var(--border)',
+                      color: 'var(--text-secondary)', fontSize: 14, fontWeight: 500,
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    Annuler
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={saveUsername}
+                    disabled={savingUsername || usernameStatus === 'taken' || usernameStatus === 'checking' || usernameStatus === 'invalid' || usernameStatus === 'idle'}
+                    style={{
+                      flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
+                      background: (savingUsername || usernameStatus === 'taken' || usernameStatus === 'checking' || usernameStatus === 'invalid' || usernameStatus === 'idle')
+                        ? 'var(--text-secondary)' : 'var(--text-primary)',
+                      color: 'var(--bg)', fontSize: 14, fontWeight: 600,
+                      cursor: (savingUsername || usernameStatus === 'taken' || usernameStatus === 'checking' || usernameStatus === 'invalid' || usernameStatus === 'idle')
+                        ? 'not-allowed' : 'pointer',
+                      fontFamily: 'inherit', transition: 'background 0.2s',
+                    }}
+                  >
+                    {savingUsername ? '…' : 'Enregistrer'}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Stats card */}
