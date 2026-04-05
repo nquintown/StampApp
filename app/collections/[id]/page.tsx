@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import TopBar, { IconButton } from '@/components/TopBar'
@@ -27,11 +27,18 @@ const itemVariants = {
 export default function CollectionPage({ params }: { params: { id: string } }) {
   const { id } = params
   const router  = useRouter()
-  const { collections, stamps, renameCollection, deleteCollection } = useStore()
+  const { collections, stamps, loading, loadStamps, renameCollection, deleteCollection } = useStore()
 
   const [menuOpen,   setMenuOpen]   = useState(false)
   const [renameOpen, setRenameOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Load stamps if not yet loaded (direct URL access / page refresh)
+  useEffect(() => {
+    if (!loading && stamps.length === 0 && collections.length === 0) {
+      loadStamps()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const collection       = collections.find((c) => c.id === id)
   const collectionStamps = stamps.filter((s) => s.collectionId === id || id === 'all')
@@ -82,13 +89,37 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
     },
   ]
 
+  // Loading skeleton
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 100 }}>
+        <TopBar
+          title="Collection"
+          leftSlot={
+            <IconButton label="Retour" onClick={() => router.back()}>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M11 4L6 9L11 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </IconButton>
+          }
+        />
+        <div style={{ padding: '4px 20px 0' }}>
+          <div style={{ height: 13, width: 70, borderRadius: 6, backgroundColor: 'var(--surface2)', marginBottom: 20, animation: 'pulse 1.4s ease-in-out infinite' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} style={{ aspectRatio: '3/4', borderRadius: 16, backgroundColor: 'var(--surface2)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 0.07}s` }} />
+            ))}
+          </div>
+        </div>
+        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
+      </div>
+    )
+  }
+
   return (
-    <AnimatePresence>
       <motion.div
-        key={id}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: isDeleting ? 0 : 1, y: isDeleting ? -20 : 0 }}
-        exit={{ opacity: 0 }}
         transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
         style={{
           minHeight: '100vh',
@@ -204,7 +235,8 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
           label="collection"
           onConfirm={(newName) => renameCollection(id, newName)}
         />
+
+        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
       </motion.div>
-    </AnimatePresence>
   )
 }
