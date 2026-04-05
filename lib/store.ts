@@ -74,6 +74,11 @@ interface StampStore {
   selectedStampId:  string | null
   setSelectedStamp: (id: string | null) => void
   isDark:           boolean
+
+  // Errors (visible in Toast)
+  dbError:    string | null
+  setDbError: (msg: string) => void
+  clearError: () => void
 }
 
 // ── Store ─────────────────────────────────────────────────────────────────────
@@ -94,6 +99,11 @@ export const useStore = create<StampStore>((set, get) => ({
   setSelectedStamp: (id) => set({ selectedStampId: id }),
   toggleDark:       () => set((s) => ({ isDark: !s.isDark })),
 
+  // ── Errors ────────────────────────────────────────────
+  dbError:    null,
+  setDbError: (msg) => set({ dbError: msg }),
+  clearError: () => set({ dbError: null }),
+
   // ── Load stamps + collections from Supabase ───────────
   loadStamps: async () => {
     set({ loading: true })
@@ -104,9 +114,10 @@ export const useStore = create<StampStore>((set, get) => ({
       ])
       const collections = buildCollections(rawCols, stamps)
       set({ stamps, collections, loading: false })
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
       console.error('loadStamps error:', err)
-      set({ loading: false })
+      set({ loading: false, dbError: `Chargement échoué : ${msg}` })
     }
   },
 
@@ -127,12 +138,12 @@ export const useStore = create<StampStore>((set, get) => ({
       set((s) => ({
         stamps: s.stamps.map((st) => (st.id === stamp.id ? saved : st)),
       }))
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
       console.error('addStamp error:', err)
-      // Rollback
       set((s) => {
         const stamps = s.stamps.filter((st) => st.id !== stamp.id)
-        return { stamps, collections: rebuildCollections(s.collections, stamps) }
+        return { stamps, collections: rebuildCollections(s.collections, stamps), dbError: `Stamp non sauvegardé : ${msg}` }
       })
     }
   },
@@ -199,10 +210,13 @@ export const useStore = create<StampStore>((set, get) => ({
 
     try {
       await db.insertCollection(id, name, user.id)
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
       console.error('addCollection error:', err)
-      // Rollback
-      set((s) => ({ collections: s.collections.filter((c) => c.id !== id) }))
+      set((s) => ({
+        collections: s.collections.filter((c) => c.id !== id),
+        dbError: `Collection non sauvegardée : ${msg}`,
+      }))
     }
   },
 }))
