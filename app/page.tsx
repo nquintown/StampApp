@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import TopBar, { IconButton } from '@/components/TopBar'
@@ -61,9 +61,20 @@ function MoonIcon() {
   )
 }
 
+// ── User icon ─────────────────────────────────────────────
+function UserIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <circle cx="9" cy="6.5" r="2.8" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M2.5 15.5C2.5 12.5 5.4 10 9 10C12.6 10 15.5 12.5 15.5 15.5"
+        stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export default function HomePage() {
   const router = useRouter()
-  const { collections, stamps, isDark, toggleDark, loading } = useStore()
+  const { collections, stamps, isDark, loading } = useStore()
 
   // Group all stamps by month (most recent first)
   const stampsByMonth: { label: string; key: string; stamps: typeof stamps }[] = []
@@ -90,7 +101,7 @@ export default function HomePage() {
         <TopBar
           title="Stampverse"
           leftSlot={<IconButton label="New Collection" onClick={() => {}}><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg></IconButton>}
-          rightSlot={<IconButton label="Toggle theme" onClick={toggleDark}>{isDark ? <MoonIcon /> : <SunIcon />}</IconButton>}
+          rightSlot={<IconButton label="Profil" onClick={() => router.push('/profile')}><UserIcon /></IconButton>}
         />
         <div style={{ padding: '8px 20px 0' }}>
           {/* Skeleton pulses */}
@@ -145,19 +156,8 @@ export default function HomePage() {
           </IconButton>
         }
         rightSlot={
-          <IconButton label="Toggle theme" onClick={toggleDark}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={isDark ? 'moon' : 'sun'}
-                initial={{ opacity: 0, rotate: -30, scale: 0.7 }}
-                animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                exit={{ opacity: 0, rotate: 30, scale: 0.7 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
-                style={{ display: 'flex' }}
-              >
-                {isDark ? <MoonIcon /> : <SunIcon />}
-              </motion.span>
-            </AnimatePresence>
+          <IconButton label="Profil" onClick={() => router.push('/profile')}>
+            <UserIcon />
           </IconButton>
         }
       />
