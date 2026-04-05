@@ -570,10 +570,10 @@ export default function StampDetailPage() {
             </span>
           </motion.button>
 
-          {/* Move to collection */}
+          {/* Partager */}
           <motion.button
             whileTap={{ scale: 0.93 }}
-            onClick={() => setCollectionPickerOpen(true)}
+            onClick={() => setShareOpen(true)}
             style={{
               flex: 1.4, padding: '13px 0', borderRadius: 14,
               backgroundColor: 'var(--text-primary)',
@@ -586,14 +586,12 @@ export default function StampDetailPage() {
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
-                d="M1.5 5C1.5 4.17 2.17 3.5 3 3.5H6L7.5 5.5H13C13.83 5.5 14.5 6.17 14.5 7V12C14.5 12.83 13.83 13.5 13 13.5H3C2.17 13.5 1.5 12.83 1.5 12V5Z"
-                stroke="var(--bg)" strokeWidth="1.3" strokeLinejoin="round"
+                d="M11.5 2.5L14.5 5.5L11.5 8.5V6.5C7 6.5 5 8 4.5 12C4 9 5 4.5 11.5 4.5V2.5Z"
+                stroke="var(--bg)" strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round"
               />
-              <path d="M8 8V11M6.5 9.5L8 8L9.5 9.5" stroke="var(--bg)" strokeWidth="1.3"
-                strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--bg)' }}>
-              Add to Collection
+              Partager
             </span>
           </motion.button>
         </motion.div>
