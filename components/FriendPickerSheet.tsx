@@ -10,11 +10,13 @@ interface Props {
   visible:  boolean
   onClose:  () => void
   stamp: {
-    id:            string
-    title:         string
-    thumbnailUrl:  string
-    imageUrl:      string
+    id:             string
+    title:          string
+    thumbnailUrl:   string
+    imageUrl:       string
     dominantColor?: string
+    createdAt?:     string
+    location?:      string | null
   }
   userId: string
 }

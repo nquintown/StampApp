@@ -11,6 +11,8 @@ export interface SharedStampRecord {
   stampThumbnailUrl:    string | null
   stampImageUrl:        string | null
   stampDominantColor:   string | null
+  stampCreatedAt:       string | null   // original stamp creation date
+  stampLocation:        string | null   // original stamp location label
   message:              string | null
   seen:                 boolean
   createdAt:            string
@@ -30,6 +32,8 @@ export async function shareStamp(
     thumbnailUrl:   string
     imageUrl:       string
     dominantColor?: string
+    createdAt?:     string
+    location?:      string | null
   },
   message?: string,
 ): Promise<boolean> {
@@ -43,6 +47,8 @@ export async function shareStamp(
       stamp_thumbnail_url:  stamp.thumbnailUrl,
       stamp_image_url:      stamp.imageUrl,
       stamp_dominant_color: stamp.dominantColor ?? null,
+      stamp_created_at:     stamp.createdAt     ?? null,
+      stamp_location:       stamp.location       ?? null,
       message:              message ?? null,
       seen:                 false,
     })
@@ -85,16 +91,18 @@ export async function getReceivedShares(userId: string): Promise<SharedStampReco
         senderId:             r.sender_id,
         recipientId:          r.recipient_id,
         stampId:              r.stamp_id,
-        stampTitle:           r.stamp_title     ?? null,
-        stampThumbnailUrl:    r.stamp_thumbnail_url ?? null,
-        stampImageUrl:        r.stamp_image_url ?? null,
+        stampTitle:           r.stamp_title          ?? null,
+        stampThumbnailUrl:    r.stamp_thumbnail_url  ?? null,
+        stampImageUrl:        r.stamp_image_url      ?? null,
         stampDominantColor:   r.stamp_dominant_color ?? null,
-        message:              r.message         ?? null,
-        seen:                 r.seen            ?? false,
+        stampCreatedAt:       r.stamp_created_at     ?? null,
+        stampLocation:        r.stamp_location       ?? null,
+        message:              r.message              ?? null,
+        seen:                 r.seen                 ?? false,
         createdAt:            r.created_at,
-        senderUsername:       sender?.username  ?? null,
-        senderFullName:       sender?.full_name ?? null,
-        senderAvatarUrl:      sender?.avatar_url ?? null,
+        senderUsername:       sender?.username       ?? null,
+        senderFullName:       sender?.full_name      ?? null,
+        senderAvatarUrl:      sender?.avatar_url     ?? null,
       }
     })
   } catch {
@@ -157,16 +165,18 @@ export async function getShareById(shareId: string, userId: string): Promise<Sha
       senderId:             data.sender_id,
       recipientId:          data.recipient_id,
       stampId:              data.stamp_id,
-      stampTitle:           data.stamp_title      ?? null,
-      stampThumbnailUrl:    data.stamp_thumbnail_url ?? null,
-      stampImageUrl:        data.stamp_image_url  ?? null,
+      stampTitle:           data.stamp_title          ?? null,
+      stampThumbnailUrl:    data.stamp_thumbnail_url  ?? null,
+      stampImageUrl:        data.stamp_image_url      ?? null,
       stampDominantColor:   data.stamp_dominant_color ?? null,
-      message:              data.message          ?? null,
-      seen:                 data.seen             ?? false,
+      stampCreatedAt:       data.stamp_created_at     ?? null,
+      stampLocation:        data.stamp_location       ?? null,
+      message:              data.message              ?? null,
+      seen:                 data.seen                 ?? false,
       createdAt:            data.created_at,
-      senderUsername:       profile?.username     ?? null,
-      senderFullName:       profile?.full_name    ?? null,
-      senderAvatarUrl:      profile?.avatar_url   ?? null,
+      senderUsername:       profile?.username         ?? null,
+      senderFullName:       profile?.full_name        ?? null,
+      senderAvatarUrl:      profile?.avatar_url       ?? null,
     }
   } catch {
     return null

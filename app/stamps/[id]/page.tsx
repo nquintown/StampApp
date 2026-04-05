@@ -628,11 +628,13 @@ export default function StampDetailPage() {
             visible={shareOpen}
             onClose={() => setShareOpen(false)}
             stamp={{
-              id:           stamp.id,
-              title:        stamp.title,
-              thumbnailUrl: stamp.thumbnailUrl,
-              imageUrl:     stamp.imageUrl,
+              id:            stamp.id,
+              title:         stamp.title,
+              thumbnailUrl:  stamp.thumbnailUrl,
+              imageUrl:      stamp.imageUrl,
               dominantColor: stamp.dominantColor,
+              createdAt:     stamp.createdAt,
+              location:      stamp.location?.label ?? null,
             }}
             userId={user.id}
           />
