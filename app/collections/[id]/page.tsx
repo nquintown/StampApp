@@ -111,9 +111,8 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
             !isVirtual ? (
               <IconButton label="Options" onClick={() => setMenuOpen(true)}>
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <circle cx="4"  cy="9" r="1.5" fill="currentColor" />
-                  <circle cx="9"  cy="9" r="1.5" fill="currentColor" />
-                  <circle cx="14" cy="9" r="1.5" fill="currentColor" />
+                  <circle cx="9" cy="9" r="2.2" stroke="currentColor" strokeWidth="1.4" />
+                  <path d="M9 2v1.5M9 14.5V16M2 9h1.5M14.5 9H16M4.1 4.1l1.06 1.06M12.84 12.84l1.06 1.06M4.1 13.9l1.06-1.06M12.84 5.16l1.06-1.06" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
                 </svg>
               </IconButton>
             ) : undefined
