@@ -128,6 +128,21 @@ export async function upsertProfile(
   if (error) throw error
 }
 
+// ── Check if a username is available ─────────────────────
+export async function checkUsernameAvailable(username: string): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', username.toLowerCase().trim())
+      .maybeSingle()
+    return data === null
+  } catch {
+    return true // assume available if error
+  }
+}
+
 export async function signOut(): Promise<void> {
   const supabase = createClient()
   await supabase.auth.signOut()
