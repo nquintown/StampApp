@@ -7,6 +7,7 @@ import { useStore } from '@/lib/store'
 import CameraStampFrame, { OW, OH, OX, OY, OR, OY_OFFSET } from '@/components/CameraStampFrame'
 import StampShape from '@/components/StampShape'
 import CollectionPickerSheet from '@/components/CollectionPickerSheet'
+import TagPicker from '@/components/TagPicker'
 import type { Stamp, StampLocation, PhotoTransform } from '@/lib/types'
 
 type Stage = 'device' | 'adjust' | 'processing' | 'name'
@@ -44,6 +45,7 @@ export default function CameraPage() {
   const [capturedThumbnail, setCapturedThumbnail] = useState<string | null>(null)
   const [savedTransform, setSavedTransform] = useState<PhotoTransform | null>(null)
   const [title, setTitle]   = useState('')
+  const [tags, setTags]     = useState<string[]>([])
   const [location, setLocation] = useState<StampLocation | null>(null)
   const [selectedCollectionId, setSelectedCollectionId] = useState('all')
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
@@ -250,7 +252,7 @@ export default function CameraPage() {
       sourceType:   'camera',
       sourceLabel:  'Camera',
       collectionId: selectedCollectionId,
-      tags:         [],
+      tags,
       dominantColor: '#60A5FA',
       favorite:     false,
       location:     location ?? undefined,
@@ -627,8 +629,16 @@ export default function CameraPage() {
                   </motion.div>
                 )}
 
+                {/* Tags */}
+                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+                  <p style={{ fontSize: 12, color: '#6B6B67', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
+                    Tags
+                  </p>
+                  <TagPicker tags={tags} onChange={setTags} variant="camera" />
+                </motion.div>
+
                 {/* Collection */}
-                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}>
+                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.46 }}>
                   <p style={{ fontSize: 12, color: '#6B6B67', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
                     Collection
                   </p>

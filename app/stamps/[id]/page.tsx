@@ -15,6 +15,7 @@ const STAMP_PATH  = generateStampPath(SW, SH, SR)
 import ContextMenuSheet from '@/components/ContextMenuSheet'
 import CollectionPickerSheet from '@/components/CollectionPickerSheet'
 import StampImagePreview from '@/components/StampImagePreview'
+import TagChip from '@/components/TagChip'
 
 export default function StampDetailPage() {
   const router = useRouter()
@@ -502,17 +503,7 @@ export default function StampDetailPage() {
                 style={{ display: 'flex', gap: 6, flexWrap: 'wrap', paddingTop: 4 }}
               >
                 {stamp.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    style={{
-                      fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)',
-                      backgroundColor: 'var(--surface2)', borderRadius: 20,
-                      padding: '4px 10px', border: '1px solid var(--border)',
-                      transition: 'background-color 0.25s ease, border-color 0.25s ease',
-                    }}
-                  >
-                    #{tag}
-                  </span>
+                  <TagChip key={tag} tag={tag} />
                 ))}
               </motion.div>
             )}
