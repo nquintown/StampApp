@@ -2,13 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-// ── VAPID config ──────────────────────────────────────────
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-)
-
 // ── Daily notification payloads ───────────────────────────
 const MESSAGES = [
   { title: 'Stampverse 📸', body: "C'est l'heure de ton stamp du jour !" },
@@ -23,6 +16,13 @@ export async function GET(request: NextRequest) {
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  // ── VAPID config (must be inside handler, not module-level) ──
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!,
+  )
 
   // ── Use service role to bypass RLS ───────────────────────
   const supabase = createSupabaseClient(
