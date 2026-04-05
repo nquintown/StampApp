@@ -635,6 +635,7 @@ export default function StampDetailPage() {
               dominantColor: stamp.dominantColor,
               createdAt:     stamp.createdAt,
               location:      stamp.location?.label ?? null,
+              tags:          stamp.tags ?? null,
             }}
             userId={user.id}
           />

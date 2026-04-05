@@ -7,6 +7,7 @@ import { useStore } from '@/lib/store'
 import { IconButton } from '@/components/TopBar'
 import StampShape, { generateStampPath } from '@/components/StampShape'
 import StampImagePreview from '@/components/StampImagePreview'
+import TagChip from '@/components/TagChip'
 import { getShareById, markShareSeen, type SharedStampRecord } from '@/lib/sharing-db'
 
 const SW         = 230
@@ -161,7 +162,10 @@ export default function ShareDetailPage() {
   }, [share])
 
   const senderName = share
-    ? (share.senderUsername || share.senderFullName || 'Un ami')
+    ? (share.senderUsername
+        || share.senderFullName
+        || (share.senderEmail ? share.senderEmail.split('@')[0] : null)
+        || 'Un ami')
     : '—'
 
   return (
@@ -235,7 +239,7 @@ export default function ShareDetailPage() {
                 style={{ cursor: 'zoom-in', position: 'relative' }}
               >
                 <StampShape
-                  imageUrl={share.stampImageUrl ?? share.stampThumbnailUrl ?? ''}
+                  imageUrl={share.stampThumbnailUrl ?? share.stampImageUrl ?? ''}
                   alt={share.stampTitle ?? 'Stamp'}
                   width={SW}
                   height={SH}
@@ -255,19 +259,28 @@ export default function ShareDetailPage() {
             </div>
           </div>
 
-          {/* ── Title ──────────────────────────────────────── */}
-          <motion.h1
+          {/* ── Title + tags ───────────────────────────────── */}
+          <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.14 }}
-            style={{
-              fontSize: 26, fontWeight: 700, color: 'var(--text-primary)',
-              margin: 0, letterSpacing: '-0.5px', textAlign: 'center',
-              transition: 'color 0.25s ease',
-            }}
+            style={{ textAlign: 'center' }}
           >
-            {share.stampTitle ?? 'Stamp sans titre'}
-          </motion.h1>
+            <h1 style={{
+              fontSize: 26, fontWeight: 700, color: 'var(--text-primary)',
+              margin: '0 0 4px', letterSpacing: '-0.5px',
+              transition: 'color 0.25s ease',
+            }}>
+              {share.stampTitle ?? 'Stamp sans titre'}
+            </h1>
+            {share.stampTags && share.stampTags.length > 0 && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
+                {share.stampTags.map((tag) => (
+                  <TagChip key={tag} tag={tag} />
+                ))}
+              </div>
+            )}
+          </motion.div>
 
           {/* ── Info cards ─────────────────────────────────── */}
           <motion.div
@@ -332,6 +345,7 @@ export default function ShareDetailPage() {
           visible={previewOpen}
           onClose={() => setPreviewOpen(false)}
           imageUrl={share.stampImageUrl ?? share.stampThumbnailUrl ?? ''}
+          thumbnailUrl={share.stampThumbnailUrl ?? undefined}
           alt={share.stampTitle ?? ''}
         />
       )}

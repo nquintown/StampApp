@@ -17,6 +17,7 @@ interface Props {
     dominantColor?: string
     createdAt?:     string
     location?:      string | null
+    tags?:          string[] | null
   }
   userId: string
 }
