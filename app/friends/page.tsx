@@ -19,8 +19,12 @@ import {
 import { getUnseenCount } from '@/lib/sharing-db'
 
 // ── Avatar ────────────────────────────────────────────────
+function displayName(user: FriendUser): string {
+  return user.username || user.fullName || (user.email ? user.email.split('@')[0] : 'Utilisateur')
+}
+
 function Avatar({ user, size = 44 }: { user: FriendUser; size?: number }) {
-  const name   = user.username || user.fullName || '?'
+  const name   = displayName(user)
   const letter = name.charAt(0).toUpperCase()
 
   if (user.avatarUrl) {
@@ -424,7 +428,7 @@ function SearchRow({
   onDecline: () => void
 }) {
   const { user, status } = result
-  const name = user.username || user.fullName || 'Utilisateur'
+  const name = displayName(user)
 
   return (
     <div style={{
@@ -499,7 +503,7 @@ function FriendshipRow({
   onAccept?: () => void
   onDelete?: () => void
 }) {
-  const name = fr.friend.username || fr.friend.fullName || 'Utilisateur'
+  const name = displayName(fr.friend)
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
