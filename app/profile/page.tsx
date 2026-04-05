@@ -1,27 +1,35 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { IconButton } from '@/components/TopBar'
 import * as profileDb from '@/lib/profile-db'
 import type { Profile } from '@/lib/profile-db'
 import { ACHIEVEMENTS } from '@/lib/achievements'
+import { AchievementCard } from '@/components/AchievementCard'
 import { subscribePush, saveSubscription, getPermissionState } from '@/lib/push'
 
 // ── Toggle switch ──────────────────────────────────────────
-function Toggle({ value, onChange }: { value: boolean; onChange: () => void }) {
+function Toggle({
+  value, onChange, disabled,
+}: {
+  value: boolean
+  onChange: () => void
+  disabled?: boolean
+}) {
   return (
     <motion.button
-      onClick={onChange}
+      onClick={disabled ? undefined : onChange}
       style={{
         width: 46, height: 27, borderRadius: 14,
         backgroundColor: value ? 'var(--text-primary)' : 'var(--border)',
-        border: 'none', cursor: 'pointer', padding: 3,
+        border: 'none', cursor: disabled ? 'default' : 'pointer', padding: 3,
         display: 'flex', alignItems: 'center', flexShrink: 0,
         WebkitTapHighlightColor: 'transparent',
-        transition: 'background-color 0.22s ease',
+        opacity: disabled ? 0.45 : 1,
+        transition: 'background-color 0.22s ease, opacity 0.22s ease',
       }}
     >
       <motion.div
@@ -115,162 +123,7 @@ function SettingRow({ iconBg, iconEl, label, sublabel, value, badge, rightSlot, 
   )
 }
 
-// ── Badge icon per achievement ID ─────────────────────────
-function BadgeIcon({ id }: { id: string }) {
-  const p = {
-    width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none',
-    stroke: 'currentColor', strokeWidth: 1.65,
-    strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
-  }
-  switch (id) {
-    case 'first_stamp':
-      return (
-        <svg {...p}>
-          <circle cx="12" cy="12.5" r="3.2" />
-          <path d="M20.5 8H18l-1.5-2.5h-9L6 8H3.5A1.5 1.5 0 0 0 2 9.5v9A1.5 1.5 0 0 0 3.5 20h17A1.5 1.5 0 0 0 22 18.5v-9A1.5 1.5 0 0 0 20.5 8Z" />
-        </svg>
-      )
-    case 'five_stamps':
-      return (
-        <svg {...p}>
-          <rect x="3" y="3" width="7" height="7" rx="1.5" />
-          <rect x="14" y="3" width="7" height="7" rx="1.5" />
-          <rect x="3" y="14" width="7" height="7" rx="1.5" />
-          <rect x="14" y="14" width="7" height="7" rx="1.5" />
-        </svg>
-      )
-    case 'twenty_stamps':
-      return (
-        <svg {...p}>
-          <path d="M12 2c0 5.5-5.5 8.5-5.5 13.5a5.5 5.5 0 0 0 11 0C17.5 10.5 12 7.5 12 2Z" />
-          <path d="M12 12.5c0 2.5-1.5 3.5-1.5 5a1.5 1.5 0 0 0 3 0c0-1.5-1.5-2.5-1.5-5Z" />
-        </svg>
-      )
-    case 'fifty_stamps':
-      return (
-        <svg {...p}>
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
-      )
-    case 'streak_3':
-      return (
-        <svg {...p}>
-          <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
-        </svg>
-      )
-    case 'streak_7':
-      return (
-        <svg {...p}>
-          <rect x="3" y="4" width="18" height="18" rx="2" />
-          <path d="M16 2v4M8 2v4M3 10h18" />
-          <path d="M9 16l2 2 4-4" />
-        </svg>
-      )
-    case 'streak_30':
-      return (
-        <svg {...p}>
-          <path d="M6.5 3h11l4 6-9.5 12L2.5 9l4-6z" />
-          <path d="M2.5 9h19M6.5 3l5.5 6 5.5-6" />
-        </svg>
-      )
-    case 'first_collection':
-      return (
-        <svg {...p}>
-          <path d="M12 2 2 7l10 5 10-5-10-5z" />
-          <path d="M2 17l10 5 10-5" />
-          <path d="M2 12l10 5 10-5" />
-        </svg>
-      )
-    case 'tag_master':
-      return (
-        <svg {...p}>
-          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-          <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
-        </svg>
-      )
-    default:
-      return <svg {...p}><circle cx="12" cy="12" r="7" /></svg>
-  }
-}
-
-// ── Stamp-shaped achievement card ──────────────────────────
-// Uses CSS mask with radial-gradient perforations on all 4 edges
-function AchievementCard({ id, label, desc, unlocked }: {
-  id: string; label: string; desc: string; unlocked: boolean
-}) {
-  const R = 5   // perforation hole radius (px)
-  const G = 14  // perforation tile size — controls spacing between holes
-  const E = R * 2  // edge strip width = 10px
-
-  // Each layer creates semicircular holes on one edge only.
-  // The 5th layer (linear-gradient) fills the center so it stays visible.
-  // Default mask-composite "add" means transparent holes punch through
-  // only where ALL layers that cover that position allow it.
-  const stampMask = [
-    `radial-gradient(circle at 50% 0,    transparent ${R}px, #000 ${R}px) top    left / ${G}px ${E}px repeat-x`,
-    `radial-gradient(circle at 50% 100%, transparent ${R}px, #000 ${R}px) bottom left / ${G}px ${E}px repeat-x`,
-    `radial-gradient(circle at 0   50%, transparent ${R}px, #000 ${R}px) top    left / ${E}px ${G}px repeat-y`,
-    `radial-gradient(circle at 100% 50%, transparent ${R}px, #000 ${R}px) top   right / ${E}px ${G}px repeat-y`,
-    `linear-gradient(#000, #000) ${E}px ${E}px / calc(100% - ${E * 2}px) calc(100% - ${E * 2}px) no-repeat`,
-  ].join(', ')
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.82 }}
-      animate={{ opacity: 1, scale: 1 }}
-      style={{
-        WebkitMask: stampMask,
-        mask: stampMask,
-        backgroundColor: 'var(--surface)',
-        padding: `${E + 14}px 8px`,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 9,
-        textAlign: 'center',
-        filter: unlocked ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.10))' : 'grayscale(1)',
-        opacity: unlocked ? 1 : 0.36,
-        transition: 'opacity 0.3s ease, filter 0.3s ease, background-color 0.25s ease',
-      }}
-    >
-      {/* Icon circle */}
-      <div style={{
-        width: 46,
-        height: 46,
-        borderRadius: '50%',
-        backgroundColor: unlocked ? 'var(--text-primary)' : 'var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        color: unlocked ? 'var(--bg)' : 'var(--text-secondary)',
-        transition: 'background-color 0.25s ease',
-      }}>
-        <BadgeIcon id={id} />
-      </div>
-
-      {/* Text */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
-        <p style={{
-          fontSize: 11, fontWeight: 700, color: 'var(--text-primary)',
-          margin: 0, lineHeight: 1.25,
-          transition: 'color 0.25s ease',
-        }}>
-          {label}
-        </p>
-        <p style={{
-          fontSize: 10, color: 'var(--text-secondary)',
-          margin: 0, lineHeight: 1.3,
-          transition: 'color 0.25s ease',
-        }}>
-          {desc}
-        </p>
-      </div>
-    </motion.div>
-  )
-}
-
-// ── Notification button states ────────────────────────────
+// ── Notification button state ─────────────────────────────
 type NotifState = 'idle' | 'loading' | 'granted' | 'denied' | 'unsupported'
 
 // ── Main page ─────────────────────────────────────────────
@@ -279,13 +132,21 @@ export default function ProfilePage() {
   const { user, stamps, collections, isDark, toggleDark } = useStore()
 
   const [profile,     setProfile]     = useState<Profile | null>(null)
+  const [avatarUrl,   setAvatarUrl]   = useState<string | null>(null)
+  const [uploading,   setUploading]   = useState(false)
   const [notifState,  setNotifState]  = useState<NotifState>('idle')
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
-    if (user) profileDb.fetchProfile(user.id).then(setProfile)
+    if (user) {
+      profileDb.fetchProfile(user.id).then((p) => {
+        setProfile(p)
+        setAvatarUrl(p?.avatarUrl ?? null)
+      })
+    }
   }, [user])
 
-  // Check current notification permission on mount
   useEffect(() => {
     const state = getPermissionState()
     if (state === 'granted')     setNotifState('granted')
@@ -293,8 +154,24 @@ export default function ProfilePage() {
     if (state === 'unsupported') setNotifState('unsupported')
   }, [])
 
+  // ── Avatar upload ─────────────────────────────────────
+  const handleAvatarClick = () => {
+    if (!uploading) fileInputRef.current?.click()
+  }
+
+  const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setUploading(true)
+    const url = await profileDb.uploadAvatar(user.id, file)
+    if (url) setAvatarUrl(`${url}?t=${Date.now()}`)  // cache-bust
+    setUploading(false)
+    e.target.value = ''  // allow re-selecting same file
+  }
+
+  // ── Notifications ─────────────────────────────────────
   const handleNotifToggle = useCallback(async () => {
-    if (notifState === 'granted' || notifState === 'denied') return
+    if (notifState !== 'idle') return
     setNotifState('loading')
     const sub = await subscribePush()
     if (!sub) {
@@ -315,23 +192,22 @@ export default function ProfilePage() {
   const streak      = profile?.streak ?? 0
   const userCols    = collections.filter((c) => c.id !== 'all')
 
-  // Compute achievements
   const unlockedIds = new Set(
     ACHIEVEMENTS.filter((a) => a.check(stamps, streak, userCols.length)).map((a) => a.id),
   )
 
-  // Notification button label
-  const notifLabel =
-    notifState === 'loading'     ? 'Activation…'           :
-    notifState === 'granted'     ? '✓ Activées'            :
-    notifState === 'denied'      ? 'Bloquées (navigateur)' :
-    notifState === 'unsupported' ? 'Non supporté'          :
-    'Activer les notifications'
+  // Only first 3 badges shown on profile; rest on /profile/badges
+  const previewBadges = ACHIEVEMENTS.slice(0, 3)
+
+  const notifSublabel =
+    notifState === 'denied'      ? 'Bloquées — modifie les réglages du navigateur' :
+    notifState === 'unsupported' ? 'Non supporté sur cet appareil' :
+    'Rappel quotidien à 11h'
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 48, transition: 'background-color 0.25s ease' }}>
 
-      {/* ── Top bar ──────────────────────────────────────── */}
+      {/* ── Top bar ────────────────────────────────────── */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '16px 20px', paddingTop: 'max(16px, env(safe-area-inset-top))',
@@ -347,18 +223,28 @@ export default function ProfilePage() {
         <div style={{ width: 36 }} />
       </div>
 
-      {/* ── Avatar + name + stats ─────────────────────────── */}
+      {/* ── Avatar + name + stats ──────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.38 }}
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 24px 32px', gap: 14 }}
       >
-        {/* Avatar */}
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleAvatarFile}
+        />
+
+        {/* Avatar — clickable */}
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 340, damping: 24, delay: 0.06 }}
+          onClick={handleAvatarClick}
           style={{
             width: 84, height: 84, borderRadius: '50%',
             backgroundColor: 'var(--text-primary)',
@@ -366,19 +252,60 @@ export default function ProfilePage() {
             boxShadow: '0 6px 24px rgba(0,0,0,0.14)',
             transition: 'background-color 0.25s ease',
             position: 'relative',
+            cursor: 'pointer',
+            overflow: 'hidden',
           }}
         >
-          <span style={{ fontSize: 32, fontWeight: 800, color: 'var(--bg)', letterSpacing: '-1px', lineHeight: 1, transition: 'color 0.25s ease' }}>
-            {initial}
-          </span>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Photo de profil"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+            />
+          ) : (
+            <span style={{ fontSize: 32, fontWeight: 800, color: 'var(--bg)', letterSpacing: '-1px', lineHeight: 1, transition: 'color 0.25s ease' }}>
+              {initial}
+            </span>
+          )}
+
+          {/* Hover / upload overlay */}
+          <motion.div
+            animate={{ opacity: uploading ? 1 : 0 }}
+            whileHover={{ opacity: 1 }}
+            style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              backgroundColor: 'rgba(0,0,0,0.40)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'opacity 0.2s ease',
+            }}
+          >
+            {uploading ? (
+              /* Spinner */
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
+                style={{
+                  width: 22, height: 22, borderRadius: '50%',
+                  border: '2.5px solid rgba(255,255,255,0.3)',
+                  borderTopColor: '#fff',
+                }}
+              />
+            ) : (
+              /* Camera icon */
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="13" r="3.5" />
+                <path d="M21 8.5h-2l-1.5-2.5h-11L5 8.5H3A1.5 1.5 0 0 0 1.5 10v10A1.5 1.5 0 0 0 3 21.5h18A1.5 1.5 0 0 0 22.5 20V10A1.5 1.5 0 0 0 21 8.5Z" />
+              </svg>
+            )}
+          </motion.div>
+
           {/* Streak badge */}
           {streak > 0 && (
             <div style={{
               position: 'absolute', bottom: -4, right: -4,
               backgroundColor: '#F97316', borderRadius: 12,
               padding: '2px 7px', border: '2px solid var(--bg)',
-              fontSize: 12, fontWeight: 800, color: '#fff',
-              lineHeight: 1.4,
+              fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.4,
             }}>
               {streak}🔥
             </div>
@@ -408,9 +335,9 @@ export default function ProfilePage() {
           }}
         >
           {[
-            { value: stamps.length, label: 'Stamps' },
-            { value: userCols.length, label: 'Collections' },
-            { value: streak, label: 'Jours 🔥' },
+            { value: stamps.length,    label: 'Stamps'      },
+            { value: userCols.length,  label: 'Collections' },
+            { value: streak,           label: 'Jours 🔥'    },
           ].map((stat, i) => (
             <div key={i} style={{
               flex: 1, padding: '16px 8px', textAlign: 'center',
@@ -428,21 +355,48 @@ export default function ProfilePage() {
         </motion.div>
       </motion.div>
 
-      {/* ── Sections ──────────────────────────────────────── */}
+      {/* ── Sections ──────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.22, duration: 0.38 }}
         style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 28 }}
       >
-        {/* ACHIEVEMENTS */}
+
+        {/* ── BADGES (preview — 3 max) ─────────────────── */}
         <div>
-          <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 10px 4px', transition: 'color 0.25s ease' }}>
-            Badges — {unlockedIds.size}/{ACHIEVEMENTS.length}
-          </p>
+          {/* Header with "Voir plus" */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 0 10px 4px' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0, transition: 'color 0.25s ease' }}>
+              Badges — {unlockedIds.size}/{ACHIEVEMENTS.length}
+            </p>
+            <motion.button
+              whileTap={{ opacity: 0.6 }}
+              onClick={() => router.push('/profile/badges')}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 13, fontWeight: 600, color: 'var(--text-primary)',
+                fontFamily: 'inherit', padding: '2px 4px',
+                WebkitTapHighlightColor: 'transparent',
+                display: 'flex', alignItems: 'center', gap: 3,
+                transition: 'color 0.25s ease',
+              }}
+            >
+              Voir plus
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </motion.button>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-            {ACHIEVEMENTS.map((a, i) => (
-              <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 + i * 0.04 }}>
+            {previewBadges.map((a, i) => (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.28 + i * 0.05 }}
+              >
                 <AchievementCard
                   id={a.id} label={a.label} desc={a.desc}
                   unlocked={unlockedIds.has(a.id)}
@@ -452,7 +406,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* NOTIFICATIONS */}
+        {/* ── NOTIFICATIONS ─────────────────────────────── */}
         <Section title="Notifications">
           <SettingRow
             iconBg="#FFE4E4"
@@ -463,31 +417,19 @@ export default function ProfilePage() {
               </svg>
             }
             label="Stamp du jour"
-            sublabel="Rappel quotidien à 11h"
+            sublabel={notifSublabel}
             rightSlot={
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={handleNotifToggle}
-                disabled={notifState === 'loading' || notifState === 'granted' || notifState === 'denied' || notifState === 'unsupported'}
-                style={{
-                  fontSize: 12, fontWeight: 600,
-                  color: notifState === 'granted' ? '#10B981' : notifState === 'denied' ? '#EF4444' : 'var(--bg)',
-                  backgroundColor: notifState === 'granted' ? '#D1FAE5' : notifState === 'denied' ? '#FFE4E4' : 'var(--text-primary)',
-                  border: 'none', borderRadius: 10, padding: '6px 12px',
-                  cursor: notifState === 'idle' ? 'pointer' : 'default',
-                  fontFamily: 'inherit', flexShrink: 0,
-                  transition: 'all 0.2s ease',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-              >
-                {notifLabel}
-              </motion.button>
+              <Toggle
+                value={notifState === 'granted'}
+                onChange={handleNotifToggle}
+                disabled={notifState === 'denied' || notifState === 'unsupported' || notifState === 'loading'}
+              />
             }
             isLast
           />
         </Section>
 
-        {/* APPARENCE */}
+        {/* ── APPARENCE ─────────────────────────────────── */}
         <Section title="Apparence">
           <SettingRow
             iconBg={isDark ? '#1A1A2E' : '#FFF8E1'}
@@ -509,7 +451,7 @@ export default function ProfilePage() {
           />
         </Section>
 
-        {/* DÉCOUVRIR */}
+        {/* ── DÉCOUVRIR ─────────────────────────────────── */}
         <Section title="Découvrir">
           <SettingRow
             iconBg="#DBEAFE"
@@ -525,7 +467,7 @@ export default function ProfilePage() {
           />
         </Section>
 
-        {/* RETOURS */}
+        {/* ── RETOURS ───────────────────────────────────── */}
         <Section title="Retours">
           <SettingRow
             iconBg="#FEF3C7"
@@ -539,7 +481,7 @@ export default function ProfilePage() {
           />
         </Section>
 
-        {/* DÉCONNEXION */}
+        {/* ── DÉCONNEXION ───────────────────────────────── */}
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleSignOut}
