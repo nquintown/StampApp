@@ -9,7 +9,8 @@ import CollectionCard from '@/components/CollectionCard'
 import StampCard from '@/components/StampCard'
 import FAB from '@/components/FAB'
 import { preGrantGyroPermission } from '@/lib/gyro'
-import { getPendingCount } from '@/lib/friends-db'
+import { getPendingCount, getFriends, type FriendUser } from '@/lib/friends-db'
+import { getReceivedShares, type SharedStampRecord } from '@/lib/sharing-db'
 
 const containerVariants = {
   hidden: {},
@@ -74,14 +75,111 @@ function UserIcon() {
   )
 }
 
+// ── Friends story row ─────────────────────────────────────
+function FriendAvatar({ friend, shareId, onClick }: {
+  friend: FriendUser
+  shareId: string | null
+  onClick: () => void
+}) {
+  const name   = friend.username || friend.fullName || (friend.email ? friend.email.split('@')[0] : '?')
+  const letter = name.charAt(0).toUpperCase()
+  const hasNew = shareId !== null
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.92 }}
+      onClick={onClick}
+      style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+        WebkitTapHighlightColor: 'transparent', flexShrink: 0, width: 66,
+      }}
+    >
+      {/* Avatar + badge wrapper */}
+      <div style={{ position: 'relative' }}>
+        {/* Ring when has new stamp */}
+        {hasNew && (
+          <div style={{
+            position: 'absolute', inset: -3, borderRadius: '50%',
+            background: 'linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)',
+            zIndex: 0,
+          }} />
+        )}
+        {/* Avatar circle */}
+        <div style={{
+          width: 56, height: 56, borderRadius: '50%',
+          backgroundColor: 'var(--text-primary)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          overflow: 'hidden', flexShrink: 0, position: 'relative', zIndex: 1,
+          border: hasNew ? '2.5px solid var(--bg)' : '2px solid var(--border)',
+          transition: 'border-color 0.25s ease',
+          boxSizing: 'border-box',
+        }}>
+          {friend.avatarUrl ? (
+            <img src={friend.avatarUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--bg)', lineHeight: 1 }}>
+              {letter}
+            </span>
+          )}
+        </div>
+        {/* Mail badge */}
+        {hasNew && (
+          <div style={{
+            position: 'absolute', bottom: -2, right: -2,
+            width: 20, height: 20, borderRadius: '50%',
+            backgroundColor: '#3B82F6',
+            border: '2px solid var(--bg)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 2,
+          }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="m2 7 10 7 10-7"/>
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {/* Name */}
+      <span style={{
+        fontSize: 11, fontWeight: hasNew ? 700 : 500,
+        color: hasNew ? 'var(--text-primary)' : 'var(--text-secondary)',
+        maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        transition: 'color 0.25s ease',
+      }}>
+        {name}
+      </span>
+    </motion.button>
+  )
+}
+
 export default function HomePage() {
   const router = useRouter()
   const { collections, stamps, isDark, loading, user } = useStore()
   const [pendingCount, setPendingCount] = useState(0)
+  const [friends,      setFriends]      = useState<FriendUser[]>([])
+  const [unseenMap,    setUnseenMap]    = useState<Map<string, string>>(new Map()) // senderId → shareId
 
   useEffect(() => {
     if (user) {
       getPendingCount(user.id).then(setPendingCount)
+
+      // Load friends + unseen shares in parallel
+      Promise.all([
+        getFriends(user.id),
+        getReceivedShares(user.id),
+      ]).then(([friendList, shares]) => {
+        setFriends(friendList)
+        // Build map: senderId → most recent unseen shareId
+        const map = new Map<string, string>()
+        for (const s of shares) {
+          if (!s.seen && !map.has(s.senderId)) {
+            map.set(s.senderId, s.id)
+          }
+        }
+        setUnseenMap(map)
+      })
     }
   }, [user])
 
@@ -182,7 +280,55 @@ export default function HomePage() {
         }
       />
 
-      <div style={{ padding: '8px 20px 0' }}>
+      <div style={{ padding: '8px 0 0' }}>
+
+        {/* ── Friends row ───────────────────────────────── */}
+        {friends.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ marginBottom: 28 }}
+          >
+            <div style={{ padding: '0 20px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{
+                fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)',
+                letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0,
+              }}>
+                Amis
+              </h2>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontFamily: 'inherit' }}
+                onClick={() => router.push('/friends')}
+              >
+                Voir tous
+              </motion.button>
+            </div>
+            <div style={{
+              display: 'flex', gap: 16, overflowX: 'auto', paddingLeft: 20, paddingRight: 20,
+              scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+            }}>
+              <style>{`.friends-row::-webkit-scrollbar { display: none }`}</style>
+              {friends.map((friend) => {
+                const shareId = unseenMap.get(friend.userId) ?? null
+                return (
+                  <FriendAvatar
+                    key={friend.userId}
+                    friend={friend}
+                    shareId={shareId}
+                    onClick={() => {
+                      if (shareId) router.push(`/friends/inbox/${shareId}`)
+                      else router.push('/friends/inbox')
+                    }}
+                  />
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+
+      <div style={{ padding: '0 20px' }}>
         {/* Collections section */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -390,6 +536,7 @@ export default function HomePage() {
             ))}
           </div>
         </motion.div>
+      </div>
       </div>
 
       <FAB
