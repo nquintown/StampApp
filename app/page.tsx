@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import TopBar, { IconButton } from '@/components/TopBar'
@@ -8,6 +9,7 @@ import CollectionCard from '@/components/CollectionCard'
 import StampCard from '@/components/StampCard'
 import FAB from '@/components/FAB'
 import { preGrantGyroPermission } from '@/lib/gyro'
+import { getPendingCount } from '@/lib/friends-db'
 
 const containerVariants = {
   hidden: {},
@@ -74,7 +76,14 @@ function UserIcon() {
 
 export default function HomePage() {
   const router = useRouter()
-  const { collections, stamps, isDark, loading } = useStore()
+  const { collections, stamps, isDark, loading, user } = useStore()
+  const [pendingCount, setPendingCount] = useState(0)
+
+  useEffect(() => {
+    if (user) {
+      getPendingCount(user.id).then(setPendingCount)
+    }
+  }, [user])
 
   // Group all stamps by month (most recent first)
   const stampsByMonth: { label: string; key: string; stamps: typeof stamps }[] = []
@@ -156,9 +165,20 @@ export default function HomePage() {
           </IconButton>
         }
         rightSlot={
-          <IconButton label="Profil" onClick={() => router.push('/profile')}>
-            <UserIcon />
-          </IconButton>
+          <div style={{ position: 'relative' }}>
+            <IconButton label="Profil" onClick={() => router.push('/profile')}>
+              <UserIcon />
+            </IconButton>
+            {pendingCount > 0 && (
+              <div style={{
+                position: 'absolute', top: 0, right: 0,
+                width: 10, height: 10, borderRadius: '50%',
+                backgroundColor: '#EF4444',
+                border: '1.5px solid var(--bg)',
+                pointerEvents: 'none',
+              }} />
+            )}
+          </div>
         }
       />
 

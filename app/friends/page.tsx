@@ -8,6 +8,7 @@ import { IconButton } from '@/components/TopBar'
 import {
   searchUsers,
   getFriendships,
+  getPendingCount,
   sendFriendRequest,
   acceptFriendRequest,
   deleteFriendship,
@@ -82,6 +83,7 @@ export default function FriendsPage() {
   const [searching,     setSearching]     = useState(false)
   const [loading,       setLoading]       = useState(true)
   const [unseenCount,   setUnseenCount]   = useState(0)
+  const [pendingCount,  setPendingCount]  = useState(0)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const loadFriendships = useCallback(async () => {
@@ -89,6 +91,8 @@ export default function FriendsPage() {
     const data = await getFriendships(user.id)
     setFriendships(data)
     setLoading(false)
+    // Refresh pending badge
+    getPendingCount(user.id).then(setPendingCount)
   }, [user])
 
   useEffect(() => {
@@ -154,9 +158,23 @@ export default function FriendsPage() {
             <path d="M11 4L6 9L11 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </IconButton>
-        <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.2px', transition: 'color 0.25s ease' }}>
-          Mes amis
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.2px', transition: 'color 0.25s ease' }}>
+            Mes amis
+          </span>
+          {pendingCount > 0 && (
+            <div style={{
+              minWidth: 18, height: 18, borderRadius: 9,
+              backgroundColor: '#EF4444',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 5px',
+            }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+                {pendingCount}
+              </span>
+            </div>
+          )}
+        </div>
         {/* Inbox button */}
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -205,7 +223,7 @@ export default function FriendsPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher par username…"
+            placeholder="Rechercher par email ou username…"
             style={{
               width: '100%', boxSizing: 'border-box',
               padding: '13px 40px 13px 40px',
@@ -457,7 +475,7 @@ function SearchRow({
                 fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
                 WebkitTapHighlightColor: 'transparent',
               }}>
-              Refuser
+              Ignorer
             </motion.button>
           </>
         )}
@@ -522,7 +540,7 @@ function FriendshipRow({
               fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
               WebkitTapHighlightColor: 'transparent',
             }}>
-            {type === 'sent' ? 'Annuler' : 'Refuser'}
+            {type === 'sent' ? 'Annuler' : 'Ignorer'}
           </motion.button>
         )}
         {type === 'friend' && onDelete && (

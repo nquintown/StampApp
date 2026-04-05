@@ -3,10 +3,11 @@ import { createClient } from '@/lib/supabase/client'
 // ── Types ─────────────────────────────────────────────────
 
 export interface FriendUser {
-  userId:    string
-  username:  string | null
-  fullName:  string | null
-  avatarUrl: string | null
+  userId:     string
+  username:   string | null
+  fullName:   string | null
+  avatarUrl:  string | null
+  email:      string | null
   stampCount: number
 }
 
@@ -34,6 +35,7 @@ function rowToFriendUser(r: Record<string, unknown>, stampCount = 0): FriendUser
     username:   (r.username as string) ?? null,
     fullName:   (r.full_name as string) ?? null,
     avatarUrl:  (r.avatar_url as string) ?? null,
+    email:      (r.email as string) ?? null,
     stampCount,
   }
 }
@@ -51,8 +53,8 @@ export async function searchUsers(
 
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url')
-      .or(`username.ilike.%${q}%,full_name.ilike.%${q}%`)
+      .select('id, username, full_name, avatar_url, email')
+      .or(`username.ilike.%${q}%,full_name.ilike.%${q}%,email.ilike.%${q}%`)
       .neq('id', currentUserId)
       .limit(15)
 
@@ -159,7 +161,7 @@ export async function getFriendships(userId: string): Promise<FriendRequest[]> {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url')
+      .select('id, username, full_name, avatar_url, email')
       .in('id', otherIds)
 
     const profileMap = new Map<string, Record<string, unknown>>()
@@ -185,4 +187,20 @@ export async function getFriendships(userId: string): Promise<FriendRequest[]> {
 export async function getFriends(userId: string): Promise<FriendUser[]> {
   const all = await getFriendships(userId)
   return all.filter((f) => f.status === 'accepted').map((f) => f.friend)
+}
+
+// ── Pending received count (for badge) ────────────────────
+export async function getPendingCount(userId: string): Promise<number> {
+  try {
+    const supabase = createClient()
+    const { count, error } = await supabase
+      .from('friendships')
+      .select('id', { count: 'exact', head: true })
+      .eq('addressee_id', userId)
+      .eq('status', 'pending')
+    if (error) return 0
+    return count ?? 0
+  } catch {
+    return 0
+  }
 }

@@ -10,10 +10,18 @@ export default function AuthProvider() {
   useEffect(() => {
     const supabase = createClient()
 
+    // Sync profile email so friend search by email works
+    const syncProfile = async (user: import('@supabase/supabase-js').User) => {
+      await supabase.from('profiles').upsert(
+        { id: user.id, email: user.email ?? null },
+        { onConflict: 'id', ignoreDuplicates: false },
+      )
+    }
+
     // Get current session on mount
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
-      if (user) loadStamps()
+      if (user) { loadStamps(); syncProfile(user) }
     })
 
     // Listen for auth changes (login / logout)
@@ -23,6 +31,7 @@ export default function AuthProvider() {
         setUser(user)
         if (user) {
           loadStamps()
+          syncProfile(user)
         } else {
           // Clear stamps on logout
           useStore.setState({ stamps: [] })
