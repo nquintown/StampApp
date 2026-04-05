@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { User } from '@supabase/supabase-js'
 import type { Stamp, Collection } from './types'
 import * as db from './stamps-db'
+import { updateStreak } from './profile-db'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -138,6 +139,8 @@ export const useStore = create<StampStore>((set, get) => ({
       set((s) => ({
         stamps: s.stamps.map((st) => (st.id === stamp.id ? saved : st)),
       }))
+      // Update streak (fire & forget)
+      updateStreak(user.id).catch(console.error)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
       console.error('addStamp error:', err)
