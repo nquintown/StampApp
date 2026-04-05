@@ -239,76 +239,103 @@ export default function ProfilePage() {
           onChange={handleAvatarFile}
         />
 
-        {/* Avatar — clickable */}
+        {/* Avatar — clickable (wrapper holds streak badge outside the circle clip) */}
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 340, damping: 24, delay: 0.06 }}
-          onClick={handleAvatarClick}
-          style={{
-            width: 84, height: 84, borderRadius: '50%',
-            backgroundColor: 'var(--text-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 6px 24px rgba(0,0,0,0.14)',
-            transition: 'background-color 0.25s ease',
-            position: 'relative',
-            cursor: 'pointer',
-            overflow: 'hidden',
-          }}
+          style={{ position: 'relative', width: 84, height: 84, flexShrink: 0 }}
         >
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt="Photo de profil"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-            />
-          ) : (
-            <span style={{ fontSize: 32, fontWeight: 800, color: 'var(--bg)', letterSpacing: '-1px', lineHeight: 1, transition: 'color 0.25s ease' }}>
-              {initial}
-            </span>
-          )}
-
-          {/* Hover / upload overlay */}
-          <motion.div
-            animate={{ opacity: uploading ? 1 : 0 }}
-            whileHover={{ opacity: 1 }}
+          {/* Circle */}
+          <div
+            onClick={handleAvatarClick}
             style={{
-              position: 'absolute', inset: 0, borderRadius: '50%',
-              backgroundColor: 'rgba(0,0,0,0.40)',
+              width: 84, height: 84, borderRadius: '50%',
+              backgroundColor: 'var(--text-primary)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'opacity 0.2s ease',
+              boxShadow: '0 6px 24px rgba(0,0,0,0.14)',
+              transition: 'background-color 0.25s ease',
+              position: 'relative',
+              cursor: 'pointer',
+              overflow: 'hidden',   // kept here, streak badge is outside this div
             }}
           >
-            {uploading ? (
-              /* Spinner */
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
-                style={{
-                  width: 22, height: 22, borderRadius: '50%',
-                  border: '2.5px solid rgba(255,255,255,0.3)',
-                  borderTopColor: '#fff',
-                }}
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Photo de profil"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
-              /* Camera icon */
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="13" r="3.5" />
-                <path d="M21 8.5h-2l-1.5-2.5h-11L5 8.5H3A1.5 1.5 0 0 0 1.5 10v10A1.5 1.5 0 0 0 3 21.5h18A1.5 1.5 0 0 0 22.5 20V10A1.5 1.5 0 0 0 21 8.5Z" />
-              </svg>
+              <span style={{ fontSize: 32, fontWeight: 800, color: 'var(--bg)', letterSpacing: '-1px', lineHeight: 1, transition: 'color 0.25s ease' }}>
+                {initial}
+              </span>
             )}
-          </motion.div>
 
-          {/* Streak badge */}
+            {/* Hover / upload overlay */}
+            <motion.div
+              animate={{ opacity: uploading ? 1 : 0 }}
+              whileHover={{ opacity: 1 }}
+              style={{
+                position: 'absolute', inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.42)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              {uploading ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
+                  style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    border: '2.5px solid rgba(255,255,255,0.3)',
+                    borderTopColor: '#fff',
+                  }}
+                />
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="13" r="3.5" />
+                  <path d="M21 8.5h-2l-1.5-2.5h-11L5 8.5H3A1.5 1.5 0 0 0 1.5 10v10A1.5 1.5 0 0 0 3 21.5h18A1.5 1.5 0 0 0 22.5 20V10A1.5 1.5 0 0 0 21 8.5Z" />
+                </svg>
+              )}
+            </motion.div>
+          </div>
+
+          {/* ── Streak flame badge — outside overflow:hidden ── */}
           {streak > 0 && (
-            <div style={{
-              position: 'absolute', bottom: -4, right: -4,
-              backgroundColor: '#F97316', borderRadius: 12,
-              padding: '2px 7px', border: '2px solid var(--bg)',
-              fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.4,
-            }}>
-              {streak}🔥
-            </div>
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 22, delay: 0.2 }}
+              style={{
+                position: 'absolute',
+                bottom: -7,
+                right: -7,
+                background: 'linear-gradient(145deg, #FB923C 0%, #EF4444 100%)',
+                borderRadius: 20,
+                border: '2.5px solid var(--bg)',
+                padding: '4px 9px 4px 7px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                boxShadow: '0 3px 14px rgba(239,68,68,0.45)',
+              }}
+            >
+              {/* Flame SVG */}
+              <svg width="9" height="12" viewBox="0 0 9 13" fill="none">
+                <path
+                  d="M4.5 0.5C4.5 0.5 1.5 4 1.5 8a3 3 0 0 0 6 0c0-2.2-1.4-3.8-1.4-5.2C6.1 2.8 5.6 5 4.2 6.2 4.2 4 4.5 0.5 4.5 0.5Z"
+                  fill="white"
+                />
+              </svg>
+              <span style={{
+                fontSize: 13, fontWeight: 800,
+                color: '#fff', lineHeight: 1,
+                letterSpacing: '-0.3px',
+              }}>
+                {streak}
+              </span>
+            </motion.div>
           )}
         </motion.div>
 
@@ -396,6 +423,7 @@ export default function ProfilePage() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.28 + i * 0.05 }}
+                style={{ height: '100%' }}
               >
                 <AchievementCard
                   id={a.id} label={a.label} desc={a.desc}

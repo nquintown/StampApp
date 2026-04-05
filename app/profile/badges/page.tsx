@@ -83,6 +83,7 @@ export default function BadgesPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12 + i * 0.04 }}
+              style={{ height: '100%' }}
             >
               <AchievementCard
                 id={a.id}

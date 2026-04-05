@@ -111,10 +111,14 @@ export function AchievementCard({
         WebkitMask: stampMask,
         mask: stampMask,
         backgroundColor: 'var(--surface)',
+        // height: 100% so CSS-grid stretch makes all cards in a row equal height
+        height: '100%',
+        boxSizing: 'border-box' as const,
         padding: `${E + 14}px 8px`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 9,
         textAlign: 'center',
         filter: unlocked ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.10))' : 'grayscale(1)',
@@ -131,16 +135,30 @@ export function AchievementCard({
       }}>
         <BadgeIcon id={id} />
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+        {/* Label — 1 line max */}
         <p style={{
           fontSize: 11, fontWeight: 700, color: 'var(--text-primary)',
-          margin: 0, lineHeight: 1.25, transition: 'color 0.25s ease',
+          margin: 0, lineHeight: 1.2,
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 1,
+          WebkitBoxOrient: 'vertical' as const,
+          transition: 'color 0.25s ease',
         }}>
           {label}
         </p>
+        {/* Desc — always 2 lines tall to keep cards equal height */}
         <p style={{
           fontSize: 10, color: 'var(--text-secondary)',
-          margin: 0, lineHeight: 1.3, transition: 'color 0.25s ease',
+          margin: 0, lineHeight: 1.35,
+          minHeight: `${1.35 * 2}em`,
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical' as const,
+          transition: 'color 0.25s ease',
         }}>
           {desc}
         </p>

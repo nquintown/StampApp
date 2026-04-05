@@ -66,6 +66,21 @@ export async function uploadAvatar(userId: string, file: File): Promise<string |
   }
 }
 
+// ── Local date string (YYYY-MM-DD) — avoids UTC timezone shift ──
+function localDateStr(d = new Date()): string {
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
+function localYesterdayStr(): string {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  return localDateStr(d)
+}
+
 // ── Update streak when a stamp is created ─────────────────
 export async function updateStreak(userId: string): Promise<number> {
   try {
@@ -77,22 +92,20 @@ export async function updateStreak(userId: string): Promise<number> {
       .eq('id', userId)
       .single()
 
-    const today     = new Date().toISOString().split('T')[0]  // YYYY-MM-DD
-    const lastDate  = profile?.last_stamp_date as string | null
+    const today    = localDateStr()
+    const lastDate = profile?.last_stamp_date as string | null
 
     // Already stamped today → no change
     if (lastDate === today) return profile?.streak ?? 1
 
-    // Check if yesterday was the last stamp (consecutive)
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
-
-    const newStreak = lastDate === yesterdayStr ? (profile?.streak ?? 0) + 1 : 1
+    // Consecutive if last stamp was yesterday
+    const newStreak = lastDate === localYesterdayStr()
+      ? (profile?.streak ?? 0) + 1
+      : 1
 
     await supabase.from('profiles').upsert({
-      id:             userId,
-      streak:         newStreak,
+      id:              userId,
+      streak:          newStreak,
       last_stamp_date: today,
     })
 
