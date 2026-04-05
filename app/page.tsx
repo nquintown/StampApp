@@ -306,7 +306,9 @@ export default function HomePage() {
               </motion.button>
             </div>
             <div style={{
-              display: 'flex', gap: 16, overflowX: 'auto', paddingLeft: 20, paddingRight: 20,
+              display: 'flex', gap: 16, overflowX: 'auto',
+              paddingLeft: 20, paddingRight: 20,
+              paddingTop: 6, paddingBottom: 10,
               scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
             }}>
               <style>{`.friends-row::-webkit-scrollbar { display: none }`}</style>
