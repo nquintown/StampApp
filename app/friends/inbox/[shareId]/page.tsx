@@ -6,15 +6,16 @@ import { useRouter, useParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { IconButton } from '@/components/TopBar'
 import StampShape, { generateStampPath } from '@/components/StampShape'
-import StampImagePreview from '@/components/StampImagePreview'
 import TagChip from '@/components/TagChip'
 import { getShareById, markShareSeen, type SharedStampRecord } from '@/lib/sharing-db'
 
+// ── Stamp dimensions — identical to stamp detail page ─────
 const SW         = 230
 const SH         = 290
 const SR         = Math.max(4, Math.min(16, Math.round(Math.min(SW, SH) * 0.034)))
 const STAMP_PATH = generateStampPath(SW, SH, SR)
 
+// ── Info card components — identical to stamp detail page ─
 function InfoCard({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
@@ -30,13 +31,8 @@ function InfoCard({ children }: { children: React.ReactNode }) {
   )
 }
 
-function InfoRow({
-  icon, label, value, isLast = false,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  isLast?: boolean
+function InfoRow({ icon, label, value, isLast = false }: {
+  icon: React.ReactNode; label: string; value: string; isLast?: boolean
 }) {
   return (
     <div>
@@ -84,11 +80,10 @@ export default function ShareDetailPage() {
   const shareId  = params?.shareId as string
   const { user } = useStore()
 
-  const [share,        setShare]        = useState<SharedStampRecord | null>(null)
-  const [loading,      setLoading]      = useState(true)
-  const [previewOpen,  setPreviewOpen]  = useState(false)
+  const [share,   setShare]   = useState<SharedStampRecord | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // 3D tilt refs
+  // 3D parallax refs — exactly as stamp detail page
   const containerRef = useRef<HTMLDivElement>(null)
   const tiltRef      = useRef<HTMLDivElement>(null)
   const shineRef     = useRef<HTMLDivElement>(null)
@@ -103,63 +98,129 @@ export default function ShareDetailPage() {
     })
   }, [user, shareId])
 
-  // 3D parallax — same as stamp detail page
+  // ── 3D parallax — exact copy from stamp detail page ──────
   useEffect(() => {
-    if (!share) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
     const target  = { rx: 0, ry: 0 }
     const current = { rx: 0, ry: 0 }
     const vel     = { rx: 0, ry: 0 }
     const STIFF   = 0.052
     const DAMP    = 0.80
-    let raf = 0
-    const animate = () => {
+
+    let raf: number
+    let usingGyro     = false
+    let introDisabled = false
+    let startTime: number | null = null
+    const INTRO_MS = 2600
+
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
+
+    const applyDOM = () => {
+      const { rx, ry } = current
+
+      if (tiltRef.current) {
+        tiltRef.current.style.transform =
+          `rotateX(${rx.toFixed(3)}deg) rotateY(${ry.toFixed(3)}deg)`
+      }
+
+      if (shineRef.current) {
+        const mag       = Math.sqrt(rx * rx + ry * ry)
+        const intensity = Math.min(0.38, mag * 0.024)
+        const sx        = (50 + ry * 2.2).toFixed(1)
+        const sy        = (50 - rx * 2.2).toFixed(1)
+        const angle     = (Math.atan2(ry, rx) * 180 / Math.PI).toFixed(1)
+        shineRef.current.style.background = [
+          `radial-gradient(ellipse 65% 55% at ${sx}% ${sy}%,`,
+          ` rgba(255,255,255,${intensity.toFixed(3)}) 0%,`,
+          ` rgba(255,255,255,${(intensity * 0.25).toFixed(3)}) 50%,`,
+          ` transparent 100%),`,
+          `linear-gradient(${angle}deg,`,
+          ` transparent 38%, rgba(255,255,255,0.055) 50%, transparent 62%)`,
+        ].join('')
+      }
+
+      if (shadowRef.current) {
+        const mag = Math.sqrt(rx * rx + ry * ry)
+        shadowRef.current.style.transform = `translate(${(ry * 2.8).toFixed(1)}px, ${(-rx * 2.8).toFixed(1)}px) scale(${(1 + mag * 0.018).toFixed(3)})`
+        shadowRef.current.style.filter    = `blur(${(18 + mag * 1.4).toFixed(1)}px)`
+        shadowRef.current.style.opacity   = (0.38 + mag * 0.022).toFixed(3)
+      }
+    }
+
+    const tick = (now: number) => {
+      if (startTime === null) startTime = now
+      const elapsed = now - startTime
+
+      if (elapsed < INTRO_MS && !introDisabled) {
+        const t    = elapsed / INTRO_MS
+        const fade = 1 - t
+        target.ry = Math.sin(t * Math.PI * 2.5) * 13 * fade
+        target.rx = Math.sin(t * Math.PI * 1.7 + 1.0) * 8 * fade
+      }
+
       vel.rx = vel.rx * DAMP + (target.rx - current.rx) * STIFF
       vel.ry = vel.ry * DAMP + (target.ry - current.ry) * STIFF
       current.rx += vel.rx
       current.ry += vel.ry
-      if (tiltRef.current) {
-        tiltRef.current.style.transform = `perspective(900px) rotateX(${current.rx}deg) rotateY(${current.ry}deg)`
-      }
-      if (shineRef.current) {
-        const norm = Math.sqrt(current.rx ** 2 + current.ry ** 2) / 20
-        shineRef.current.style.opacity = String(norm * 0.38)
-        shineRef.current.style.background =
-          `radial-gradient(circle at ${50 - current.ry * 2}% ${50 - current.rx * 2}%, rgba(255,255,255,0.9) 0%, transparent 70%)`
-      }
-      if (shadowRef.current) {
-        const depth = Math.sqrt(current.rx ** 2 + current.ry ** 2) / 15
-        shadowRef.current.style.transform = `translate(${current.ry * 1.8}px, ${current.rx * 1.8}px)`
-        shadowRef.current.style.opacity   = String(0.18 + depth * 0.25)
-        shadowRef.current.style.filter    = `blur(${12 + depth * 10}px)`
-      }
-      raf = requestAnimationFrame(animate)
+      applyDOM()
+      raf = requestAnimationFrame(tick)
     }
-    raf = requestAnimationFrame(animate)
+
+    const onOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma === null && e.beta === null) return
+      usingGyro = true
+      introDisabled = true
+      target.ry = clamp((e.gamma ?? 0) * 0.44, -18, 18)
+      target.rx = clamp(-((e.beta  ?? 50) - 50) * 0.44, -18, 18)
+    }
+
+    const startGyro = () => {
+      window.addEventListener('deviceorientation', onOrientation, true)
+    }
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (usingGyro) return
+      introDisabled = true
+      const el = containerRef.current
+      if (!el) return
+      const r  = el.getBoundingClientRect()
+      const dx = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2)
+      const dy = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2)
+      target.ry = clamp(dx * 16, -16, 16)
+      target.rx = clamp(-dy * 16, -16, 16)
+    }
+
+    const onMouseLeave = () => {
+      if (usingGyro) return
+      target.rx = 0
+      target.ry = 0
+    }
+
+    if (typeof DeviceOrientationEvent !== 'undefined') {
+      const reqPerm = (DeviceOrientationEvent as any).requestPermission
+      if (typeof reqPerm === 'function') {
+        reqPerm()
+          .then((state: string) => { if (state === 'granted') startGyro() })
+          .catch(() => {})
+      } else {
+        startGyro()
+      }
+    }
+
     const el = containerRef.current
-    const onMove = (e: TouchEvent | MouseEvent) => {
-      const rect = el?.getBoundingClientRect()
-      if (!rect) return
-      const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left
-      const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top
-      const nx = (x / rect.width  - 0.5) * 2
-      const ny = (y / rect.height - 0.5) * 2
-      target.rx = -ny * 14
-      target.ry =  nx * 14
-    }
-    const onLeave = () => { target.rx = 0; target.ry = 0 }
-    el?.addEventListener('mousemove', onMove)
-    el?.addEventListener('touchmove', onMove, { passive: true })
-    el?.addEventListener('mouseleave', onLeave)
-    el?.addEventListener('touchend', onLeave)
+    el?.addEventListener('mousemove', onMouseMove)
+    el?.addEventListener('mouseleave', onMouseLeave)
+
+    raf = requestAnimationFrame(tick)
+
     return () => {
       cancelAnimationFrame(raf)
-      el?.removeEventListener('mousemove', onMove)
-      el?.removeEventListener('touchmove', onMove)
-      el?.removeEventListener('mouseleave', onLeave)
-      el?.removeEventListener('touchend', onLeave)
+      window.removeEventListener('deviceorientation', onOrientation, true)
+      el?.removeEventListener('mousemove', onMouseMove)
+      el?.removeEventListener('mouseleave', onMouseLeave)
     }
-  }, [share])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const senderName = share
     ? (share.senderUsername
@@ -175,20 +236,25 @@ export default function ShareDetailPage() {
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '16px 20px', paddingTop: 'max(16px, env(safe-area-inset-top))',
+        position: 'sticky', top: 0,
+        backgroundColor: 'var(--bg)', zIndex: 50,
+        transition: 'background-color 0.25s ease',
       }}>
         <IconButton label="Retour" onClick={() => router.back()}>
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M11 4L6 9L11 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </IconButton>
-        <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.2px', transition: 'color 0.25s ease' }}>
+        <span style={{
+          fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)',
+          letterSpacing: '0.06em', textTransform: 'uppercase',
+        }}>
           Stamp reçu
         </span>
         <div style={{ width: 36 }} />
       </div>
 
       {loading ? (
-        /* Skeleton */
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 24px', gap: 20 }}>
           <div style={{ width: SW, height: SH, borderRadius: 24, backgroundColor: 'var(--surface2)', animation: 'pulse 1.4s ease-in-out infinite' }} />
           <div style={{ height: 28, width: 200, borderRadius: 8, backgroundColor: 'var(--surface2)', animation: 'pulse 1.4s ease-in-out infinite' }} />
@@ -207,64 +273,68 @@ export default function ShareDetailPage() {
           </motion.button>
         </div>
       ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.38 }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 20px 0', gap: 20 }}
-        >
-          {/* ── Stamp image with 3D tilt ─────────────────── */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          padding: '16px 24px 48px', gap: 0,
+        }}>
+          {/* ── Stamp with 3D parallax — exact copy from stamp detail ── */}
           <div
             ref={containerRef}
-            style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}
+            style={{ position: 'relative', marginBottom: 24, display: 'flex', justifyContent: 'center' }}
           >
-            {/* Shadow */}
+            {/* Parallax shadow */}
             <div
               ref={shadowRef}
               style={{
-                position: 'absolute', inset: 0,
-                background: share.stampDominantColor ?? 'rgba(0,0,0,0.4)',
-                borderRadius: 20, filter: 'blur(18px)', opacity: 0.18,
-                zIndex: 0, transition: 'opacity 0.3s ease',
+                position: 'absolute',
+                bottom: -28, left: '8%', right: '8%', height: 60,
+                background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 45%, transparent 72%)',
+                pointerEvents: 'none',
+                willChange: 'transform, filter, opacity',
+                opacity: 0.38,
               }}
             />
 
-            {/* Stamp */}
-            <div ref={tiltRef} style={{ position: 'relative', zIndex: 1, willChange: 'transform' }}>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.88, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 28, delay: 0.06 }}
-                onClick={() => setPreviewOpen(true)}
-                style={{ cursor: 'zoom-in', position: 'relative' }}
-              >
-                <StampShape
-                  imageUrl={share.stampThumbnailUrl ?? share.stampImageUrl ?? ''}
-                  alt={share.stampTitle ?? 'Stamp'}
-                  width={SW}
-                  height={SH}
-                  dominantColor={share.stampDominantColor ?? undefined}
-                />
-                {/* Shine */}
-                <div
-                  ref={shineRef}
-                  style={{
-                    position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none',
-                    WebkitMaskImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='${SW}' height='${SH}'><path d='${STAMP_PATH}' fill='white'/></svg>")`,
-                    maskImage:       `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='${SW}' height='${SH}'><path d='${STAMP_PATH}' fill='white'/></svg>")`,
-                    WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
-                  }}
-                />
-              </motion.div>
+            {/* Perspective wrapper */}
+            <div style={{ perspective: '700px', perspectiveOrigin: '50% 50%' }}>
+              {/* Tilt container */}
+              <div ref={tiltRef} style={{ display: 'inline-block', willChange: 'transform' }}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.86, y: 28 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+                  style={{ position: 'relative', display: 'inline-block' }}
+                >
+                  <StampShape
+                    imageUrl={share.stampThumbnailUrl ?? share.stampImageUrl ?? ''}
+                    alt={share.stampTitle ?? 'Stamp'}
+                    width={SW}
+                    height={SH}
+                    dominantColor={share.stampDominantColor ?? undefined}
+                  />
+                  {/* Specular shine layer — clipped to stamp shape, updated by rAF */}
+                  <div
+                    ref={shineRef}
+                    style={{
+                      position: 'absolute',
+                      top: 0, left: 0,
+                      width: SW, height: SH,
+                      clipPath: `path('${STAMP_PATH}')`,
+                      pointerEvents: 'none',
+                      willChange: 'background',
+                    }}
+                  />
+                </motion.div>
+              </div>
             </div>
           </div>
 
-          {/* ── Title + tags ───────────────────────────────── */}
+          {/* Title + tags */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.14 }}
-            style={{ textAlign: 'center' }}
+            transition={{ delay: 0.12, duration: 0.38 }}
+            style={{ textAlign: 'center', marginBottom: 28, width: '100%' }}
           >
             <h1 style={{
               fontSize: 26, fontWeight: 700, color: 'var(--text-primary)',
@@ -274,19 +344,24 @@ export default function ShareDetailPage() {
               {share.stampTitle ?? 'Stamp sans titre'}
             </h1>
             {share.stampTags && share.stampTags.length > 0 && (
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22, duration: 0.3 }}
+                style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 10 }}
+              >
                 {share.stampTags.map((tag) => (
                   <TagChip key={tag} tag={tag} />
                 ))}
-              </div>
+              </motion.div>
             )}
           </motion.div>
 
-          {/* ── Info cards ─────────────────────────────────── */}
+          {/* Info cards */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
             style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}
           >
             {/* Date + Time */}
@@ -318,7 +393,7 @@ export default function ShareDetailPage() {
               </InfoCard>
             )}
 
-            {/* Sender */}
+            {/* Sender + message */}
             <InfoCard>
               <InfoRow
                 icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2L9 13.5L7 9L2.5 7L14 2Z"/></svg>}
@@ -336,18 +411,7 @@ export default function ShareDetailPage() {
               )}
             </InfoCard>
           </motion.div>
-        </motion.div>
-      )}
-
-      {/* Full-screen image preview */}
-      {share && (
-        <StampImagePreview
-          visible={previewOpen}
-          onClose={() => setPreviewOpen(false)}
-          imageUrl={share.stampImageUrl ?? share.stampThumbnailUrl ?? ''}
-          thumbnailUrl={share.stampThumbnailUrl ?? undefined}
-          alt={share.stampTitle ?? ''}
-        />
+        </div>
       )}
 
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
