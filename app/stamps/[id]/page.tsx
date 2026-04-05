@@ -16,17 +16,19 @@ import ContextMenuSheet from '@/components/ContextMenuSheet'
 import CollectionPickerSheet from '@/components/CollectionPickerSheet'
 import StampImagePreview from '@/components/StampImagePreview'
 import TagChip from '@/components/TagChip'
+import FriendPickerSheet from '@/components/FriendPickerSheet'
 
 export default function StampDetailPage() {
   const router = useRouter()
   const params = useParams()
   const id = params?.id as string
-  const { stamps, collections, deleteStamp, moveToCollection, toggleFavorite } = useStore()
+  const { stamps, collections, deleteStamp, moveToCollection, toggleFavorite, user } = useStore()
 
   const [menuOpen, setMenuOpen]               = useState(false)
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
   const [isDeleting, setIsDeleting]           = useState(false)
   const [previewOpen, setPreviewOpen]         = useState(false)
+  const [shareOpen, setShareOpen]             = useState(false)
 
   // ── 3D parallax tilt — refs (DOM updated directly, zero re-renders) ──
   const containerRef = useRef<HTMLDivElement>(null)
@@ -236,7 +238,7 @@ export default function StampDetailPage() {
             stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
         </svg>
       ),
-      onPress: () => {},
+      onPress: () => { setMenuOpen(false); setTimeout(() => setShareOpen(true), 200) },
     },
     {
       label: 'Delete stamp',
@@ -608,6 +610,21 @@ export default function StampDetailPage() {
           stampHeight={290}
           photoTransform={stamp.photoTransform}
         />
+
+        {user && (
+          <FriendPickerSheet
+            visible={shareOpen}
+            onClose={() => setShareOpen(false)}
+            stamp={{
+              id:           stamp.id,
+              title:        stamp.title,
+              thumbnailUrl: stamp.thumbnailUrl,
+              imageUrl:     stamp.imageUrl,
+              dominantColor: stamp.dominantColor,
+            }}
+            userId={user.id}
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   )

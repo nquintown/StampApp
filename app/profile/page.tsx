@@ -10,6 +10,7 @@ import type { Profile } from '@/lib/profile-db'
 import { ACHIEVEMENTS } from '@/lib/achievements'
 import { AchievementCard } from '@/components/AchievementCard'
 import { subscribePush, saveSubscription, getPermissionState } from '@/lib/push'
+import { getUnseenCount } from '@/lib/sharing-db'
 
 // ── Toggle switch ──────────────────────────────────────────
 function Toggle({
@@ -135,6 +136,7 @@ export default function ProfilePage() {
   const [avatarUrl,   setAvatarUrl]   = useState<string | null>(null)
   const [uploading,   setUploading]   = useState(false)
   const [notifState,  setNotifState]  = useState<NotifState>('idle')
+  const [unseenCount, setUnseenCount] = useState(0)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -144,6 +146,7 @@ export default function ProfilePage() {
         setProfile(p)
         setAvatarUrl(p?.avatarUrl ?? null)
       })
+      getUnseenCount(user.id).then(setUnseenCount)
     }
   }, [user])
 
@@ -484,14 +487,29 @@ export default function ProfilePage() {
           <SettingRow
             iconBg="#DBEAFE"
             iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" color="#3B82F6"><circle cx="7" cy="7" r="3" stroke="currentColor" strokeWidth="1.4" /><path d="M1.5 15C1.5 12.5 4 10.5 7 10.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /><path d="M13.5 10.5V15.5M11 13H16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
-            label="Mes amis" sublabel="Suis tes amis et leurs stamps"
-            badge="Bientôt" disabled
+            label="Mes amis"
+            sublabel="Suis tes amis et leurs stamps"
+            onPress={() => router.push('/friends')}
           />
           <SettingRow
             iconBg="#D1FAE5"
             iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" color="#10B981"><path d="M13 3L17 7L13 11V8.5C8 8.5 5 10.5 4 15C3.5 11 5 6 13 5.5V3Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
-            label="Partager un stamp" sublabel="Envoie un stamp à un ami"
-            badge="Bientôt" disabled isLast
+            label="Stamps reçus"
+            sublabel="Stamps partagés par tes amis"
+            onPress={() => router.push('/friends/inbox')}
+            rightSlot={unseenCount > 0 ? (
+              <div style={{
+                minWidth: 20, height: 20, borderRadius: 10,
+                backgroundColor: '#EF4444',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '0 6px',
+              }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+                  {unseenCount > 9 ? '9+' : unseenCount}
+                </span>
+              </div>
+            ) : undefined}
+            isLast
           />
         </Section>
 
