@@ -383,6 +383,19 @@ export default function StampDetailPage() {
                 ♥ Favorited
               </span>
             )}
+            {/* Colored tags — centered under the title */}
+            {stamp.tags && stamp.tags.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22, duration: 0.3 }}
+                style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: 10 }}
+              >
+                {stamp.tags.map((tag) => (
+                  <TagChip key={tag} tag={tag} />
+                ))}
+              </motion.div>
+            )}
           </motion.div>
 
           {/* ── Info cards ──────────────────────────────── */}
@@ -494,19 +507,6 @@ export default function StampDetailPage() {
               </div>
             </motion.button>
 
-            {/* Tags */}
-            {stamp.tags && stamp.tags.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.35 }}
-                style={{ display: 'flex', gap: 6, flexWrap: 'wrap', paddingTop: 4 }}
-              >
-                {stamp.tags.map((tag) => (
-                  <TagChip key={tag} tag={tag} />
-                ))}
-              </motion.div>
-            )}
           </motion.div>
         </div>
 
