@@ -273,7 +273,9 @@ export default function CameraPage() {
       style={{ position: 'fixed', inset: 0, backgroundColor: 'var(--bg)', overflow: 'hidden' }}
     >
       {/* Hidden file inputs */}
-      <input ref={fileInputRef}   type="file" accept="image/*"                      style={{ display: 'none' }} onChange={handleFileSelect} />
+      {/* Gallery: specific MIME types → iOS skips its own sheet and opens Photos directly */}
+      <input ref={fileInputRef}   type="file" accept="image/jpeg,image/png,image/heic,image/heif,image/gif,image/webp" style={{ display: 'none' }} onChange={handleFileSelect} />
+      {/* Camera: capture attribute → opens camera directly */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFileSelect} />
 
       {/* ══ STAGE: DEVICE ════════════════════════════════ */}
