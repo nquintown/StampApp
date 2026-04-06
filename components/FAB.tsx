@@ -56,7 +56,7 @@ export default function FAB({ onCamera, onGallery }: FABProps) {
             transition={{ type: 'spring', stiffness: 340, damping: 26 }}
             style={{
               position: 'fixed',
-              bottom: 'max(100px, calc(env(safe-area-inset-bottom, 0px) + 100px))',
+              bottom: 'calc(60px + max(88px, calc(env(safe-area-inset-bottom, 0px) + 88px)))',
               right: 20,
               display: 'flex',
               flexDirection: 'column',
@@ -173,7 +173,7 @@ export default function FAB({ onCamera, onGallery }: FABProps) {
         aria-label="Add stamp"
         style={{
           position: 'fixed',
-          bottom: 'max(28px, env(safe-area-inset-bottom, 28px))',
+          bottom: 'calc(60px + max(28px, env(safe-area-inset-bottom, 28px)))',
           right: 24,
           width: 56,
           height: 56,

@@ -8,6 +8,7 @@ import TopBar, { IconButton } from '@/components/TopBar'
 import CollectionCard from '@/components/CollectionCard'
 import StampCard from '@/components/StampCard'
 import FAB from '@/components/FAB'
+import TabBar from '@/components/TabBar'
 import { preGrantGyroPermission } from '@/lib/gyro'
 import { getPendingCount, getFriends, type FriendUser } from '@/lib/friends-db'
 import { getReceivedShares, type SharedStampRecord } from '@/lib/sharing-db'
@@ -204,7 +205,7 @@ export default function HomePage() {
   // ── Loading skeleton ────────────────────────────────────
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 100 }}>
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 160 }}>
         <TopBar
           title="Stampverse"
           leftSlot={<IconButton label="Nouvelle collection" onClick={() => {}}><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg></IconButton>}
@@ -226,6 +227,7 @@ export default function HomePage() {
           </div>
         </div>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
+        <TabBar active="stamps" />
       </div>
     )
   }
@@ -235,7 +237,7 @@ export default function HomePage() {
       style={{
         minHeight: '100vh',
         backgroundColor: 'var(--bg)',
-        paddingBottom: 100,
+        paddingBottom: 160,
         transition: 'background-color 0.25s ease',
       }}
     >
@@ -540,6 +542,8 @@ export default function HomePage() {
         </motion.div>
       </div>
       </div>
+
+      <TabBar active="stamps" />
 
       <FAB
         onCamera={() => router.push('/camera')}
