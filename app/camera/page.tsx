@@ -34,7 +34,8 @@ export default function CameraPage() {
   const router = useRouter()
   const { addStamp, collections } = useStore()
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef   = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
   // Gesture container
   const gestureRef = useRef<HTMLDivElement>(null)
 
@@ -49,6 +50,7 @@ export default function CameraPage() {
   const [location, setLocation] = useState<StampLocation | null>(null)
   const [selectedCollectionId, setSelectedCollectionId] = useState('all')
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
+  const [photoPickerOpen, setPhotoPickerOpen] = useState(false)
 
 
   // Photo transform — ref is the source of truth for touch handlers (avoids stale closures)
@@ -270,7 +272,9 @@ export default function CameraPage() {
       transition={{ duration: 0.28 }}
       style={{ position: 'fixed', inset: 0, backgroundColor: 'var(--bg)', overflow: 'hidden' }}
     >
-      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
+      {/* Hidden file inputs */}
+      <input ref={fileInputRef}   type="file" accept="image/*"                      style={{ display: 'none' }} onChange={handleFileSelect} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFileSelect} />
 
       {/* ══ STAGE: DEVICE ════════════════════════════════ */}
       <AnimatePresence>
@@ -305,7 +309,7 @@ export default function CameraPage() {
             {/* Device + tap area */}
             <div
               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => setPhotoPickerOpen(true)}
             >
               <div style={{ position: 'relative' }}>
                 <CameraStampFrame isProcessing={false} />
@@ -711,6 +715,133 @@ export default function CameraPage() {
         )}
       </AnimatePresence>
 
+      {/* ══ PHOTO PICKER SHEET ═══════════════════════════ */}
+      <AnimatePresence>
+        {photoPickerOpen && (
+          <motion.div
+            key="picker-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setPhotoPickerOpen(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 300,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+            }}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%', maxWidth: 430,
+                backgroundColor: 'var(--surface)',
+                borderRadius: '24px 24px 0 0',
+                paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))',
+                transition: 'background-color 0.25s ease',
+              }}
+            >
+              {/* Handle */}
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 8px' }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: 'var(--border)' }} />
+              </div>
+
+              <div style={{ padding: '4px 20px 8px' }}>
+                <p style={{
+                  margin: '0 0 16px',
+                  fontSize: 13, fontWeight: 600,
+                  color: 'var(--text-secondary)',
+                  textTransform: 'uppercase', letterSpacing: '0.06em',
+                }}>
+                  Ajouter une photo
+                </p>
+
+                {/* Camera option */}
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setPhotoPickerOpen(false)
+                    setTimeout(() => cameraInputRef.current?.click(), 120)
+                  }}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 16,
+                    padding: '14px 16px', borderRadius: 16, marginBottom: 10,
+                    backgroundColor: 'var(--surface2)', border: '1px solid var(--border)',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    WebkitTapHighlightColor: 'transparent',
+                    transition: 'background-color 0.25s ease, border-color 0.25s ease',
+                  }}
+                >
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                    backgroundColor: 'var(--text-primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'background-color 0.25s ease',
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <rect x="1.5" y="5" width="17" height="12" rx="2.5" stroke="var(--bg)" strokeWidth="1.5" />
+                      <circle cx="10" cy="10.5" r="3" stroke="var(--bg)" strokeWidth="1.5" />
+                      <path d="M6.5 5L7.8 3H12.2L13.5 5" stroke="var(--bg)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', transition: 'color 0.25s ease' }}>
+                      Prendre une photo
+                    </p>
+                    <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-secondary)', transition: 'color 0.25s ease' }}>
+                      Ouvre l&apos;appareil photo
+                    </p>
+                  </div>
+                </motion.button>
+
+                {/* Gallery option */}
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setPhotoPickerOpen(false)
+                    setTimeout(() => fileInputRef.current?.click(), 120)
+                  }}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 16,
+                    padding: '14px 16px', borderRadius: 16,
+                    backgroundColor: 'var(--surface2)', border: '1px solid var(--border)',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    WebkitTapHighlightColor: 'transparent',
+                    transition: 'background-color 0.25s ease, border-color 0.25s ease',
+                  }}
+                >
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                    backgroundColor: 'var(--surface2)',
+                    border: '1.5px solid var(--border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--text-primary)',
+                    transition: 'background-color 0.25s ease, border-color 0.25s ease',
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <rect x="1.5" y="3.5" width="17" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M1.5 13L5.5 9.5L8.5 12.5L12.5 8.5L18.5 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="6" cy="7.5" r="1.5" fill="currentColor" />
+                    </svg>
+                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', transition: 'color 0.25s ease' }}>
+                      Depuis la galerie
+                    </p>
+                    <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-secondary)', transition: 'color 0.25s ease' }}>
+                      Choisir dans tes photos
+                    </p>
+                  </div>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </motion.div>
   )
