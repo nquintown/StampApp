@@ -20,6 +20,20 @@
   --text-primary: #1E1E1C;
   --text-secondary: #6B6B67;
   --border: #E7E1D5;
+
+  /* ── Icon palette (profile settings rows) ── */
+  --icon-red-bg:    #FFE4E4;
+  --icon-red:       #EF4444;
+  --icon-blue-bg:   #DBEAFE;
+  --icon-blue:      #3B82F6;
+  --icon-green-bg:  #D1FAE5;
+  --icon-green:     #10B981;
+  --icon-yellow-bg: #FEF3C7;
+  --icon-yellow:    #F59E0B;
+  --icon-purple-bg: #EDE9FE;
+  --icon-purple:    #8B5CF6;
+  --icon-theme-bg:  #FFF8E1;
+  --icon-theme:     #F59E0B;
 }
 
 /* ── Dark mode overrides ── */
@@ -30,6 +44,20 @@ html.dark {
   --text-primary: #EDE8DE;
   --text-secondary: #8A8580;
   --border: #38342C;
+
+  /* ── Icon palette (dark) ── */
+  --icon-red-bg:    #3D1515;
+  --icon-red:       #F87171;
+  --icon-blue-bg:   #1E2D4A;
+  --icon-blue:      #60A5FA;
+  --icon-green-bg:  #0F2D1F;
+  --icon-green:     #34D399;
+  --icon-yellow-bg: #2D2512;
+  --icon-yellow:    #FBBF24;
+  --icon-purple-bg: #231B3D;
+  --icon-purple:    #A78BFA;
+  --icon-theme-bg:  #1A1A2E;
+  --icon-theme:     #818CF8;
 }
 
 *, *::before, *::after {

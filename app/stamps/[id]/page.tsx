@@ -184,7 +184,7 @@ export default function StampDetailPage() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexDirection: 'column', gap: 12,
       }}>
-        <p style={{ fontSize: 16, color: 'var(--text-secondary)' }}>Stamp not found</p>
+        <p style={{ fontSize: 16, color: 'var(--text-secondary)' }}>Stamp introuvable</p>
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => router.back()}
@@ -195,7 +195,7 @@ export default function StampDetailPage() {
             fontFamily: 'inherit',
           }}
         >
-          Go back
+          Retour
         </motion.button>
       </div>
     )
@@ -293,7 +293,7 @@ export default function StampDetailPage() {
           zIndex: 50,
           transition: 'background-color 0.25s ease',
         }}>
-          <IconButton label="Back" onClick={() => router.back()}>
+          <IconButton label="Retour" onClick={() => router.back()}>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M11 4L6 9L11 14" stroke="currentColor" strokeWidth="1.6"
                 strokeLinecap="round" strokeLinejoin="round" />
@@ -396,7 +396,7 @@ export default function StampDetailPage() {
             </h1>
             {stamp.favorite && (
               <span style={{ fontSize: 12, color: '#EF4444', fontWeight: 600, letterSpacing: '0.04em' }}>
-                ♥ Favorited
+                ♥ Favori
               </span>
             )}
             {/* Colored tags — centered under the title */}
@@ -444,7 +444,7 @@ export default function StampDetailPage() {
                       strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 }
-                label="Time"
+                label="Heure"
                 value={formatTime(stamp.createdAt)}
               />
             </InfoCard>
@@ -463,7 +463,7 @@ export default function StampDetailPage() {
                       <circle cx="7" cy="5" r="2" stroke="currentColor" strokeWidth="1.2" />
                     </svg>
                   }
-                  label="Location"
+                  label="Lieu"
                   value={stamp.location.label}
                   highlight
                 />
@@ -514,7 +514,7 @@ export default function StampDetailPage() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>Change</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>Changer</span>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" color="var(--text-secondary)">
                     <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.4"
                       strokeLinecap="round" strokeLinejoin="round" />
@@ -566,7 +566,7 @@ export default function StampDetailPage() {
               />
             </svg>
             <span style={{ fontSize: 14, fontWeight: 600, color: stamp.favorite ? '#EF4444' : 'var(--text-secondary)' }}>
-              {stamp.favorite ? 'Saved' : 'Favorite'}
+              {stamp.favorite ? 'Sauvegardé' : 'Favori'}
             </span>
           </motion.button>
 
@@ -655,10 +655,10 @@ export default function StampDetailPage() {
 
 // ── Helpers ─────────────────────────────────────────────
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  return new Date(iso).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+  return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
 // ── Sub-components ──────────────────────────────────────

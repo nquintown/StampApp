@@ -298,7 +298,7 @@ export default function CameraPage() {
                 flex: 1, textAlign: 'center', fontSize: 16, fontWeight: 600,
                 color: 'var(--text-primary)', marginRight: 36, letterSpacing: '-0.2px',
               }}>
-                New Stamp
+                Nouveau Stamp
               </span>
             </div>
 
@@ -350,7 +350,7 @@ export default function CameraPage() {
                 letterSpacing: '-0.1px',
               }}
             >
-              Tap to add a photo
+              Appuie pour ajouter une photo
             </motion.p>
           </motion.div>
         )}
@@ -483,7 +483,7 @@ export default function CameraPage() {
                   <rect x="2.5" y="2.5" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.4" strokeDasharray="2.5 2" />
                   <path d="M9 5.5V12.5M5.5 9H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
-                Cut your stamp
+                Découper le stamp
               </motion.button>
             </motion.div>
           </motion.div>
@@ -516,7 +516,7 @@ export default function CameraPage() {
                 ))}
               </div>
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 600 }}>
-                Stamping…
+                Création en cours…
               </p>
             </div>
           </motion.div>
@@ -559,7 +559,7 @@ export default function CameraPage() {
                 flex: 1, textAlign: 'center', fontSize: 16, fontWeight: 600,
                 color: '#1E1E1C', letterSpacing: '-0.2px', marginRight: 36,
               }}>
-                Name your stamp
+                Nommer ton stamp
               </span>
             </div>
 
@@ -588,13 +588,13 @@ export default function CameraPage() {
                 {/* Title */}
                 <div>
                   <p style={{ fontSize: 12, color: '#6B6B67', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
-                    Stamp title
+                    Titre du stamp
                   </p>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Give your stamp a name…"
+                    placeholder="Donne un nom à ton stamp…"
                     autoFocus
                     style={{
                       width: '100%', padding: '14px 16px', borderRadius: 14,
@@ -660,11 +660,11 @@ export default function CameraPage() {
                         </svg>
                       </div>
                       <span style={{ fontSize: 15, fontWeight: 600, color: '#1E1E1C' }}>
-                        {collections.find(c => c.id === selectedCollectionId)?.name ?? 'All Stamps'}
+                        {collections.find(c => c.id === selectedCollectionId)?.name ?? 'Tous les Stamps'}
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <span style={{ fontSize: 13, color: '#6B6B67', fontWeight: 500 }}>Change</span>
+                      <span style={{ fontSize: 13, color: '#6B6B67', fontWeight: 500 }}>Changer</span>
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                         <path d="M5 3L9 7L5 11" stroke="#6B6B67" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -696,7 +696,7 @@ export default function CameraPage() {
                   fontFamily: 'inherit',
                 }}
               >
-                Save Stamp
+                Enregistrer le stamp
               </motion.button>
             </motion.div>
 

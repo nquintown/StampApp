@@ -117,7 +117,7 @@ export default function CreatePage() {
             letterSpacing: '-0.2px',
           }}
         >
-          {stage === 'name' ? 'Name your stamp' : 'New Stamp'}
+          {stage === 'name' ? 'Nommer ton stamp' : 'Nouveau Stamp'}
         </span>
 
         <div style={{ width: 36 }} />
@@ -164,8 +164,8 @@ export default function CreatePage() {
                   }}
                 >
                   {selectedImage
-                    ? 'Looking good! Tap Save Stamp to capture'
-                    : 'Select a photo from the gallery below'}
+                    ? 'Super\u00a0! Appuie sur Enregistrer pour capturer'
+                    : 'Sélectionne une photo dans la galerie'}
                 </motion.p>
               )}
 
@@ -206,7 +206,7 @@ export default function CreatePage() {
                     ))}
                   </div>
                   <p style={{ fontSize: 13, color: 'rgba(247,244,237,0.5)' }}>
-                    Stamping...
+                    Création en cours...
                   </p>
                 </motion.div>
               )}
@@ -260,13 +260,13 @@ export default function CreatePage() {
                     fontWeight: 600,
                   }}
                 >
-                  Stamp Title
+                  Titre du stamp
                 </p>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Give your stamp a name..."
+                  placeholder="Donne un nom à ton stamp..."
                   autoFocus
                   style={{
                     width: '100%',
@@ -316,7 +316,7 @@ export default function CreatePage() {
                 paddingLeft: 24,
               }}
             >
-              Select photo
+              Sélectionner une photo
             </p>
             <div
               style={{
@@ -390,7 +390,7 @@ export default function CreatePage() {
                   fontFamily: 'inherit',
                 }}
               >
-                Save Stamp
+                Enregistrer le stamp
               </motion.button>
             </div>
           </motion.div>
@@ -427,7 +427,7 @@ export default function CreatePage() {
                 fontFamily: 'inherit',
               }}
             >
-              Add to Collection
+              Ajouter à la collection
             </motion.button>
           </motion.div>
         )}

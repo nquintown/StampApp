@@ -87,6 +87,7 @@ function SettingRow({ iconBg, iconEl, label, sublabel, value, badge, rightSlot, 
       <div style={{
         width: 36, height: 36, borderRadius: 10, backgroundColor: iconBg,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        transition: 'background-color 0.25s ease',
       }}>
         {iconEl}
       </div>
@@ -645,9 +646,9 @@ export default function ProfilePage() {
         {/* ── NOTIFICATIONS ─────────────────────────────── */}
         <Section title="Notifications">
           <SettingRow
-            iconBg="#FFE4E4"
+            iconBg="var(--icon-red-bg)"
             iconEl={
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" color="#EF4444">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-red)' }}>
                 <path d="M9 2C6.24 2 4 4.24 4 7V11L2 13H16L14 11V7C14 4.24 11.76 2 9 2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
                 <path d="M7 13C7 14.1 7.9 15 9 15C10.1 15 11 14.1 11 13" stroke="currentColor" strokeWidth="1.4" />
               </svg>
@@ -668,9 +669,9 @@ export default function ProfilePage() {
         {/* ── APPARENCE ─────────────────────────────────── */}
         <Section title="Apparence">
           <SettingRow
-            iconBg={isDark ? '#1A1A2E' : '#FFF8E1'}
+            iconBg="var(--icon-theme-bg)"
             iconEl={
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" color={isDark ? '#818CF8' : '#F59E0B'}>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-theme)' }}>
                 {isDark ? (
                   <path d="M14.5 10.5A6.5 6.5 0 0 1 7.5 3.5a6.5 6.5 0 1 0 7 7z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                 ) : (
@@ -690,15 +691,15 @@ export default function ProfilePage() {
         {/* ── DÉCOUVRIR ─────────────────────────────────── */}
         <Section title="Découvrir">
           <SettingRow
-            iconBg="#DBEAFE"
-            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" color="#3B82F6"><circle cx="7" cy="7" r="3" stroke="currentColor" strokeWidth="1.4" /><path d="M1.5 15C1.5 12.5 4 10.5 7 10.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /><path d="M13.5 10.5V15.5M11 13H16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
+            iconBg="var(--icon-blue-bg)"
+            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-blue)' }}><circle cx="7" cy="7" r="3" stroke="currentColor" strokeWidth="1.4" /><path d="M1.5 15C1.5 12.5 4 10.5 7 10.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /><path d="M13.5 10.5V15.5M11 13H16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
             label="Mes amis"
             sublabel="Suis tes amis et leurs stamps"
             onPress={() => router.push('/friends')}
           />
           <SettingRow
-            iconBg="#D1FAE5"
-            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" color="#10B981"><path d="M13 3L17 7L13 11V8.5C8 8.5 5 10.5 4 15C3.5 11 5 6 13 5.5V3Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
+            iconBg="var(--icon-green-bg)"
+            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-green)' }}><path d="M13 3L17 7L13 11V8.5C8 8.5 5 10.5 4 15C3.5 11 5 6 13 5.5V3Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
             label="Stamps reçus"
             sublabel="Stamps partagés par tes amis"
             onPress={() => router.push('/friends/inbox')}
@@ -721,13 +722,13 @@ export default function ProfilePage() {
         {/* ── RETOURS ───────────────────────────────────── */}
         <Section title="Retours">
           <SettingRow
-            iconBg="#FEF3C7"
-            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" color="#F59E0B"><path d="M9 2L11 7H16.5L12 10.5L14 16L9 12.5L4 16L6 10.5L1.5 7H7L9 2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
+            iconBg="var(--icon-yellow-bg)"
+            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-yellow)' }}><path d="M9 2L11 7H16.5L12 10.5L14 16L9 12.5L4 16L6 10.5L1.5 7H7L9 2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
             label="Donner un avis" onPress={() => {}}
           />
           <SettingRow
-            iconBg="#EDE9FE"
-            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" color="#8B5CF6"><path d="M2 3.5C2 2.67 2.67 2 3.5 2H14.5C15.33 2 16 2.67 16 3.5V11.5C16 12.33 15.33 13 14.5 13H10L6 16V13H3.5C2.67 13 2 12.33 2 11.5V3.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
+            iconBg="var(--icon-purple-bg)"
+            iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-purple)' }}><path d="M2 3.5C2 2.67 2.67 2 3.5 2H14.5C15.33 2 16 2.67 16 3.5V11.5C16 12.33 15.33 13 14.5 13H10L6 16V13H3.5C2.67 13 2 12.33 2 11.5V3.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
             label="Support" onPress={() => {}} isLast
           />
         </Section>

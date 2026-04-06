@@ -191,7 +191,7 @@ export default function HomePage() {
   )) {
     const d = new Date(stamp.createdAt)
     const key = `${d.getFullYear()}-${d.getMonth()}`
-    const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    const label = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
     if (!seen.has(key)) { seen.set(key, []); stampsByMonth.push({ label, key, stamps: seen.get(key)! }) }
     seen.get(key)!.push(stamp)
   }
@@ -207,7 +207,7 @@ export default function HomePage() {
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 100 }}>
         <TopBar
           title="Stampverse"
-          leftSlot={<IconButton label="New Collection" onClick={() => {}}><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg></IconButton>}
+          leftSlot={<IconButton label="Nouvelle collection" onClick={() => {}}><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg></IconButton>}
           rightSlot={<IconButton label="Profil" onClick={() => router.push('/profile')}><UserIcon /></IconButton>}
         />
         <div style={{ padding: '8px 20px 0' }}>
@@ -243,7 +243,7 @@ export default function HomePage() {
         title="Stampverse"
         leftSlot={
           <IconButton
-            label="New Collection"
+            label="Nouvelle collection"
             onClick={() => router.push('/collections/new')}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -372,7 +372,7 @@ export default function HomePage() {
               }}
               onClick={() => router.push('/grid')}
             >
-              See all
+              Voir tout
             </motion.button>
           </div>
 
@@ -491,14 +491,14 @@ export default function HomePage() {
           {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
-              All Stamps
+              Tous les Stamps
             </h2>
             <motion.button
               whileTap={{ scale: 0.95 }}
               style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontFamily: 'inherit' }}
               onClick={() => router.push('/grid')}
             >
-              See all
+              Voir tout
             </motion.button>
           </div>
 

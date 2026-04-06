@@ -48,9 +48,9 @@ export default function GridPage() {
       }}
     >
       <TopBar
-        title="All Stamps"
+        title="Tous les Stamps"
         leftSlot={
-          <IconButton label="Back" onClick={() => router.back()}>
+          <IconButton label="Retour" onClick={() => router.back()}>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M11 4L6 9L11 14"
@@ -63,7 +63,7 @@ export default function GridPage() {
           </IconButton>
         }
         rightSlot={
-          <IconButton label="Sort">
+          <IconButton label="Trier">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M3 5h12M5 9h8M7 13h4"
@@ -154,10 +154,10 @@ export default function GridPage() {
               </svg>
             </div>
             <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
-              No stamps yet
+              Aucun stamp pour l&apos;instant
             </p>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', textAlign: 'center' }}>
-              Tap the + button to create your first stamp
+              Appuie sur + pour créer ton premier stamp
             </p>
           </motion.div>
         )}

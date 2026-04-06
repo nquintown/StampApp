@@ -20,9 +20,9 @@ export default function NewCollectionPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)' }}>
       <TopBar
-        title="New Collection"
+        title="Nouvelle collection"
         leftSlot={
-          <IconButton label="Back" onClick={() => router.back()}>
+          <IconButton label="Retour" onClick={() => router.back()}>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M11 14L6 9L11 4"
@@ -86,14 +86,14 @@ export default function NewCollectionPage() {
               marginBottom: 10,
             }}
           >
-            Collection Name
+            Nom de la collection
           </label>
           <input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            placeholder="e.g. Travel, Nature, Friends…"
+            placeholder="ex. Voyage, Nature, Amis…"
             maxLength={40}
             style={{
               width: '100%',
@@ -124,7 +124,7 @@ export default function NewCollectionPage() {
               lineHeight: 1.5,
             }}
           >
-            Give your collection a name to get started.
+            Donne un nom à ta collection pour commencer.
           </p>
         </motion.div>
 
@@ -154,7 +154,7 @@ export default function NewCollectionPage() {
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            Create Collection
+            Créer la collection
           </motion.button>
         </motion.div>
       </div>

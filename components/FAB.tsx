@@ -105,7 +105,7 @@ export default function FAB({ onCamera, onGallery }: FABProps) {
                   <circle cx="5" cy="6" r="1.2" fill="currentColor" />
                 </svg>
               </div>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>From Gallery</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>Depuis la galerie</span>
             </motion.button>
 
             {/* Camera option */}
@@ -149,7 +149,7 @@ export default function FAB({ onCamera, onGallery }: FABProps) {
                     stroke="var(--bg)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Take Photo</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>Prendre une photo</span>
             </motion.button>
           </motion.div>
         )}

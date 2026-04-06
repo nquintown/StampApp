@@ -90,7 +90,7 @@ export default function CollectionPickerSheet({
                 textTransform: 'uppercase',
                 margin: 0,
               }}>
-                Move to Collection
+                Déplacer vers une collection
               </p>
             </div>
 

@@ -6,7 +6,7 @@ import Toast from '@/components/Toast'
 
 export const metadata: Metadata = {
   title: 'Stampverse',
-  description: 'Your personal stamp collection',
+  description: 'Ta collection de stamps personnelle',
 }
 
 export const viewport: Viewport = {
@@ -21,7 +21,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="fr">
+      <head>
+        {/* Restore dark mode before first paint to avoid flash */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
+      </head>
       <body>
         <ThemeSync />
         <AuthProvider />

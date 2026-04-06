@@ -9,7 +9,7 @@ interface ProcessingOverlayProps {
 
 export default function ProcessingOverlay({
   visible,
-  message = 'Processing stamp...',
+  message = 'Création du stamp...',
 }: ProcessingOverlayProps) {
   return (
     <AnimatePresence>

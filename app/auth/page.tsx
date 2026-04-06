@@ -88,7 +88,7 @@ export default function AuthWelcomePage() {
           maxWidth: 280,
           margin: 0,
         }}>
-          Collect, organize and share your stamps — beautifully.
+          Collectionne, organise et partage tes stamps.
         </p>
       </motion.div>
 
@@ -110,7 +110,7 @@ export default function AuthWelcomePage() {
             cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
           }}
         >
-          Login
+          Connexion
         </motion.button>
 
         <motion.button
@@ -124,13 +124,13 @@ export default function AuthWelcomePage() {
             cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
           }}
         >
-          Sign up
+          S&apos;inscrire
         </motion.button>
 
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '4px 0' }}>
           <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>or</span>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>ou</span>
           <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
         </div>
 
@@ -148,7 +148,7 @@ export default function AuthWelcomePage() {
           }}
         >
           <GoogleIcon />
-          Continue with Google
+          Continuer avec Google
         </motion.button>
 
         <motion.button
@@ -164,7 +164,7 @@ export default function AuthWelcomePage() {
           }}
         >
           <AppleIcon />
-          Continue with Apple
+          Continuer avec Apple
         </motion.button>
       </motion.div>
     </div>

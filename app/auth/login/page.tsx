@@ -111,10 +111,10 @@ export default function LoginPage() {
         {/* Header */}
         <div style={{ marginBottom: 36 }}>
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 6px' }}>
-            Login
+            Connexion
           </h1>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>
-            Please login to your account
+            Connecte-toi à ton compte
           </p>
         </div>
 
@@ -123,7 +123,7 @@ export default function LoginPage() {
           {/* Email */}
           <div>
             <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
-              E-mail Address
+              Adresse e-mail
             </label>
             <div style={{ position: 'relative' }}>
               <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
@@ -150,7 +150,7 @@ export default function LoginPage() {
           {/* Password */}
           <div>
             <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
-              Password
+              Mot de passe
             </label>
             <div style={{ position: 'relative' }}>
               <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>
@@ -188,14 +188,14 @@ export default function LoginPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)' }}>
               <input type="checkbox" style={{ accentColor: 'var(--text-primary)', width: 15, height: 15 }} />
-              Remember me
+              Se souvenir de moi
             </label>
             <button
               type="button"
               onClick={() => router.push('/auth/forgot')}
               style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
             >
-              Forgot password?
+              Mot de passe oublié ?
             </button>
           </div>
 
@@ -219,14 +219,14 @@ export default function LoginPage() {
               transition: 'background 0.2s',
             }}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Connexion...' : 'Connexion'}
           </motion.button>
         </form>
 
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
           <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>or</span>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>ou</span>
           <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
         </div>
 
@@ -240,7 +240,7 @@ export default function LoginPage() {
               cursor: 'pointer', fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             }}>
-            <GoogleIcon /> Continue with Google
+            <GoogleIcon /> Continuer avec Google
           </motion.button>
 
           <motion.button whileTap={{ scale: 0.97 }} onClick={handleApple}
@@ -251,18 +251,18 @@ export default function LoginPage() {
               cursor: 'pointer', fontFamily: 'inherit',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             }}>
-            <AppleIcon /> Continue with Apple
+            <AppleIcon /> Continuer avec Apple
           </motion.button>
         </div>
 
         {/* Switch to register */}
         <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--text-secondary)', marginTop: 28 }}>
-          Don&apos;t have an account?{' '}
+          Pas encore de compte ?{' '}
           <button
             onClick={() => router.push('/auth/register')}
             style={{ fontWeight: 600, color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}
           >
-            Sign up
+            S&apos;inscrire
           </button>
         </p>
       </motion.div>
