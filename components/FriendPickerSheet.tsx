@@ -23,8 +23,12 @@ interface Props {
 }
 
 // ── Avatar helper ─────────────────────────────────────────
+function friendDisplayName(user: FriendUser): string {
+  return user.username || user.fullName || (user.email ? user.email.split('@')[0] : 'Utilisateur')
+}
+
 function Avatar({ user, size = 40 }: { user: FriendUser; size?: number }) {
-  const name   = user.username || user.fullName || '?'
+  const name   = friendDisplayName(user)
   const letter = name.charAt(0).toUpperCase()
 
   if (user.avatarUrl) {
@@ -235,7 +239,7 @@ export default function FriendPickerSheet({ visible, onClose, stamp, userId }: P
                 <div style={{ padding: '8px 0' }}>
                   {friends.map((f, i) => {
                     const isSelected = selectedId === f.userId
-                    const name = f.username || f.fullName || 'Utilisateur'
+                    const name = friendDisplayName(f)
                     return (
                       <motion.button
                         key={f.userId}
