@@ -23,8 +23,8 @@ function WaveDots() {
 
     const isDark   = document.documentElement.classList.contains('dark')
     const dotColor = isDark ? '237,232,222' : '30,30,28'
-    const SPACING  = 22
-    const RADIUS   = 1.7
+    const SPACING  = 32
+    const RADIUS   = 1.5
     const cols     = Math.ceil(w / SPACING) + 2
     const rows     = Math.ceil(h / SPACING) + 2
 
