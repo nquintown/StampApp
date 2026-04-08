@@ -1,133 +1,45 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-// ── Demo stamp images for bubbles ──────────────────────────
-const BUBBLE_IMAGES = [
-  'https://picsum.photos/seed/stamp1/300/300',
-  'https://picsum.photos/seed/stamp3/300/300',
-  'https://picsum.photos/seed/stamp5/300/300',
-  'https://picsum.photos/seed/stamp7/300/300',
-  'https://picsum.photos/seed/stamp9/300/300',
-  'https://picsum.photos/seed/stamp2/300/300',
-  'https://picsum.photos/seed/stamp4/300/300',
-  'https://picsum.photos/seed/stamp6/300/300',
+// ── Stamp photos for background decoration ─────────────────
+const DECO_STAMPS = [
+  { id: 0, size: 108, left: '62%',  top: '4%',   img: 'https://picsum.photos/seed/stamp1/300/300',  delay: 0,    dur: 9  },
+  { id: 1, size: 72,  left: '-4%',  top: '14%',  img: 'https://picsum.photos/seed/stamp3/300/300',  delay: 0.1,  dur: 11 },
+  { id: 2, size: 88,  left: '78%',  top: '28%',  img: 'https://picsum.photos/seed/stamp5/300/300',  delay: 0.05, dur: 10 },
+  { id: 3, size: 64,  left: '4%',   top: '38%',  img: 'https://picsum.photos/seed/stamp7/300/300',  delay: 0.15, dur: 13 },
+  { id: 4, size: 80,  left: '55%',  top: '40%',  img: 'https://picsum.photos/seed/stamp9/300/300',  delay: 0.08, dur: 8  },
 ]
 
-// ── Bubble layout + float animation config ─────────────────
-const BUBBLES = [
-  { id: 0, size: 112, left: '4%',   top: '4%',  floatX: [0, 14, -8, 10, 0],  floatY: [0, -20, 10, -14, 0], dur: 9.2,  featured: false },
-  { id: 1, size: 66,  left: '73%',  top: '5%',  floatX: [0, -12, 16, -6, 0], floatY: [0, -14, 6, -18, 0],  dur: 11.5, featured: false },
-  { id: 2, size: 54,  left: '-3%',  top: '27%', floatX: [0, 16, -8, 12, 0],  floatY: [0, -12, 16, -8, 0],  dur: 8.3,  featured: false },
-  { id: 3, size: 100, left: '24%',  top: '15%', floatX: [0, -10, 14, -7, 0], floatY: [0, -18, 8, -22, 0],  dur: 12.1, featured: true  },
-  { id: 4, size: 58,  left: '79%',  top: '24%', floatX: [0, -14, 10, -18, 0],floatY: [0, 12, -16, 10, 0],  dur: 10.4, featured: false },
-  { id: 5, size: 78,  left: '2%',   top: '48%', floatX: [0, 12, -16, 8, 0],  floatY: [0, -10, 14, -8, 0],  dur: 13.2, featured: false },
-  { id: 6, size: 64,  left: '59%',  top: '40%', floatX: [0, -8, 10, -12, 0], floatY: [0, -14, 8, -16, 0],  dur: 9.7,  featured: false },
-  { id: 7, size: 60,  left: '76%',  top: '51%', floatX: [0, 8, -14, 10, 0],  floatY: [0, -12, 16, -10, 0], dur: 11.0, featured: false },
+const FLOAT_PATHS = [
+  { x: [0, 10, -6, 8, 0],  y: [0, -16, 8, -12, 0]  },
+  { x: [0, -8, 12, -5, 0], y: [0, -10, 6, -14, 0]  },
+  { x: [0, 12, -8, 6, 0],  y: [0, -18, 10, -8, 0]  },
+  { x: [0, -6, 10, -8, 0], y: [0, -8, 14, -10, 0]  },
+  { x: [0, 8, -10, 6, 0],  y: [0, -12, 6, -16, 0]  },
 ]
 
-const ROTATING_LABELS = ['Capture ✦', 'Organise ✦', 'Partage ✦']
-
-// ── Soap bubble visual component ───────────────────────────
-function SoapBubble({ size, imgSrc, labelIdx, featured }: {
-  size: number
-  imgSrc: string
-  labelIdx: number
-  featured: boolean
-}) {
+// ── Icons ──────────────────────────────────────────────────
+function StampIcon() {
   return (
-    <div style={{ position: 'relative', width: size, height: size }}>
-      {/* Gradient ring (soap film rim) */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: '50%',
-        padding: 2,
-        background: 'linear-gradient(145deg, rgba(255,255,255,0.45) 0%, rgba(255,180,120,0.2) 30%, rgba(150,120,255,0.25) 60%, rgba(255,255,255,0.15) 100%)',
-        zIndex: 2,
-        pointerEvents: 'none',
-      }}>
-        <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'transparent' }} />
-      </div>
-
-      {/* Photo + overlays container */}
-      <div style={{
-        position: 'absolute', inset: 2, borderRadius: '50%', overflow: 'hidden',
-        boxShadow: 'inset 0 -6px 16px rgba(0,0,0,0.45)',
-      }}>
-        {/* Photo */}
-        <img
-          src={imgSrc}
-          alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          loading="lazy"
-        />
-
-        {/* Iridescent tint overlay */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: [
-            'radial-gradient(circle at 32% 26%, rgba(255,255,255,0.22) 0%, transparent 48%)',
-            'conic-gradient(from 110deg, rgba(255,110,130,0.1), rgba(110,130,255,0.12), rgba(110,255,200,0.08), rgba(255,200,110,0.12), rgba(255,110,130,0.1))',
-          ].join(', '),
-        }} />
-
-        {/* Specular highlight (top-left glint) */}
-        <div style={{
-          position: 'absolute',
-          top: '8%', left: '16%',
-          width: '38%', height: '19%',
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.38)',
-          filter: 'blur(5px)',
-          transform: 'rotate(-22deg)',
-        }} />
-
-        {/* Bottom dark vignette inside bubble */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(circle at 50% 110%, rgba(0,0,0,0.45) 0%, transparent 65%)',
-        }} />
-      </div>
-
-      {/* Featured label pill */}
-      {featured && (
-        <div style={{
-          position: 'absolute',
-          bottom: -10, left: '50%', transform: 'translateX(-50%)',
-          zIndex: 10,
-          whiteSpace: 'nowrap',
-        }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={labelIdx}
-              initial={{ opacity: 0, y: 6, scale: 0.88 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.92 }}
-              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-              style={{
-                backgroundColor: 'rgba(20,18,14,0.82)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                borderRadius: 20,
-                padding: '5px 14px',
-                fontSize: 12,
-                fontWeight: 700,
-                color: 'rgba(255,255,255,0.92)',
-                letterSpacing: '0.02em',
-              }}
-            >
-              {ROTATING_LABELS[labelIdx]}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      )}
-    </div>
+    <svg width="52" height="52" viewBox="0 0 56 56" fill="none">
+      <rect width="56" height="56" rx="14" fill="var(--text-primary)" />
+      <path
+        d="M14 20a2 2 0 0 1 2-2h24a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V20Z"
+        fill="none" stroke="var(--bg)" strokeWidth="1.5"
+      />
+      <path
+        d="M12 20h2M12 24h2M12 28h2M12 32h2M12 36h2M42 20h2M42 24h2M42 28h2M42 32h2M42 36h2M20 12v2M24 12v2M28 12v2M32 12v2M36 12v2M20 42v2M24 42v2M28 42v2M32 42v2M36 42v2"
+        stroke="var(--bg)" strokeWidth="1.5" strokeLinecap="round"
+      />
+      <circle cx="28" cy="28" r="5" fill="var(--bg)" />
+    </svg>
   )
 }
 
-// ── Icons ──────────────────────────────────────────────────
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18">
@@ -151,21 +63,13 @@ function AppleIcon() {
 export default function AuthWelcomePage() {
   const router = useRouter()
   const supabase = createClient()
-  const [phase, setPhase] = useState<'intro' | 'main'>('intro')
-  const [labelIdx, setLabelIdx] = useState(0)
+  const [ready, setReady] = useState(false)
 
-  // Switch to main phase after intro bubble animation
+  // Slight delay before animating in so images can start loading
   useEffect(() => {
-    const t = setTimeout(() => setPhase('main'), 1750)
+    const t = setTimeout(() => setReady(true), 80)
     return () => clearTimeout(t)
   }, [])
-
-  // Rotate featured bubble label
-  useEffect(() => {
-    if (phase !== 'main') return
-    const t = setInterval(() => setLabelIdx((i) => (i + 1) % ROTATING_LABELS.length), 2600)
-    return () => clearInterval(t)
-  }, [phase])
 
   const handleGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -183,263 +87,221 @@ export default function AuthWelcomePage() {
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, overflow: 'hidden',
-      backgroundColor: '#11100D',
+      position: 'fixed', inset: 0,
+      backgroundColor: 'var(--bg)',
+      overflow: 'hidden',
+      transition: 'background-color 0.25s ease',
     }}>
-      {/* ── Background gradient layers ────────────────── */}
 
-      {/* Warm amber radial — top center */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 85% 55% at 50% -2%, rgba(185,105,38,0.65) 0%, rgba(130,65,20,0.3) 50%, transparent 75%)',
-      }} />
-
-      {/* Mid warm haze */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 60% 40% at 20% 40%, rgba(140,70,25,0.18) 0%, transparent 70%)',
-      }} />
-
-      {/* Cool blue radial — bottom */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 55% 30% at 50% 108%, rgba(45,75,210,0.32) 0%, transparent 70%)',
-      }} />
-
-      {/* Perimeter vignette */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 110% 90% at 50% 50%, transparent 38%, rgba(0,0,0,0.55) 100%)',
-      }} />
-
-      {/* ── Intro bubble (inflates then pops) ─────────── */}
-      <AnimatePresence>
-        {phase === 'intro' && (
-          <motion.div
-            key="intro"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{
-              scale:   [0, 0.12, 0.45, 3.8, 0.04],
-              opacity: [0, 0.8,  0.95, 0.55, 0],
-            }}
-            transition={{
-              duration: 1.65,
-              times: [0, 0.1, 0.3, 0.82, 1],
-              ease: 'easeInOut',
-            }}
-            style={{
-              position: 'absolute',
-              left: 'calc(50% - 35vw)',
-              bottom: '8%',
-              width: '70vw',
-              height: '70vw',
-              borderRadius: '50%',
-              background: [
-                'radial-gradient(circle at 34% 28%, rgba(255,255,255,0.22) 0%, transparent 50%)',
-                'radial-gradient(circle at 50% 50%, rgba(200,140,60,0.08), rgba(80,100,220,0.06), transparent 80%)',
-              ].join(', '),
-              border: '2px solid rgba(255,255,255,0.22)',
-              boxShadow: [
-                '0 0 50px rgba(210,145,70,0.28)',
-                '0 0 110px rgba(70,100,230,0.2)',
-                'inset 0 0 40px rgba(255,255,255,0.04)',
-              ].join(', '),
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── Floating bubbles ──────────────────────────── */}
-      {phase === 'main' && BUBBLES.map((b, i) => (
+      {/* ── Floating stamp decorations (background) ───── */}
+      {DECO_STAMPS.map((s, i) => (
         <motion.div
-          key={b.id}
+          key={s.id}
           initial={{ scale: 0, opacity: 0 }}
-          animate={{
+          animate={ready ? {
             scale: 1,
             opacity: 1,
-            x: b.floatX,
-            y: b.floatY,
-          }}
+            x: FLOAT_PATHS[i].x,
+            y: FLOAT_PATHS[i].y,
+          } : {}}
           transition={{
-            scale:   { type: 'spring', stiffness: 190, damping: 17, delay: i * 0.07 },
-            opacity: { duration: 0.5, delay: i * 0.07 },
-            x: { duration: b.dur, repeat: Infinity, ease: 'easeInOut', delay: i * 0.07 + 0.3 },
-            y: { duration: b.dur * 1.15, repeat: Infinity, ease: 'easeInOut', delay: i * 0.07 + 0.3 },
+            scale:   { type: 'spring', stiffness: 160, damping: 18, delay: s.delay + 0.2 },
+            opacity: { duration: 0.6, delay: s.delay + 0.2 },
+            x: { duration: s.dur, repeat: Infinity, ease: 'easeInOut', delay: s.delay + 0.6 },
+            y: { duration: s.dur * 1.2, repeat: Infinity, ease: 'easeInOut', delay: s.delay + 0.6 },
           }}
           style={{
             position: 'absolute',
-            left: b.left,
-            top: b.top,
-            width: b.size,
-            height: b.size,
+            left: s.left,
+            top: s.top,
+            width: s.size,
+            height: s.size,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '2.5px solid var(--border)',
+            boxShadow: '0 6px 24px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.04)',
           }}
         >
-          <SoapBubble
-            size={b.size}
-            imgSrc={BUBBLE_IMAGES[i]}
-            featured={b.featured}
-            labelIdx={labelIdx}
+          <img
+            src={s.img}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            loading="eager"
           />
+          {/* Subtle inner shadow to integrate with background */}
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: '50%',
+            boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.04)',
+            pointerEvents: 'none',
+          }} />
         </motion.div>
       ))}
 
-      {/* ── Content (title + buttons) ─────────────────── */}
-      {phase === 'main' && (
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 20,
-          display: 'flex', flexDirection: 'column',
-          paddingTop: 'max(56px, env(safe-area-inset-top))',
-          paddingBottom: 'max(36px, env(safe-area-inset-bottom))',
-          pointerEvents: 'none',
-        }}>
+      {/* ── Soft gradient fade at bottom — keeps buttons readable ── */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        height: '55%',
+        background: 'linear-gradient(to top, var(--bg) 60%, transparent)',
+        pointerEvents: 'none',
+        zIndex: 5,
+        transition: 'background 0.25s ease',
+      }} />
 
-          {/* Title — top area */}
+      {/* ── Content layer ─────────────────────────────── */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '0 24px',
+        paddingTop: 'max(64px, env(safe-area-inset-top))',
+        paddingBottom: 'max(40px, env(safe-area-inset-bottom))',
+      }}>
+
+        {/* Logo + title */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 40 }}>
+
+          {/* Stamp icon — animated float */}
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
-            style={{ paddingLeft: 28, pointerEvents: 'none' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={ready ? { opacity: 1, y: [0, -6, 0] } : {}}
+            transition={{
+              opacity: { duration: 0.5, delay: 0.15 },
+              y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.6 },
+            }}
+            style={{ marginBottom: 18, display: 'inline-block' }}
           >
-            <p style={{
-              margin: '0 0 5px',
-              fontSize: 11, fontWeight: 600,
-              color: 'rgba(255,255,255,0.45)',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-            }}>
-              Bienvenue sur
-            </p>
-            <h1 style={{
-              margin: '0 0 10px',
-              fontSize: 52, fontWeight: 800,
-              color: '#FFFFFF',
-              letterSpacing: '-1.5px',
-              lineHeight: 1,
-            }}>
-              Patch
-            </h1>
-            <p style={{
-              margin: 0,
-              fontSize: 15, lineHeight: 1.6,
-              color: 'rgba(255,255,255,0.55)',
-              maxWidth: 220,
-            }}>
-              Collecte tes moments,<br />un stamp à la fois.
-            </p>
+            <StampIcon />
           </motion.div>
 
-          <div style={{ flex: 1 }} />
+          {/* "Patch" wordmark */}
+          <div style={{ overflow: 'hidden', marginBottom: 12 }}>
+            <motion.h1
+              initial={{ y: '110%' }}
+              animate={ready ? { y: 0 } : {}}
+              transition={{ type: 'spring', stiffness: 200, damping: 24, delay: 0.2 }}
+              style={{
+                margin: 0,
+                fontSize: 48,
+                fontWeight: 800,
+                letterSpacing: '-1.5px',
+                color: 'var(--text-primary)',
+                lineHeight: 1,
+                transition: 'color 0.25s ease',
+              }}
+            >
+              Patch
+            </motion.h1>
+          </div>
 
-          {/* Buttons — bottom area */}
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          {/* Tagline — word by word */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 6px', overflow: 'hidden' }}>
+            {['Collecte,', 'organise', 'et', 'partage', 'tes', 'stamps.'].map((word, i) => (
+              <div key={i} style={{ overflow: 'hidden' }}>
+                <motion.span
+                  initial={{ y: '110%', opacity: 0 }}
+                  animate={ready ? { y: 0, opacity: 1 } : {}}
+                  transition={{
+                    type: 'spring', stiffness: 220, damping: 26,
+                    delay: 0.32 + i * 0.055,
+                  }}
+                  style={{
+                    display: 'block',
+                    fontSize: 17,
+                    fontWeight: 500,
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.5,
+                    transition: 'color 0.25s ease',
+                  }}
+                >
+                  {word}
+                </motion.span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={ready ? { opacity: 1, y: 0 } : {}}
+          transition={{ type: 'spring', stiffness: 200, damping: 28, delay: 0.45 }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
+        >
+          {/* Connexion — primary */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => router.push('/auth/login')}
             style={{
-              padding: '20px 22px 0',
-              pointerEvents: 'auto',
+              width: '100%', padding: '15px 0', borderRadius: 14,
+              background: 'var(--text-primary)', color: 'var(--bg)',
+              fontSize: 16, fontWeight: 600, border: 'none',
+              cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
+              transition: 'background-color 0.25s ease, color 0.25s ease',
             }}
           >
-            {/* Glass backdrop behind buttons */}
-            <div style={{
-              backgroundColor: 'rgba(12,10,8,0.45)',
-              backdropFilter: 'blur(28px)',
-              WebkitBackdropFilter: 'blur(28px)',
-              borderRadius: 28,
-              border: '1px solid rgba(255,255,255,0.08)',
-              padding: '18px 18px 10px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}>
-              {/* Connexion — primary */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => router.push('/auth/login')}
-                style={{
-                  width: '100%', padding: '16px', borderRadius: 50,
-                  background: '#F7F4ED', color: '#1E1E1C',
-                  fontSize: 16, fontWeight: 700, border: 'none',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                Connexion
-              </motion.button>
+            Connexion
+          </motion.button>
 
-              {/* S'inscrire — secondary */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => router.push('/auth/register')}
-                style={{
-                  width: '100%', padding: '16px', borderRadius: 50,
-                  background: 'rgba(255,255,255,0.09)',
-                  color: 'rgba(255,255,255,0.88)',
-                  fontSize: 16, fontWeight: 600,
-                  border: '1.5px solid rgba(255,255,255,0.16)',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                S&apos;inscrire
-              </motion.button>
+          {/* S'inscrire — secondary */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => router.push('/auth/register')}
+            style={{
+              width: '100%', padding: '15px 0', borderRadius: 14,
+              background: 'var(--surface)', color: 'var(--text-primary)',
+              fontSize: 16, fontWeight: 600,
+              border: '1.5px solid var(--border)',
+              cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
+              transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
+            }}
+          >
+            S&apos;inscrire
+          </motion.button>
 
-              {/* Divider */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '2px 4px' }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>ou</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-              </div>
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '2px 0' }}>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)', transition: 'background 0.25s ease' }} />
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', transition: 'color 0.25s ease' }}>ou</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--border)', transition: 'background 0.25s ease' }} />
+          </div>
 
-              {/* Google */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleGoogle}
-                style={{
-                  width: '100%', padding: '13px', borderRadius: 50,
-                  background: 'rgba(255,255,255,0.07)',
-                  color: 'rgba(255,255,255,0.82)',
-                  fontSize: 14, fontWeight: 500,
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                }}
-              >
-                <GoogleIcon />
-                Continuer avec Google
-              </motion.button>
+          {/* Google */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleGoogle}
+            style={{
+              width: '100%', padding: '14px 0', borderRadius: 14,
+              background: 'var(--surface)', color: 'var(--text-primary)',
+              fontSize: 15, fontWeight: 500,
+              border: '1.5px solid var(--border)',
+              cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
+            }}
+          >
+            <GoogleIcon />
+            Continuer avec Google
+          </motion.button>
 
-              {/* Apple */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleApple}
-                style={{
-                  width: '100%', padding: '13px', borderRadius: 50,
-                  background: 'rgba(255,255,255,0.07)',
-                  color: 'rgba(255,255,255,0.82)',
-                  fontSize: 14, fontWeight: 500,
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                }}
-              >
-                <AppleIcon />
-                Continuer avec Apple
-              </motion.button>
-
-              <p style={{
-                textAlign: 'center', fontSize: 11,
-                color: 'rgba(255,255,255,0.22)',
-                margin: '2px 0 6px',
-                lineHeight: 1.5,
-              }}>
-                En utilisant Patch, vous acceptez nos conditions d&apos;utilisation.
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      )}
+          {/* Apple */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleApple}
+            style={{
+              width: '100%', padding: '14px 0', borderRadius: 14,
+              background: 'var(--surface)', color: 'var(--text-primary)',
+              fontSize: 15, fontWeight: 500,
+              border: '1.5px solid var(--border)',
+              cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
+            }}
+          >
+            <AppleIcon />
+            Continuer avec Apple
+          </motion.button>
+        </motion.div>
+      </div>
     </div>
   )
 }
