@@ -123,19 +123,75 @@ function WaveDots() {
 
 // ── Icons ──────────────────────────────────────────────────
 function StampIcon({ size = 56 }: { size?: number }) {
-  const r = size * 0.25
   return (
-    <svg width={size} height={size} viewBox="0 0 56 56" fill="none">
-      <rect width="56" height="56" rx={r} fill="var(--text-primary)" />
-      <path
-        d="M14 20a2 2 0 0 1 2-2h24a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V20Z"
-        fill="none" stroke="var(--bg)" strokeWidth="1.5"
-      />
-      <path
-        d="M12 20h2M12 24h2M12 28h2M12 32h2M12 36h2M42 20h2M42 24h2M42 28h2M42 32h2M42 36h2M20 12v2M24 12v2M28 12v2M32 12v2M36 12v2M20 42v2M24 42v2M28 42v2M32 42v2M36 42v2"
-        stroke="var(--bg)" strokeWidth="1.5" strokeLinecap="round"
-      />
-      <circle cx="28" cy="28" r="5" fill="var(--bg)" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 500 600"
+      width={size}
+      height={size * 1.2}
+      style={{ overflow: 'visible' }}
+    >
+      <defs>
+        <style>{`
+          .si-stamp-container {
+            transform-origin: 250px 300px;
+            animation: siJerkySwing 7s step-end infinite;
+          }
+          @keyframes siJerkySwing {
+            0%     { transform: rotate(-4deg); }
+            14.28% { transform: rotate(4deg); }
+            42.85% { transform: rotate(-4deg); }
+            85.71% { transform: rotate(4deg); }
+            100%   { transform: rotate(-4deg); }
+          }
+          .si-draw {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1500;
+            stroke-dashoffset: 1500;
+          }
+          .si-flower { animation: siFlowerSeq 12s linear infinite; }
+          .si-person { animation: siPersonSeq 12s linear infinite; }
+          .si-tower  { animation: siTowerSeq  12s linear infinite; }
+          @keyframes siFlowerSeq {
+            0%      { stroke-dashoffset: 1500; }
+            12.5%   { stroke-dashoffset: 0; }
+            20.83%  { stroke-dashoffset: 0; }
+            33.33%  { stroke-dashoffset: 1500; }
+            100%    { stroke-dashoffset: 1500; }
+          }
+          @keyframes siPersonSeq {
+            0%      { stroke-dashoffset: 1500; }
+            33.33%  { stroke-dashoffset: 1500; }
+            45.83%  { stroke-dashoffset: 0; }
+            54.16%  { stroke-dashoffset: 0; }
+            66.66%  { stroke-dashoffset: 1500; }
+            100%    { stroke-dashoffset: 1500; }
+          }
+          @keyframes siTowerSeq {
+            0%      { stroke-dashoffset: 1500; }
+            66.66%  { stroke-dashoffset: 1500; }
+            79.16%  { stroke-dashoffset: 0; }
+            87.5%   { stroke-dashoffset: 0; }
+            100%    { stroke-dashoffset: 1500; }
+          }
+        `}</style>
+      </defs>
+
+      <g className="si-stamp-container">
+        <g fill="none" stroke="currentColor" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M 100,100 Q 125,65 150,100 Q 175,65 200,100 Q 225,65 250,100 Q 275,65 300,100 Q 325,65 350,100 Q 375,65 400,100 Q 435,125 400,150 Q 435,175 400,200 Q 435,225 400,250 Q 435,275 400,300 Q 435,325 400,350 Q 435,375 400,400 Q 435,425 400,450 Q 435,475 400,500 Q 375,535 350,500 Q 325,535 300,500 Q 275,535 250,500 Q 225,535 200,500 Q 175,535 150,500 Q 125,535 100,500 Q 65,475 100,450 Q 65,425 100,400 Q 65,375 100,350 Q 65,325 100,300 Q 65,275 100,250 Q 65,225 100,200 Q 65,175 100,150 Q 65,125 100,100 Z" />
+          <path d="M 130,135 Q 250,145 375,145 Q 365,300 360,470 Q 240,465 125,455 Q 125,300 130,135 Z" strokeWidth="14" />
+        </g>
+        <g>
+          <path className="si-draw si-flower" d="M250,430 Q240,330 250,240 M250,240 Q210,240 210,190 C210,140 240,150 250,180 C260,150 290,140 290,190 Q290,240 250,240 M250,360 Q210,340 190,280 Q220,380 250,380 M250,330 Q290,310 310,250 Q280,350 250,350" />
+          <path className="si-draw si-person" d="M250,210 A30,30 0 1,1 249.9,210 M250,240 L250,360 M250,270 L190,320 M250,270 L310,320 M250,360 L200,440 M250,360 L300,440" />
+          <path className="si-draw si-tower" d="M250,150 L240,250 L200,440 M250,150 L260,250 L300,440 M230,250 L270,250 M215,360 L285,360 M210,440 Q250,390 290,440 M245,150 L255,150 L250,130 Z M225,360 L260,250 M275,360 L240,250" />
+        </g>
+      </g>
     </svg>
   )
 }
