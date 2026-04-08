@@ -321,7 +321,7 @@ export default function AuthWelcomePage() {
                   color: 'var(--text-primary)',
                   transition: 'color 0.25s ease',
                 }}>
-                  Bienvenue sur Patch
+                  Bienvenue sur Stamply
                 </h1>
               </motion.div>
             </div>

@@ -207,7 +207,7 @@ export default function HomePage() {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 160 }}>
         <TopBar
-          title="Stampverse"
+          title="Stamply"
           leftSlot={<IconButton label="Nouvelle collection" onClick={() => {}}><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg></IconButton>}
           rightSlot={<IconButton label="Profil" onClick={() => router.push('/profile')}><UserIcon /></IconButton>}
         />
@@ -242,7 +242,7 @@ export default function HomePage() {
       }}
     >
       <TopBar
-        title="Stampverse"
+        title="Stamply"
         leftSlot={
           <IconButton
             label="Nouvelle collection"

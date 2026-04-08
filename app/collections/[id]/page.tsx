@@ -65,7 +65,7 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
       ),
       onPress: () => {
         if (typeof navigator !== 'undefined' && navigator.share) {
-          navigator.share({ title: collection?.name ?? 'Collection', text: `Regarde ma collection "${collection?.name}" sur Stampverse !` })
+          navigator.share({ title: collection?.name ?? 'Collection', text: `Regarde ma collection "${collection?.name}" sur Stamply !` })
             .catch(() => {})
         }
       },

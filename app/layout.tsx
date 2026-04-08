@@ -5,7 +5,7 @@ import AuthProvider from '@/components/AuthProvider'
 import Toast from '@/components/Toast'
 
 export const metadata: Metadata = {
-  title: 'Stampverse',
+  title: 'Stamply',
   description: 'Ta collection de stamps personnelle',
 }
 

@@ -750,7 +750,7 @@ export default function ProfilePage() {
         </motion.button>
 
         <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)', margin: 0, transition: 'color 0.25s ease' }}>
-          Stampverse v1.0
+          Stamply v1.0
         </p>
       </motion.div>
     </div>

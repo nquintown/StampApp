@@ -4,10 +4,10 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 // ── Daily notification payloads ───────────────────────────
 const MESSAGES = [
-  { title: 'Stampverse 📸', body: "C'est l'heure de ton stamp du jour !" },
-  { title: 'Stampverse 🌅', body: 'Un nouveau souvenir t\'attend aujourd\'hui.' },
-  { title: 'Stampverse ✨', body: 'Capture quelque chose de beau aujourd\'hui.' },
-  { title: 'Stampverse 🎯', body: 'Ton stamp quotidien t\'attend !' },
+  { title: 'Stamply 📸', body: "C'est l'heure de ton stamp du jour !" },
+  { title: 'Stamply 🌅', body: 'Un nouveau souvenir t\'attend aujourd\'hui.' },
+  { title: 'Stamply ✨', body: 'Capture quelque chose de beau aujourd\'hui.' },
+  { title: 'Stamply 🎯', body: 'Ton stamp quotidien t\'attend !' },
 ]
 
 export async function GET(request: NextRequest) {
