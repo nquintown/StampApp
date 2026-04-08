@@ -15,6 +15,7 @@
 /* ── CSS custom properties (light defaults) ── */
 :root {
   --bg: #F7F4ED;
+  --dot: rgba(30,30,28,0.1);
   --surface: #FFFFFF;
   --surface2: #F3EFE6;
   --text-primary: #1E1E1C;
@@ -39,6 +40,7 @@
 /* ── Dark mode overrides ── */
 html.dark {
   --bg: #18150F;
+  --dot: rgba(237,232,222,0.07);
   --surface: #222018;
   --surface2: #2C2820;
   --text-primary: #EDE8DE;

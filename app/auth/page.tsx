@@ -1,32 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-// ── Stamp photos for background decoration ─────────────────
-const DECO_STAMPS = [
-  { id: 0, size: 108, left: '62%',  top: '4%',   img: 'https://picsum.photos/seed/stamp1/300/300',  delay: 0,    dur: 9  },
-  { id: 1, size: 72,  left: '-4%',  top: '14%',  img: 'https://picsum.photos/seed/stamp3/300/300',  delay: 0.1,  dur: 11 },
-  { id: 2, size: 88,  left: '78%',  top: '28%',  img: 'https://picsum.photos/seed/stamp5/300/300',  delay: 0.05, dur: 10 },
-  { id: 3, size: 64,  left: '4%',   top: '38%',  img: 'https://picsum.photos/seed/stamp7/300/300',  delay: 0.15, dur: 13 },
-  { id: 4, size: 80,  left: '55%',  top: '40%',  img: 'https://picsum.photos/seed/stamp9/300/300',  delay: 0.08, dur: 8  },
-]
-
-const FLOAT_PATHS = [
-  { x: [0, 10, -6, 8, 0],  y: [0, -16, 8, -12, 0]  },
-  { x: [0, -8, 12, -5, 0], y: [0, -10, 6, -14, 0]  },
-  { x: [0, 12, -8, 6, 0],  y: [0, -18, 10, -8, 0]  },
-  { x: [0, -6, 10, -8, 0], y: [0, -8, 14, -10, 0]  },
-  { x: [0, 8, -10, 6, 0],  y: [0, -12, 6, -16, 0]  },
-]
+type Phase = 'splash' | 'auth'
 
 // ── Icons ──────────────────────────────────────────────────
-function StampIcon() {
+function StampIcon({ size = 56 }: { size?: number }) {
+  const r = size * 0.25
   return (
-    <svg width="52" height="52" viewBox="0 0 56 56" fill="none">
-      <rect width="56" height="56" rx="14" fill="var(--text-primary)" />
+    <svg width={size} height={size} viewBox="0 0 56 56" fill="none">
+      <rect width="56" height="56" rx={r} fill="var(--text-primary)" />
       <path
         d="M14 20a2 2 0 0 1 2-2h24a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V20Z"
         fill="none" stroke="var(--bg)" strokeWidth="1.5"
@@ -59,15 +45,14 @@ function AppleIcon() {
   )
 }
 
-// ── Main page ──────────────────────────────────────────────
+// ── Page ───────────────────────────────────────────────────
 export default function AuthWelcomePage() {
   const router = useRouter()
   const supabase = createClient()
-  const [ready, setReady] = useState(false)
+  const [phase, setPhase] = useState<Phase>('splash')
 
-  // Slight delay before animating in so images can start loading
   useEffect(() => {
-    const t = setTimeout(() => setReady(true), 80)
+    const t = setTimeout(() => setPhase('auth'), 1500)
     return () => clearTimeout(t)
   }, [])
 
@@ -89,219 +74,179 @@ export default function AuthWelcomePage() {
     <div style={{
       position: 'fixed', inset: 0,
       backgroundColor: 'var(--bg)',
-      overflow: 'hidden',
       transition: 'background-color 0.25s ease',
     }}>
 
-      {/* ── Floating stamp decorations (background) ───── */}
-      {DECO_STAMPS.map((s, i) => (
-        <motion.div
-          key={s.id}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={ready ? {
-            scale: 1,
-            opacity: 1,
-            x: FLOAT_PATHS[i].x,
-            y: FLOAT_PATHS[i].y,
-          } : {}}
-          transition={{
-            scale:   { type: 'spring', stiffness: 160, damping: 18, delay: s.delay + 0.2 },
-            opacity: { duration: 0.6, delay: s.delay + 0.2 },
-            x: { duration: s.dur, repeat: Infinity, ease: 'easeInOut', delay: s.delay + 0.6 },
-            y: { duration: s.dur * 1.2, repeat: Infinity, ease: 'easeInOut', delay: s.delay + 0.6 },
-          }}
-          style={{
-            position: 'absolute',
-            left: s.left,
-            top: s.top,
-            width: s.size,
-            height: s.size,
-            borderRadius: '50%',
-            overflow: 'hidden',
-            border: '2.5px solid var(--border)',
-            boxShadow: '0 6px 24px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.04)',
-          }}
-        >
-          <img
-            src={s.img}
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            loading="eager"
-          />
-          {/* Subtle inner shadow to integrate with background */}
-          <div style={{
-            position: 'absolute', inset: 0, borderRadius: '50%',
-            boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.04)',
-            pointerEvents: 'none',
-          }} />
-        </motion.div>
-      ))}
-
-      {/* ── Soft gradient fade at bottom — keeps buttons readable ── */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: '55%',
-        background: 'linear-gradient(to top, var(--bg) 60%, transparent)',
-        pointerEvents: 'none',
-        zIndex: 5,
-        transition: 'background 0.25s ease',
-      }} />
-
-      {/* ── Content layer ─────────────────────────────── */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 10,
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '0 24px',
-        paddingTop: 'max(64px, env(safe-area-inset-top))',
-        paddingBottom: 'max(40px, env(safe-area-inset-bottom))',
-      }}>
-
-        {/* Logo + title */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 40 }}>
-
-          {/* Stamp icon — animated float */}
+      {/* ── SPLASH ────────────────────────────────────── */}
+      <AnimatePresence>
+        {phase === 'splash' && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={ready ? { opacity: 1, y: [0, -6, 0] } : {}}
-            transition={{
-              opacity: { duration: 0.5, delay: 0.15 },
-              y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.6 },
+            key="splash"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
-            style={{ marginBottom: 18, display: 'inline-block' }}
           >
-            <StampIcon />
-          </motion.div>
-
-          {/* "Patch" wordmark */}
-          <div style={{ overflow: 'hidden', marginBottom: 12 }}>
-            <motion.h1
-              initial={{ y: '110%' }}
-              animate={ready ? { y: 0 } : {}}
-              transition={{ type: 'spring', stiffness: 200, damping: 24, delay: 0.2 }}
-              style={{
-                margin: 0,
-                fontSize: 48,
-                fontWeight: 800,
-                letterSpacing: '-1.5px',
-                color: 'var(--text-primary)',
-                lineHeight: 1,
-                transition: 'color 0.25s ease',
+            {/* Icon springs in, then does a little "stamp" press */}
+            <motion.div
+              layoutId="auth-icon"
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{
+                scale:   [0.6, 1.12, 0.94, 1.04, 1],
+                opacity: [0, 1,    1,    1,    1],
               }}
+              transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              Patch
-            </motion.h1>
-          </div>
+              <StampIcon size={64} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* Tagline — word by word */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 6px', overflow: 'hidden' }}>
-            {['Collecte,', 'organise', 'et', 'partage', 'tes', 'stamps.'].map((word, i) => (
-              <div key={i} style={{ overflow: 'hidden' }}>
-                <motion.span
-                  initial={{ y: '110%', opacity: 0 }}
-                  animate={ready ? { y: 0, opacity: 1 } : {}}
-                  transition={{
-                    type: 'spring', stiffness: 220, damping: 26,
-                    delay: 0.32 + i * 0.055,
-                  }}
-                  style={{
-                    display: 'block',
-                    fontSize: 17,
-                    fontWeight: 500,
-                    color: 'var(--text-secondary)',
-                    lineHeight: 1.5,
-                    transition: 'color 0.25s ease',
-                  }}
-                >
-                  {word}
-                </motion.span>
+      {/* ── AUTH ──────────────────────────────────────── */}
+      <AnimatePresence>
+        {phase === 'auth' && (
+          <motion.div
+            key="auth"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', flexDirection: 'column',
+              paddingTop: 'max(56px, env(safe-area-inset-top))',
+              paddingBottom: 'max(40px, env(safe-area-inset-bottom))',
+              /* Dot grid */
+              backgroundImage: 'radial-gradient(circle, var(--dot) 1.3px, transparent 1.3px)',
+              backgroundSize: '22px 22px',
+            }}
+          >
+            {/* Center section: icon + title */}
+            <div style={{
+              flex: 1,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              gap: 20,
+            }}>
+              {/* Icon — layoutId matches splash icon, animates from center */}
+              <motion.div layoutId="auth-icon">
+                <StampIcon size={64} />
+              </motion.div>
+
+              {/* Title */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ textAlign: 'center' }}
+              >
+                <h1 style={{
+                  margin: 0,
+                  fontSize: 28,
+                  fontWeight: 700,
+                  letterSpacing: '-0.5px',
+                  color: 'var(--text-primary)',
+                  transition: 'color 0.25s ease',
+                }}>
+                  Bienvenue sur Patch
+                </h1>
+              </motion.div>
+            </div>
+
+            {/* Bottom: buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+              style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 10 }}
+            >
+              {/* Connexion */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => router.push('/auth/login')}
+                style={{
+                  width: '100%', padding: '15px 0', borderRadius: 14,
+                  background: 'var(--text-primary)', color: 'var(--bg)',
+                  fontSize: 16, fontWeight: 600, border: 'none',
+                  cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
+                  transition: 'background-color 0.25s ease, color 0.25s ease',
+                }}
+              >
+                Connexion
+              </motion.button>
+
+              {/* S'inscrire */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => router.push('/auth/register')}
+                style={{
+                  width: '100%', padding: '15px 0', borderRadius: 14,
+                  background: 'var(--surface)', color: 'var(--text-primary)',
+                  fontSize: 16, fontWeight: 600,
+                  border: '1.5px solid var(--border)',
+                  cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
+                  transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
+                }}
+              >
+                S&apos;inscrire
+              </motion.button>
+
+              {/* Divider */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '2px 0' }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)', transition: 'background 0.25s ease' }} />
+                <span style={{ fontSize: 13, color: 'var(--text-secondary)', transition: 'color 0.25s ease' }}>ou</span>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)', transition: 'background 0.25s ease' }} />
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={ready ? { opacity: 1, y: 0 } : {}}
-          transition={{ type: 'spring', stiffness: 200, damping: 28, delay: 0.45 }}
-          style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
-        >
-          {/* Connexion — primary */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => router.push('/auth/login')}
-            style={{
-              width: '100%', padding: '15px 0', borderRadius: 14,
-              background: 'var(--text-primary)', color: 'var(--bg)',
-              fontSize: 16, fontWeight: 600, border: 'none',
-              cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
-              transition: 'background-color 0.25s ease, color 0.25s ease',
-            }}
-          >
-            Connexion
-          </motion.button>
+              {/* Google */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={handleGoogle}
+                style={{
+                  width: '100%', padding: '14px 0', borderRadius: 14,
+                  background: 'var(--surface)', color: 'var(--text-primary)',
+                  fontSize: 15, fontWeight: 500,
+                  border: '1.5px solid var(--border)',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                  transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
+                }}
+              >
+                <GoogleIcon />
+                Continuer avec Google
+              </motion.button>
 
-          {/* S'inscrire — secondary */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => router.push('/auth/register')}
-            style={{
-              width: '100%', padding: '15px 0', borderRadius: 14,
-              background: 'var(--surface)', color: 'var(--text-primary)',
-              fontSize: 16, fontWeight: 600,
-              border: '1.5px solid var(--border)',
-              cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em',
-              transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
-            }}
-          >
-            S&apos;inscrire
-          </motion.button>
+              {/* Apple */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={handleApple}
+                style={{
+                  width: '100%', padding: '14px 0', borderRadius: 14,
+                  background: 'var(--surface)', color: 'var(--text-primary)',
+                  fontSize: 15, fontWeight: 500,
+                  border: '1.5px solid var(--border)',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                  transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
+                }}
+              >
+                <AppleIcon />
+                Continuer avec Apple
+              </motion.button>
 
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '2px 0' }}>
-            <div style={{ flex: 1, height: 1, background: 'var(--border)', transition: 'background 0.25s ease' }} />
-            <span style={{ fontSize: 13, color: 'var(--text-secondary)', transition: 'color 0.25s ease' }}>ou</span>
-            <div style={{ flex: 1, height: 1, background: 'var(--border)', transition: 'background 0.25s ease' }} />
-          </div>
-
-          {/* Google */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={handleGoogle}
-            style={{
-              width: '100%', padding: '14px 0', borderRadius: 14,
-              background: 'var(--surface)', color: 'var(--text-primary)',
-              fontSize: 15, fontWeight: 500,
-              border: '1.5px solid var(--border)',
-              cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
-            }}
-          >
-            <GoogleIcon />
-            Continuer avec Google
-          </motion.button>
-
-          {/* Apple */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={handleApple}
-            style={{
-              width: '100%', padding: '14px 0', borderRadius: 14,
-              background: 'var(--surface)', color: 'var(--text-primary)',
-              fontSize: 15, fontWeight: 500,
-              border: '1.5px solid var(--border)',
-              cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              transition: 'background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease',
-            }}
-          >
-            <AppleIcon />
-            Continuer avec Apple
-          </motion.button>
-        </motion.div>
-      </div>
+              <p style={{
+                textAlign: 'center', fontSize: 12,
+                color: 'var(--text-secondary)', margin: '4px 0 0',
+                lineHeight: 1.5, transition: 'color 0.25s ease',
+              }}>
+                En continuant, vous acceptez nos conditions d&apos;utilisation.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
