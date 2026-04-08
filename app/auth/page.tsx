@@ -1,11 +1,122 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 type Phase = 'splash' | 'auth'
+
+// ── Animated wave dots canvas ──────────────────────────────
+function WaveDots() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')!
+
+    const w = window.innerWidth
+    const h = window.innerHeight
+    canvas.width  = w
+    canvas.height = h
+
+    const isDark   = document.documentElement.classList.contains('dark')
+    const dotColor = isDark ? '237,232,222' : '30,30,28'
+    const SPACING  = 22
+    const RADIUS   = 1.7
+    const cols     = Math.ceil(w / SPACING) + 2
+    const rows     = Math.ceil(h / SPACING) + 2
+
+    // Gyroscope state — target (raw) and current (smoothed via lerp)
+    const target  = { x: 0, y: 0 }
+    const current = { x: 0, y: 0 }
+
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma !== null) target.x = e.gamma   // left/right tilt  –90…90
+      if (e.beta  !== null) target.y = e.beta    // front/back tilt –180…180
+    }
+
+    // iOS 13+ requires explicit permission (must be triggered from user gesture)
+    const attachGyro = () => {
+      window.addEventListener('deviceorientation', handleOrientation)
+    }
+
+    if (
+      typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof (DeviceOrientationEvent as any).requestPermission === 'function'
+    ) {
+      // iOS 13+ — request on first touch
+      const onTouch = () => {
+        ;(DeviceOrientationEvent as any)
+          .requestPermission()
+          .then((res: string) => { if (res === 'granted') attachGyro() })
+          .catch(() => {})
+        window.removeEventListener('touchstart', onTouch)
+      }
+      window.addEventListener('touchstart', onTouch, { once: true })
+    } else {
+      // Android + older iOS — attach directly
+      attachGyro()
+    }
+
+    let t      = 0
+    let animId: number
+
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h)
+
+      // Smooth gyro values (lerp factor 0.06 = ~10-frame lag, feels fluid)
+      current.x += (target.x - current.x) * 0.06
+      current.y += (target.y - current.y) * 0.06
+
+      // Map tilt to wave phase offset (±90° → ±~6 rad ≈ ±1 full cycle)
+      const gx = current.x * 0.07
+      const gy = current.y * 0.04
+
+      for (let row = 0; row <= rows; row++) {
+        for (let col = 0; col <= cols; col++) {
+          const x    = col * SPACING
+          const y    = row * SPACING
+          // Diagonal wave + secondary wave, both shifted by gyro
+          const v1   = Math.sin((x * 0.65 + y * 0.65) / 58 - t * 1.1 + gx)
+          const v2   = Math.sin((x * 0.3  - y * 0.5)  / 72 + t * 0.7 - gy)
+          const wave = ((v1 + v2) / 2 + 1) * 0.5   // 0 → 1
+
+          const a = isDark
+            ? 0.03 + wave * 0.06
+            : 0.05 + wave * 0.07
+
+          ctx.beginPath()
+          ctx.arc(x, y, RADIUS, 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${dotColor},${a.toFixed(3)})`
+          ctx.fill()
+        }
+      }
+
+      t      += 0.018
+      animId  = requestAnimationFrame(draw)
+    }
+
+    animId = requestAnimationFrame(draw)
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('deviceorientation', handleOrientation)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute', inset: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }}
+    />
+  )
+}
 
 // ── Icons ──────────────────────────────────────────────────
 function StampIcon({ size = 56 }: { size?: number }) {
@@ -118,17 +229,18 @@ export default function AuthWelcomePage() {
               display: 'flex', flexDirection: 'column',
               paddingTop: 'max(56px, env(safe-area-inset-top))',
               paddingBottom: 'max(40px, env(safe-area-inset-bottom))',
-              /* Dot grid */
-              backgroundImage: 'radial-gradient(circle, var(--dot) 1.3px, transparent 1.3px)',
-              backgroundSize: '22px 22px',
             }}
           >
+            {/* Animated wave dots */}
+            <WaveDots />
+
             {/* Center section: icon + title */}
             <div style={{
               flex: 1,
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               gap: 20,
+              position: 'relative', zIndex: 1,
             }}>
               {/* Icon — layoutId matches splash icon, animates from center */}
               <motion.div layoutId="auth-icon">
@@ -160,7 +272,7 @@ export default function AuthWelcomePage() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
-              style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 10 }}
+              style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}
             >
               {/* Connexion */}
               <motion.button
