@@ -4,9 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Caveat } from 'next/font/google'
+import { Playfair_Display } from 'next/font/google'
 
-const caveat = Caveat({ subsets: ['latin'], weight: ['700'] })
+const playfair = Playfair_Display({ subsets: ['latin'], weight: ['700'] })
 
 type Phase = 'splash' | 'auth'
 
@@ -257,11 +257,11 @@ export default function AuthWelcomePage() {
                 transition={{ delay: 0.15, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 style={{ textAlign: 'center' }}
               >
-                <h1 className={caveat.className} style={{
+                <h1 className={playfair.className} style={{
                   margin: 0,
-                  fontSize: 38,
+                  fontSize: 34,
                   fontWeight: 700,
-                  letterSpacing: '0px',
+                  letterSpacing: '-0.3px',
                   color: 'var(--text-primary)',
                   transition: 'color 0.25s ease',
                 }}>
