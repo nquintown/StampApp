@@ -269,7 +269,7 @@ export default function AuthWelcomePage() {
               }}
               transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              <StampIcon size={64} />
+              <StampIcon size={128} />
             </motion.div>
           </motion.div>
         )}
@@ -303,7 +303,7 @@ export default function AuthWelcomePage() {
             }}>
               {/* Icon — layoutId matches splash icon, animates from center */}
               <motion.div layoutId="auth-icon">
-                <StampIcon size={64} />
+                <StampIcon size={128} />
               </motion.div>
 
               {/* Title */}
