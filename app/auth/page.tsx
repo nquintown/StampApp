@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Caveat } from 'next/font/google'
+
+const caveat = Caveat({ subsets: ['latin'], weight: ['700'] })
 
 type Phase = 'splash' | 'auth'
 
@@ -254,11 +257,11 @@ export default function AuthWelcomePage() {
                 transition={{ delay: 0.15, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 style={{ textAlign: 'center' }}
               >
-                <h1 style={{
+                <h1 className={caveat.className} style={{
                   margin: 0,
-                  fontSize: 28,
+                  fontSize: 38,
                   fontWeight: 700,
-                  letterSpacing: '-0.5px',
+                  letterSpacing: '0px',
                   color: 'var(--text-primary)',
                   transition: 'color 0.25s ease',
                 }}>
