@@ -120,42 +120,70 @@ function IllustrationCapture() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      <svg viewBox="0 0 500 600" width="190" height="228">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 600" width="220" height="264">
         <defs>
-          <linearGradient id="il1-sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor="#FBE3B8" />
-            <stop offset="42%"  stopColor="#E8956D" />
-            <stop offset="100%" stopColor="#7DAA6E" />
-          </linearGradient>
-          <clipPath id="il1-clip">
-            <path d={STAMP_INNER} />
-          </clipPath>
+          <style>{`
+            .il1-stamp-container {
+              transform-origin: 250px 300px;
+              animation: il1JerkySwing 7s step-end infinite;
+            }
+            @keyframes il1JerkySwing {
+              0%     { transform: rotate(-3deg); }
+              14.28% { transform: rotate(3deg); }
+              42.85% { transform: rotate(-3deg); }
+              85.71% { transform: rotate(3deg); }
+              100%   { transform: rotate(-3deg); }
+            }
+            .il1-draw {
+              fill: none;
+              stroke: currentColor;
+              stroke-width: 14;
+              stroke-linecap: round;
+              stroke-linejoin: round;
+              stroke-dasharray: 100;
+              stroke-dashoffset: 100;
+            }
+            @keyframes il1DrawInOut {
+              0%   { stroke-dashoffset: 100; }
+              15%  { stroke-dashoffset: 0; }
+              85%  { stroke-dashoffset: 0; }
+              100% { stroke-dashoffset: 100; }
+            }
+            @keyframes il1ParasolSway {
+              0%   { transform: rotate(-8deg); }
+              50%  { transform: rotate(8deg); }
+              100% { transform: rotate(-8deg); }
+            }
+            .il1-parasol-draw { animation: il1DrawInOut 10s ease-in-out infinite 0s; }
+            .il1-bg-elements  { animation: il1DrawInOut 10s ease-in-out infinite 1s; }
+            .il1-parasol-container {
+              transform-origin: 280px 420px;
+              animation: il1ParasolSway 4s ease-in-out infinite;
+            }
+          `}</style>
         </defs>
-        <g clipPath="url(#il1-clip)">
-          <rect x="125" y="135" width="250" height="335" fill="url(#il1-sky)" />
-          {/* Sun glow */}
-          <motion.circle
-            cx="222" cy="248" r="64"
-            fill="#F5C87A" fillOpacity="0.28"
-            animate={{ r: [64, 74, 64] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          {/* Sun */}
-          <circle cx="222" cy="248" r="44" fill="#F5C87A" fillOpacity="0.92" />
-          {/* Far hill */}
-          <path d="M125 390 Q178 335 252 362 Q318 332 375 384 L375 470 L125 470 Z" fill="#5C7A5B" />
-          {/* Near hill */}
-          <path d="M125 435 Q198 396 268 418 Q328 400 375 432 L375 470 L125 470 Z" fill="#3D5C3E" />
-          {/* Small tree */}
-          <line x1="196" y1="390" x2="196" y2="352" stroke="#3D5C3E" strokeWidth="5" strokeLinecap="round" />
-          <path d="M180 378 Q196 347 212 378" stroke="#3D5C3E" strokeWidth="4" fill="none" strokeLinecap="round" />
-        </g>
-        <g fill="none" stroke="currentColor" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round">
-          <path d={STAMP_OUTER} />
-          <path d={STAMP_INNER} strokeWidth="14" />
+
+        <g className="il1-stamp-container">
+          <g fill="none" stroke="currentColor" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round">
+            <path d={STAMP_OUTER} />
+            <path d={STAMP_INNER} strokeWidth="14" />
+          </g>
+          <g>
+            <path
+              className="il1-draw il1-bg-elements"
+              pathLength={100}
+              d="M 130,410 Q 200,350 260,410 T 365,390 M 190,180 A 40,40 0 1,1 189.9,180"
+            />
+            <g className="il1-parasol-container">
+              <path
+                className="il1-draw il1-parasol-draw"
+                pathLength={100}
+                d="M 280,420 L 280,250 M 190,250 Q 280,150 370,250 Q 340,270 310,250 Q 280,270 250,250 Q 220,270 190,250 M 280,205 L 280,180 M 280,205 Q 260,230 250,250 M 280,205 Q 300,230 310,250"
+              />
+            </g>
+          </g>
         </g>
       </svg>
-
     </motion.div>
   )
 }
