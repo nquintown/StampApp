@@ -190,47 +190,78 @@ function IllustrationCapture() {
 
 // ── Illustration 2: Collect ───────────────────────────────
 function IllustrationCollect() {
-  const stamps = [
-    { dx: -52, dy: 22, rot: -11, z: 1, g1: '#C5DEB5', g2: '#7DAA6E', delay: 0.05 },
-    { dx: 0,   dy: 4,  rot: 2,   z: 2, g1: '#FDDCCA', g2: '#E8956D', delay: 0.15 },
-    { dx: 52,  dy: 16, rot: 11,  z: 3, g1: '#DBEAFE', g2: '#7B9BB2', delay: 0.25 },
-  ]
   return (
-    <div style={{ position: 'relative', width: 280, height: 230, margin: '0 auto' }}>
-      {stamps.map((s, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 24, rotate: s.rot * 0.5 }}
-          animate={{ opacity: 1, y: 0, rotate: s.rot }}
-          transition={{ delay: s.delay, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-          style={{
-            position: 'absolute',
-            left: `calc(50% + ${s.dx}px - 77px)`,
-            top: s.dy,
-            zIndex: s.z,
-          }}
-        >
-          <svg viewBox="0 0 500 600" width="154" height="185">
-            <defs>
-              <linearGradient id={`il2-g${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor={s.g1} />
-                <stop offset="100%" stopColor={s.g2} />
-              </linearGradient>
-              <clipPath id={`il2-c${i}`}>
-                <path d={STAMP_INNER} />
-              </clipPath>
-            </defs>
-            <g clipPath={`url(#il2-c${i})`}>
-              <rect x="125" y="135" width="250" height="335" fill={`url(#il2-g${i})`} />
-            </g>
-            <g fill="none" stroke="currentColor" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round">
-              <path d={STAMP_OUTER} />
-              <path d={STAMP_INNER} strokeWidth="14" />
-            </g>
-          </svg>
-        </motion.div>
-      ))}
-    </div>
+    <motion.div
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 600" width="220" height="264">
+        <defs>
+          <style>{`
+            .il2-trio-container {
+              transform-origin: 250px 300px;
+              animation: il2JerkySwing 7s step-end infinite;
+            }
+            @keyframes il2JerkySwing {
+              0%     { transform: rotate(-3deg); }
+              14.28% { transform: rotate(3deg); }
+              42.85% { transform: rotate(-3deg); }
+              85.71% { transform: rotate(3deg); }
+              100%   { transform: rotate(-3deg); }
+            }
+            .il2-draw-animated {
+              fill: none;
+              stroke: currentColor;
+              stroke-width: 14;
+              stroke-linecap: round;
+              stroke-linejoin: round;
+              stroke-dasharray: 2000;
+              stroke-dashoffset: 2000;
+            }
+            .il2-frame {
+              fill: var(--background, white);
+              stroke: currentColor;
+              stroke-width: 18;
+              stroke-linecap: round;
+              stroke-linejoin: round;
+            }
+            .il2-draw-g { animation: il2DrawInOut 12s linear infinite 0s; }
+            .il2-draw-c { animation: il2DrawInOut 12s linear infinite 0.5s; }
+            .il2-draw-d { animation: il2DrawInOut 12s linear infinite 1.0s; }
+            @keyframes il2DrawInOut {
+              0%    { stroke-dashoffset: 2000; }
+              12.5% { stroke-dashoffset: 0; }
+              75%   { stroke-dashoffset: 0; }
+              87.5% { stroke-dashoffset: 2000; }
+              100%  { stroke-dashoffset: 2000; }
+            }
+          `}</style>
+        </defs>
+
+        <g className="il2-trio-container">
+          {/* Left stamp — flower, rotated -22° */}
+          <g transform="translate(62.5, 75) scale(0.75) rotate(-22, 250, 450)">
+            <path className="il2-frame" d={STAMP_OUTER} />
+            <path className="il2-frame" d={STAMP_INNER} strokeWidth="14" />
+            <path className="il2-draw-animated il2-draw-g" d="M250,430 Q240,330 250,240 M250,240 Q210,240 210,190 C210,140 240,150 250,180 C260,150 290,140 290,190 Q290,240 250,240 M250,360 Q210,340 190,280 Q220,380 250,380 M250,330 Q290,310 310,250 Q280,350 250,350" />
+          </g>
+          {/* Right stamp — Eiffel Tower, rotated +22° */}
+          <g transform="translate(62.5, 75) scale(0.75) rotate(22, 250, 450)">
+            <path className="il2-frame" d={STAMP_OUTER} />
+            <path className="il2-frame" d={STAMP_INNER} strokeWidth="14" />
+            <path className="il2-draw-animated il2-draw-d" d="M250,150 L240,250 L200,440 M250,150 L260,250 L300,440 M230,250 L270,250 M215,360 L285,360 M210,440 Q250,390 290,440 M245,150 L255,150 L250,130 Z M225,360 L260,250 M275,360 L240,250" />
+          </g>
+          {/* Center stamp — person */}
+          <g transform="translate(62.5, 75) scale(0.75)">
+            <path className="il2-frame" d={STAMP_OUTER} />
+            <path className="il2-frame" d={STAMP_INNER} strokeWidth="14" />
+            <path className="il2-draw-animated il2-draw-c" d="M250,210 A30,30 0 1,1 249.9,210 M250,240 L250,360 M250,270 L190,320 M250,270 L310,320 M250,360 L200,440 M250,360 L300,440" />
+          </g>
+        </g>
+      </svg>
+    </motion.div>
   )
 }
 
