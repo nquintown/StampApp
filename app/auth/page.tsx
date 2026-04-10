@@ -919,6 +919,33 @@ export default function AuthWelcomePage() {
               paddingBottom: 'max(40px, env(safe-area-inset-bottom))',
             }}
           >
+            {/* Back button */}
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              onClick={() => {
+                localStorage.removeItem('stamply_onboarded')
+                setStep(1)
+                setDirection(-1)
+                setPhase('onboarding')
+              }}
+              style={{
+                position: 'absolute',
+                top: 'max(16px, env(safe-area-inset-top))',
+                left: 20,
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 14, fontWeight: 500,
+                color: 'var(--text-secondary)',
+                fontFamily: 'inherit', padding: '6px 4px',
+                display: 'flex', alignItems: 'center', gap: 4,
+                transition: 'color 0.25s ease',
+                zIndex: 2,
+              }}
+            >
+              ← Retour
+            </motion.button>
+
             {/* Center: icon + title */}
             <div style={{
               flex: 1,
