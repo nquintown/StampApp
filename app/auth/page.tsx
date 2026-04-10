@@ -581,7 +581,7 @@ export default function AuthWelcomePage() {
             </div>
 
             {/* Text + CTA */}
-            <div style={{ paddingLeft: 28, paddingRight: 28, paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ flex: 1, paddingLeft: 28, paddingRight: 28, paddingTop: 24, display: 'flex', flexDirection: 'column' }}>
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
                   key={`text-${step}`}
@@ -609,7 +609,7 @@ export default function AuthWelcomePage() {
                 </motion.div>
               </AnimatePresence>
 
-              <motion.button whileTap={{ scale: 0.97 }} onClick={goNext} style={btnPrimary}>
+              <motion.button whileTap={{ scale: 0.97 }} onClick={goNext} style={{ ...btnPrimary, marginTop: 'auto' }}>
                 {current.cta}
               </motion.button>
             </div>
