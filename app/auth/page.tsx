@@ -115,7 +115,7 @@ function WaveDots() {
 function IllustrationCapture() {
   return (
     <motion.div
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
@@ -156,11 +156,6 @@ function IllustrationCapture() {
         </g>
       </svg>
 
-      {/* Journal lines */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 9, width: 186 }}>
-        <div style={{ height: 2, background: 'var(--border)', borderRadius: 1, transition: 'background 0.25s ease' }} />
-        <div style={{ height: 2, background: 'var(--border)', borderRadius: 1, width: '62%', transition: 'background 0.25s ease' }} />
-      </div>
     </motion.div>
   )
 }
@@ -509,16 +504,31 @@ export default function AuthWelcomePage() {
             style={{
               position: 'absolute', inset: 0, zIndex: 1,
               display: 'flex', flexDirection: 'column',
-              paddingTop: 'max(56px, env(safe-area-inset-top))',
+              paddingTop: 'max(44px, env(safe-area-inset-top))',
               paddingBottom: 'max(36px, env(safe-area-inset-bottom))',
             }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.08}
+            onDragEnd={(_e, info) => {
+              if (info.offset.x < -60) {
+                // swipe left → next
+                if (step < 3) { setDirection(1); setStep(s => (s + 1) as OnboardingStep) }
+                else setPhase('permissions')
+              } else if (info.offset.x > 60 && step > 1) {
+                // swipe right → prev
+                setDirection(-1)
+                setStep(s => (s - 1) as OnboardingStep)
+              }
+            }}
           >
-            {/* Top bar */}
+            {/* Top bar — stepper centered, Passer right-absolute */}
             <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              paddingLeft: 24, paddingRight: 24, paddingBottom: 12,
+              position: 'relative',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              paddingLeft: 24, paddingRight: 24, paddingTop: 8, paddingBottom: 8,
             }}>
-              {/* Stepper */}
+              {/* Stepper centered */}
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 {([1, 2, 3] as OnboardingStep[]).map(s => (
                   <motion.div
@@ -533,10 +543,11 @@ export default function AuthWelcomePage() {
                   />
                 ))}
               </div>
-              {/* Skip */}
+              {/* Passer — absolute right */}
               <button
                 onClick={skipOnboarding}
                 style={{
+                  position: 'absolute', right: 24,
                   background: 'none', border: 'none', cursor: 'pointer',
                   fontSize: 14, fontWeight: 500, color: 'var(--text-secondary)',
                   fontFamily: 'inherit', padding: '4px 0',
@@ -551,7 +562,7 @@ export default function AuthWelcomePage() {
             <div style={{
               flex: 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', paddingBottom: 8,
+              overflow: 'hidden',
             }}>
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
@@ -569,7 +580,7 @@ export default function AuthWelcomePage() {
             </div>
 
             {/* Text + CTA */}
-            <div style={{ paddingLeft: 28, paddingRight: 28, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ paddingLeft: 28, paddingRight: 28, paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
                   key={`text-${step}`}
