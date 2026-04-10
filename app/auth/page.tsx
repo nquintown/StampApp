@@ -168,7 +168,7 @@ function IllustrationCollect() {
     { dx: 52,  dy: 16, rot: 11,  z: 3, g1: '#DBEAFE', g2: '#7B9BB2', delay: 0.25 },
   ]
   return (
-    <div style={{ position: 'relative', width: 280, height: 230 }}>
+    <div style={{ position: 'relative', width: 280, height: 230, margin: '0 auto' }}>
       {stamps.map((s, i) => (
         <motion.div
           key={i}
@@ -563,6 +563,7 @@ export default function AuthWelcomePage() {
               flex: 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               overflow: 'hidden',
+              minHeight: 0,
             }}>
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
@@ -590,7 +591,7 @@ export default function AuthWelcomePage() {
                   animate="center"
                   exit="exit"
                   transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-                  style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', textAlign: 'center' }}
                 >
                   <h2 className={playfair.className} style={{
                     margin: 0, fontSize: 26, fontWeight: 700,
