@@ -560,10 +560,10 @@ export default function AuthWelcomePage() {
 
             {/* Illustration */}
             <div style={{
-              flex: 1,
+              height: 290,
+              flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               overflow: 'hidden',
-              minHeight: 0,
             }}>
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
@@ -591,7 +591,7 @@ export default function AuthWelcomePage() {
                   animate="center"
                   exit="exit"
                   transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-                  style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', textAlign: 'center' }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
                 >
                   <h2 className={playfair.className} style={{
                     margin: 0, fontSize: 26, fontWeight: 700,
