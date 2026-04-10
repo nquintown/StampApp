@@ -164,7 +164,7 @@ function IllustrationCapture() {
         </defs>
 
         <g className="il1-stamp-container">
-          <g fill="none" stroke="currentColor" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round">
+          <g fill="var(--background, white)" stroke="currentColor" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round">
             <path d={STAMP_OUTER} />
             <path d={STAMP_INNER} strokeWidth="14" />
           </g>
