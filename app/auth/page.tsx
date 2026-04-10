@@ -267,46 +267,86 @@ function IllustrationCollect() {
 
 // ── Illustration 3: Share / Mosaic ────────────────────────
 function IllustrationShare() {
-  const cells = [
-    { g1: '#FBD5A0', g2: '#E8956D', rot: -2 },
-    { g1: '#C5DEB5', g2: '#7DAA6E', rot: 1  },
-    { g1: '#DBEAFE', g2: '#7B9BB2', rot: -3 },
-    { g1: '#FDDCCA', g2: '#D4845A', rot: 2  },
-    { g1: '#E8D5F5', g2: '#B4A7D6', rot: -1 },
-    { g1: '#D5EDD5', g2: '#5C8050', rot: 3  },
-    { g1: '#FDE8C8', g2: '#E8A87C', rot: -2 },
-    { g1: '#DBEAFE', g2: '#87BEEA', rot: 1  },
-    { g1: '#FBD5A0', g2: '#C88B5A', rot: -3 },
-    { g1: '#E0F0F0', g2: '#7BB8C0', rot: 2  },
-    { g1: '#FDD5DD', g2: '#E8788A', rot: -1 },
-    { g1: '#D5EDD5', g2: '#5C8050', rot: 0  },
+  // 4 cols × 3 rows — translate positions from the original SVG
+  const stamps = [
+    { tx: 50,   ty: 50,   tilt: 'il3-t1',  draw: 'il3-dr1',  d: "M250,430 Q240,330 250,240 M250,240 Q210,240 210,190 C210,140 240,150 250,180 C260,150 290,140 290,190 Q290,240 250,240 M250,360 Q210,340 190,280 Q220,380 250,380 M250,330 Q290,310 310,250 Q280,350 250,350" },
+    { tx: 500,  ty: 50,   tilt: 'il3-t2',  draw: 'il3-dr2',  d: "M250,210 A30,30 0 1,1 249.9,210 M250,240 L250,360 M250,270 L190,320 M250,270 L310,320 M250,360 L200,440 M250,360 L300,440" },
+    { tx: 950,  ty: 50,   tilt: 'il3-t3',  draw: 'il3-dr3',  d: "M250,150 L240,250 L200,440 M250,150 L260,250 L300,440 M230,250 L270,250 M215,360 L285,360 M210,440 Q250,390 290,440 M245,150 L255,150 L250,130 Z M225,360 L260,250 M275,360 L240,250" },
+    { tx: 1400, ty: 50,   tilt: 'il3-t4',  draw: 'il3-dr4',  d: "M 280,420 L 280,250 M 190,250 Q 280,150 370,250 Q 340,270 310,250 Q 280,270 250,250 Q 220,270 190,250 M 280,205 L 280,180 M 280,205 Q 260,230 250,250 M 280,205 Q 300,230 310,250" },
+    { tx: 50,   ty: 600,  tilt: 'il3-t5',  draw: 'il3-dr5',  d: "M 130,410 Q 200,350 260,410 T 365,390 M 190,180 A 40,40 0 1,1 189.9,180" },
+    { tx: 500,  ty: 600,  tilt: 'il3-t6',  draw: 'il3-dr6',  d: "M 250,170 Q 250,250 330,250 Q 250,250 250,330 Q 250,250 170,250 Q 250,250 250,170 Z M 160,360 Q 160,400 200,400 Q 160,400 160,440 Q 160,400 120,400 Q 160,400 160,360 Z" },
+    { tx: 950,  ty: 600,  tilt: 'il3-t7',  draw: 'il3-dr7',  d: "M 180,280 L 250,200 L 320,280 L 320,400 L 180,400 Z M 220,400 L 220,330 L 280,330 L 280,400" },
+    { tx: 1400, ty: 600,  tilt: 'il3-t8',  draw: 'il3-dr8',  d: "M 250,250 C 250,150 150,150 150,250 C 150,350 250,420 250,420 C 250,420 350,350 350,250 C 350,150 250,150 250,250 Z" },
+    { tx: 50,   ty: 1150, tilt: 'il3-t9',  draw: 'il3-dr9',  d: "M 180,320 Q 150,320 150,280 Q 150,230 200,230 Q 220,180 270,180 Q 330,180 340,240 Q 370,240 370,280 Q 370,320 340,320 Z" },
+    { tx: 500,  ty: 1150, tilt: 'il3-t10', draw: 'il3-dr10', d: "M 280,180 A 80 80 0 1 0 280,340 A 100 100 0 0 1 280,180 Z" },
+    { tx: 950,  ty: 1150, tilt: 'il3-t11', draw: 'il3-dr11', d: "M 170,320 L 330,320 L 290,380 L 210,380 Z M 250,320 L 250,180 L 320,280 Z" },
+    { tx: 1400, ty: 1150, tilt: 'il3-t12', draw: 'il3-dr12', d: "M 250,400 L 250,300 M 200,300 Q 250,180 300,300 Z M 210,250 Q 250,150 290,250 M 230,200 Q 250,120 270,200" },
   ]
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7, width: 264 }}>
-      {cells.map((c, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, scale: 0.75 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: i * 0.04, duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          style={{ transform: `rotate(${c.rot}deg)` }}
-        >
-          <div style={{
-            padding: 5,
-            backgroundImage: 'radial-gradient(circle, var(--bg) 3px, transparent 3px)',
-            backgroundSize: '10px 10px',
-          }}>
-            <div style={{
-              width: '100%',
-              aspectRatio: '5/6',
-              background: `linear-gradient(to bottom, ${c.g1}, ${c.g2})`,
-              borderRadius: 2,
-            }} />
-          </div>
-        </motion.div>
-      ))}
-    </div>
+    <motion.div
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1850" width="260" height="241">
+        <defs>
+          <style>{`
+            .il3-frame { fill: var(--background, white); stroke: currentColor; stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+            .il3-draw  { fill: none; stroke: currentColor; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2000; stroke-dashoffset: 2000; }
+            .il3-appear { opacity: 0; animation: il3PopIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+            @keyframes il3PopIn { 100% { opacity: 1; transform: scale(1); } }
+            .il3-d1{animation-delay:0.1s} .il3-d2{animation-delay:0.3s} .il3-d3{animation-delay:0.5s} .il3-d4{animation-delay:0.7s}
+            .il3-d5{animation-delay:0.9s} .il3-d6{animation-delay:1.1s} .il3-d7{animation-delay:1.3s} .il3-d8{animation-delay:1.5s}
+            .il3-d9{animation-delay:1.7s} .il3-d10{animation-delay:1.9s} .il3-d11{animation-delay:2.1s} .il3-d12{animation-delay:2.3s}
+            @keyframes il3TiltA { 0%{transform:rotate(0deg)} 25%{transform:rotate(-4deg)} 50%{transform:rotate(2deg)} 75%{transform:rotate(5deg)} 100%{transform:rotate(0deg)} }
+            @keyframes il3TiltB { 0%{transform:rotate(3deg)} 20%{transform:rotate(5deg)} 40%{transform:rotate(-3deg)} 60%{transform:rotate(2deg)} 80%{transform:rotate(-5deg)} 100%{transform:rotate(3deg)} }
+            @keyframes il3TiltC { 0%{transform:rotate(-2deg)} 30%{transform:rotate(4deg)} 60%{transform:rotate(-5deg)} 85%{transform:rotate(3deg)} 100%{transform:rotate(-2deg)} }
+            @keyframes il3TiltD { 0%{transform:rotate(2deg)} 25%{transform:rotate(-3deg)} 50%{transform:rotate(6deg)} 75%{transform:rotate(-4deg)} 100%{transform:rotate(2deg)} }
+            .il3-t1{transform-origin:250px 300px;animation:il3TiltA 4s step-end infinite}
+            .il3-t2{transform-origin:250px 300px;animation:il3TiltB 5s step-end infinite}
+            .il3-t3{transform-origin:250px 300px;animation:il3TiltC 6s step-end infinite}
+            .il3-t4{transform-origin:250px 300px;animation:il3TiltD 4.5s step-end infinite}
+            .il3-t5{transform-origin:250px 300px;animation:il3TiltB 5.5s step-end infinite}
+            .il3-t6{transform-origin:250px 300px;animation:il3TiltC 4s step-end infinite}
+            .il3-t7{transform-origin:250px 300px;animation:il3TiltD 6s step-end infinite}
+            .il3-t8{transform-origin:250px 300px;animation:il3TiltA 5s step-end infinite}
+            .il3-t9{transform-origin:250px 300px;animation:il3TiltD 4.5s step-end infinite}
+            .il3-t10{transform-origin:250px 300px;animation:il3TiltA 6.5s step-end infinite}
+            .il3-t11{transform-origin:250px 300px;animation:il3TiltB 4s step-end infinite}
+            .il3-t12{transform-origin:250px 300px;animation:il3TiltC 5.5s step-end infinite}
+            @keyframes il3DrawLoop { 0%{stroke-dashoffset:2000} 10%{stroke-dashoffset:0} 80%{stroke-dashoffset:0} 90%{stroke-dashoffset:2000} 100%{stroke-dashoffset:2000} }
+            .il3-dr1{animation:il3DrawLoop 12s linear infinite 0.4s}
+            .il3-dr2{animation:il3DrawLoop 12s linear infinite 0.6s}
+            .il3-dr3{animation:il3DrawLoop 12s linear infinite 0.8s}
+            .il3-dr4{animation:il3DrawLoop 12s linear infinite 1.0s}
+            .il3-dr5{animation:il3DrawLoop 12s linear infinite 1.2s}
+            .il3-dr6{animation:il3DrawLoop 12s linear infinite 1.4s}
+            .il3-dr7{animation:il3DrawLoop 12s linear infinite 1.6s}
+            .il3-dr8{animation:il3DrawLoop 12s linear infinite 1.8s}
+            .il3-dr9{animation:il3DrawLoop 12s linear infinite 2.0s}
+            .il3-dr10{animation:il3DrawLoop 12s linear infinite 2.2s}
+            .il3-dr11{animation:il3DrawLoop 12s linear infinite 2.4s}
+            .il3-dr12{animation:il3DrawLoop 12s linear infinite 2.6s}
+          `}</style>
+          <g id="il3-stamp-base">
+            <path className="il3-frame" d={STAMP_OUTER} />
+            <path className="il3-frame" d={STAMP_INNER} strokeWidth="14" />
+          </g>
+        </defs>
+        {stamps.map((s, i) => (
+          <g key={i} transform={`translate(${s.tx}, ${s.ty})`}>
+            <g className={`il3-appear il3-d${i + 1}`}>
+              <g className={s.tilt}>
+                <use href="#il3-stamp-base" />
+                <path className={`il3-draw ${s.draw}`} d={s.d} />
+              </g>
+            </g>
+          </g>
+        ))}
+      </svg>
+    </motion.div>
   )
 }
 
