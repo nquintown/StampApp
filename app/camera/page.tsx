@@ -301,6 +301,8 @@ function CameraPageInner() {
       } catch (e) {
         console.error('[daily] upsertJournalEntry failed:', e)
       }
+      const todayUTC = new Date().toISOString().split('T')[0]
+      document.cookie = `stamply_daily=${todayUTC}; path=/; max-age=86400; SameSite=Lax`
       localStorage.setItem(`stamply_daily_ok_${today}`, 'true')
       router.push('/journal')
     } else {

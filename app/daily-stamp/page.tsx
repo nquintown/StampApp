@@ -15,8 +15,10 @@ function todayISO(): string {
 }
 
 function markDailyOk() {
-  if (typeof window !== 'undefined')
-    localStorage.setItem(`stamply_daily_ok_${todayISO()}`, 'true')
+  if (typeof window === 'undefined') return
+  const todayUTC = new Date().toISOString().split('T')[0]
+  document.cookie = `stamply_daily=${todayUTC}; path=/; max-age=86400; SameSite=Lax`
+  localStorage.setItem(`stamply_daily_ok_${todayISO()}`, 'true')
 }
 
 function CameraIcon() {

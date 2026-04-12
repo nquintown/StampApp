@@ -34,6 +34,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
+  // Daily stamp check: redirect home to /daily-stamp if today's stamp not done
+  if (user && pathname === '/') {
+    const todayUTC = new Date().toISOString().split('T')[0]
+    const dailyCookie = request.cookies.get('stamply_daily')?.value
+    if (dailyCookie !== todayUTC) {
+      return NextResponse.redirect(new URL('/daily-stamp', request.url))
+    }
+  }
+
   return supabaseResponse
 }
 
