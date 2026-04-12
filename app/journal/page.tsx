@@ -428,9 +428,8 @@ interface EntrySheetProps {
 }
 
 function EntrySheet({ dateStr, entry, onClose, onSave, onDelete }: EntrySheetProps) {
-  const { stamps, user } = useStore()
+  const { user } = useStore()
   const router = useRouter()
-  const [selectedStampId, setSelectedStampId] = useState<string | null>(entry?.stampId ?? null)
   const [note, setNote] = useState(entry?.note ?? '')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -444,8 +443,6 @@ function EntrySheet({ dateStr, entry, onClose, onSave, onDelete }: EntrySheetPro
   })()
   const dateLabelCapitalized = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)
 
-  const selectedStamp = stamps.find((s) => s.id === selectedStampId) ?? null
-
   const handleSave = async () => {
     if (!user) return
     setSaving(true)
@@ -453,10 +450,10 @@ function EntrySheet({ dateStr, entry, onClose, onSave, onDelete }: EntrySheetPro
       const saved = await upsertJournalEntry({
         userId: user.id,
         entryDate: dateStr,
-        stampId: selectedStampId,
+        stampId: entry?.stampId ?? null,
         note: note.trim() || null,
-        stampThumbnailUrl: selectedStamp?.thumbnailUrl ?? null,
-        stampDominantColor: selectedStamp?.dominantColor ?? null,
+        stampThumbnailUrl: entry?.stampThumbnailUrl ?? null,
+        stampDominantColor: entry?.stampDominantColor ?? null,
       })
       onSave(saved)
       onClose()
@@ -556,69 +553,51 @@ function EntrySheet({ dateStr, entry, onClose, onSave, onDelete }: EntrySheetPro
             </motion.button>
           </div>
 
-          {/* Stamp picker */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Stamp du jour
-            </p>
+          {/* Stamp preview + retake button */}
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => { onClose(); router.push('/camera?daily=true') }}
+            style={{
+              width: '100%', marginBottom: 20,
+              borderRadius: 16, overflow: 'hidden',
+              border: '1.5px solid var(--border)',
+              backgroundColor: 'var(--surface2)',
+              cursor: 'pointer', padding: 0,
+              display: 'flex', alignItems: 'center',
+              WebkitTapHighlightColor: 'transparent',
+              transition: 'border-color 0.2s ease, background-color 0.25s ease',
+            }}
+          >
+            {/* Thumbnail */}
             <div style={{
-              display: 'flex',
-              gap: 10,
-              overflowX: 'auto',
-              paddingBottom: 4,
-              scrollbarWidth: 'none',
+              width: 72, height: 72, flexShrink: 0,
+              backgroundColor: entry?.stampDominantColor ?? 'var(--border)',
+              overflow: 'hidden',
             }}>
-              <style>{`.stamp-picker::-webkit-scrollbar { display: none }`}</style>
-              {/* "No stamp" option */}
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setSelectedStampId(null)}
-                style={{
-                  width: 64, height: 64,
-                  borderRadius: 16, flexShrink: 0,
-                  border: selectedStampId === null
-                    ? '2px solid var(--text-primary)'
-                    : '1.5px solid var(--border)',
-                  backgroundColor: 'var(--surface2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer',
-                  WebkitTapHighlightColor: 'transparent',
-                  transition: 'border-color 0.2s ease, background-color 0.25s ease',
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M2 2L16 16M16 2L2 16" stroke="var(--text-secondary)" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              </motion.button>
-
-              {stamps.map((stamp) => (
-                <motion.button
-                  key={stamp.id}
-                  whileTap={{ scale: 0.92 }}
-                  onClick={() => setSelectedStampId(stamp.id)}
-                  style={{
-                    width: 64, height: 64,
-                    borderRadius: 16, flexShrink: 0,
-                    overflow: 'hidden',
-                    border: selectedStampId === stamp.id
-                      ? '2px solid var(--text-primary)'
-                      : '1.5px solid var(--border)',
-                    cursor: 'pointer',
-                    padding: 0,
-                    WebkitTapHighlightColor: 'transparent',
-                    transition: 'border-color 0.2s ease',
-                    backgroundColor: stamp.dominantColor ?? 'var(--surface2)',
-                  }}
-                >
-                  <img
-                    src={stamp.thumbnailUrl}
-                    alt={stamp.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </motion.button>
-              ))}
+              {entry?.stampThumbnailUrl ? (
+                <img
+                  src={entry.stampThumbnailUrl}
+                  alt="Stamp du jour"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5v14M5 12h14" stroke="var(--text-secondary)" strokeWidth="1.8" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              )}
             </div>
-          </div>
+            {/* Label */}
+            <div style={{ flex: 1, padding: '0 16px', textAlign: 'left' }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', transition: 'color 0.25s ease' }}>
+                {entry?.stampThumbnailUrl ? 'Reprendre la photo' : 'Ajouter une photo'}
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-secondary)', transition: 'color 0.25s ease' }}>
+                Ouvrir la caméra →
+              </p>
+            </div>
+          </motion.button>
 
           {/* Note textarea */}
           <div style={{ marginBottom: 24 }}>
