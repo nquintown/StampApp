@@ -216,7 +216,7 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
 
         <FAB
           onCamera={() => router.push('/camera')}
-          onGallery={() => router.push('/camera?source=gallery')}
+          
         />
 
         {/* Action sheet */}

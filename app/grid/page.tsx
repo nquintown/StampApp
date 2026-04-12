@@ -165,7 +165,7 @@ export default function GridPage() {
 
       <FAB
         onCamera={() => router.push('/camera')}
-        onGallery={() => router.push('/camera?source=gallery')}
+        
       />
     </motion.div>
   )

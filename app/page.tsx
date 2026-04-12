@@ -553,10 +553,7 @@ export default function HomePage() {
 
       <TabBar active="stamps" />
 
-      <FAB
-        onCamera={() => router.push('/camera')}
-        onGallery={() => router.push('/camera?source=gallery')}
-      />
+      <FAB onCamera={() => router.push('/camera')} />
     </div>
   )
 }
