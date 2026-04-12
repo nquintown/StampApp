@@ -16,7 +16,7 @@ function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-type Stage = 'device' | 'adjust' | 'processing' | 'name'
+type Stage = 'device' | 'adjust' | 'name'
 
 // ── Reverse geocode ──────────────────────────────────────
 async function reverseGeocode(lat: number, lng: number): Promise<string> {
@@ -253,7 +253,7 @@ export default function CameraPage() {
     setCapturedThumbnail(thumbnailDataUrl)
     setCapturedImage(selectedImage)
     setSavedTransform({ ...transformRef.current })
-    setTimeout(() => setStage('name'), 420)
+    setStage('name')
   }, [selectedImage])
 
   // ── Save stamp ────────────────────────────────────────
@@ -531,35 +531,6 @@ export default function CameraPage() {
 
       {/* ══ STAGE: PROCESSING ════════════════════════════ */}
       <AnimatePresence>
-        {stage === 'processing' && (
-          <motion.div
-            key="processing"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
-            style={{
-              position: 'absolute', inset: 0, backgroundColor: '#111110',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 32,
-            }}
-          >
-            <CameraStampFrame isProcessing capturedImage={capturedThumbnail ?? capturedImage} />
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-              <div style={{ display: 'flex', gap: 6 }}>
-                {[0, 1, 2].map((i) => (
-                  <motion.div key={i}
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.35, 1, 0.35] }}
-                    transition={{ duration: 0.75, repeat: Infinity, delay: i * 0.14 }}
-                    style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#60A5FA' }}
-                  />
-                ))}
-              </div>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 600 }}>
-                Création en cours…
-              </p>
-            </div>
-          </motion.div>
-        )}
       </AnimatePresence>
 
       {/* ══ STAGE: NAME ══════════════════════════════════ */}
