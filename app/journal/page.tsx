@@ -343,27 +343,19 @@ function TodayCard({ todayEntry, onPress }: TodayCardProps) {
         transition: 'background-color 0.25s ease, border-color 0.25s ease',
       }}
     >
-      {/* Thumbnail or prompt icon */}
-      <div style={{
-        width: 52,
-        height: 52,
-        borderRadius: 14,
-        overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: 'var(--surface2)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'background-color 0.25s ease',
-      }}>
+      {/* Stamp-shaped thumbnail or botanical icon */}
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 68 }}>
         {todayEntry?.stampThumbnailUrl ? (
-          <img
-            src={todayEntry.stampThumbnailUrl}
-            alt="stamp"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          <StampShape imageUrl={todayEntry.stampThumbnailUrl} width={52} height={64} />
         ) : (
-          <div style={{ color: 'var(--text-secondary)' }}>
+          <div style={{
+            width: 52, height: 64,
+            backgroundColor: 'var(--surface2)',
+            borderRadius: 8,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-secondary)',
+            transition: 'background-color 0.25s ease',
+          }}>
             <BotanicalIcon variant={dayOfYear(todayLocal()) % 8} size={24} />
           </div>
         )}
