@@ -666,20 +666,20 @@ function EntrySheet({ dateStr, entry, onClose, onSave, onDelete }: EntrySheetPro
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={handleSave}
-              disabled={saving || (!selectedStampId && !note.trim())}
+              disabled={saving}
               style={{
                 flex: 1, height: 50,
                 borderRadius: 14,
-                backgroundColor: saving || (!selectedStampId && !note.trim())
+                backgroundColor: saving
                   ? 'var(--surface2)'
                   : 'var(--text-primary)',
-                color: saving || (!selectedStampId && !note.trim())
+                color: saving
                   ? 'var(--text-secondary)'
                   : 'var(--bg)',
                 border: 'none',
                 fontFamily: 'inherit',
                 fontSize: 15, fontWeight: 700,
-                cursor: saving || (!selectedStampId && !note.trim()) ? 'default' : 'pointer',
+                cursor: saving ? 'default' : 'pointer',
                 WebkitTapHighlightColor: 'transparent',
                 transition: 'background-color 0.25s ease, color 0.25s ease',
               }}
