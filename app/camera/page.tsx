@@ -2,13 +2,19 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import CameraStampFrame, { OW, OH, OX, OY, OR, OY_OFFSET } from '@/components/CameraStampFrame'
 import StampShape from '@/components/StampShape'
 import CollectionPickerSheet from '@/components/CollectionPickerSheet'
 import TagPicker from '@/components/TagPicker'
 import type { Stamp, StampLocation, PhotoTransform } from '@/lib/types'
+import { upsertJournalEntry } from '@/lib/journal-db'
+
+function todayISO(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 type Stage = 'device' | 'adjust' | 'processing' | 'name'
 
@@ -32,7 +38,9 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
 // ─────────────────────────────────────────────────────────
 export default function CameraPage() {
   const router = useRouter()
-  const { addStamp, collections } = useStore()
+  const searchParams = useSearchParams()
+  const isDaily = searchParams.get('daily') === 'true'
+  const { addStamp, collections, user } = useStore()
 
   const fileInputRef   = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
@@ -242,10 +250,12 @@ export default function CameraPage() {
   }, [selectedImage])
 
   // ── Save stamp ────────────────────────────────────────
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!capturedImage || !title.trim()) return
+    const today = todayISO()
+    const id = `stamp-cam-${Date.now()}`
     const stamp: Stamp = {
-      id:           `stamp-cam-${Date.now()}`,
+      id,
       title:        title.trim(),
       imageUrl:       capturedImage,
       thumbnailUrl:   capturedThumbnail ?? capturedImage,
@@ -260,7 +270,23 @@ export default function CameraPage() {
       location:     location ?? undefined,
     }
     addStamp(stamp)
-    router.push('/')
+
+    if (isDaily && user) {
+      try {
+        await upsertJournalEntry({
+          userId: user.id,
+          entryDate: today,
+          stampId: id,
+          note: null,
+          stampThumbnailUrl: capturedThumbnail ?? capturedImage,
+          stampDominantColor: '#60A5FA',
+        })
+        localStorage.setItem(`stamply_daily_ok_${today}`, 'true')
+      } catch (_) {}
+      router.push('/journal')
+    } else {
+      router.push('/')
+    }
   }
 
   // ════════════════════════════════════════════════════════

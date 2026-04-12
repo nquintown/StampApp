@@ -169,12 +169,9 @@ export default function HomePage() {
   const [unseenMap,    setUnseenMap]    = useState<Map<string, string>>(new Map()) // senderId → shareId
 
   useEffect(() => {
-    // Redirect new users to first-stamp experience
-    const isNewUser = typeof window !== 'undefined' && localStorage.getItem('stamply_new_user')
-    if (isNewUser) {
+    // New user flag: clean up legacy key (flow now goes through daily-stamp)
+    if (typeof window !== 'undefined') {
       localStorage.removeItem('stamply_new_user')
-      router.replace('/first-stamp')
-      return
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
