@@ -295,10 +295,11 @@ function CameraPageInner() {
           stampThumbnailUrl: capturedThumbnail ?? capturedImage,
           stampDominantColor: '#60A5FA',
         })
-        localStorage.setItem(`stamply_daily_ok_${today}`, 'true')
-      } catch (_) {}
+      } catch (e) {
+        console.error('[daily] upsertJournalEntry failed:', e)
+      }
+      localStorage.setItem(`stamply_daily_ok_${today}`, 'true')
       router.push('/journal')
-      router.refresh()
     } else {
       router.push('/')
     }

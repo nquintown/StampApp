@@ -722,7 +722,7 @@ export default function JournalPage() {
   const today = todayLocal()
 
   // Load entries for current year
-  useEffect(() => {
+  const loadEntries = useCallback(() => {
     if (!user) return
     getJournalEntriesForYear(user.id, year)
       .then((data) => {
@@ -733,6 +733,15 @@ export default function JournalPage() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [user, year])
+
+  useEffect(() => { loadEntries() }, [loadEntries])
+
+  // Refetch when navigating back to this page
+  useEffect(() => {
+    const handleFocus = () => loadEntries()
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [loadEntries])
 
   const todayEntry = entries.get(today) ?? null
 
