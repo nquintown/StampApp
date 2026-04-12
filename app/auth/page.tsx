@@ -740,20 +740,64 @@ export default function AuthWelcomePage() {
               alignItems: 'center', justifyContent: 'center',
               gap: 28,
             }}>
-              {/* Icon */}
+              {/* Stars illustration */}
               <motion.div
                 initial={{ scale: 0.6, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{
-                  width: 76, height: 76, borderRadius: 22,
-                  background: 'var(--surface)', border: '1.5px solid var(--border)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 34,
-                  transition: 'background 0.25s ease, border-color 0.25s ease',
-                }}
               >
-                ✨
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 600" width="130" height="156">
+                  <defs>
+                    <style>{`
+                      .perm-draw {
+                        fill: none;
+                        stroke: currentColor;
+                        stroke-width: 14;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        stroke-dasharray: 1200;
+                        stroke-dashoffset: 1200;
+                      }
+                      @keyframes permDrawCycle {
+                        0%   { stroke-dashoffset: 1200; }
+                        15%  { stroke-dashoffset: 0; }
+                        60%  { stroke-dashoffset: 0; }
+                        75%  { stroke-dashoffset: 1200; }
+                        100% { stroke-dashoffset: 1200; }
+                      }
+                      @keyframes permTilt1 {
+                        0%  { transform: rotate(0deg); }   20% { transform: rotate(-15deg); }
+                        40% { transform: rotate(10deg); }  60% { transform: rotate(-5deg); }
+                        80% { transform: rotate(20deg); }  100%{ transform: rotate(0deg); }
+                      }
+                      @keyframes permTilt2 {
+                        0%  { transform: rotate(10deg); }  15% { transform: rotate(-25deg); }
+                        35% { transform: rotate(15deg); }  65% { transform: rotate(-10deg); }
+                        85% { transform: rotate(25deg); }  100%{ transform: rotate(10deg); }
+                      }
+                      @keyframes permTilt3 {
+                        0%  { transform: rotate(-10deg); } 25% { transform: rotate(15deg); }
+                        50% { transform: rotate(-5deg); }  75% { transform: rotate(20deg); }
+                        100%{ transform: rotate(-10deg); }
+                      }
+                      .perm-sg1 { transform-origin: 160px 180px; animation: permTilt1 4s step-end infinite; }
+                      .perm-sg2 { transform-origin: 180px 420px; animation: permTilt2 5s step-end infinite; }
+                      .perm-sg3 { transform-origin: 280px 300px; animation: permTilt3 6s step-end infinite; }
+                      .perm-sp1 { animation: permDrawCycle 6s ease-in-out infinite; }
+                      .perm-sp2 { animation: permDrawCycle 6s ease-in-out infinite 1.5s; }
+                      .perm-sp3 { animation: permDrawCycle 6s ease-in-out infinite 0.5s; }
+                    `}</style>
+                  </defs>
+                  <g className="perm-sg1">
+                    <path className="perm-draw perm-sp1" d="M 160,120 Q 160,180 220,180 Q 160,180 160,240 Q 160,180 100,180 Q 160,180 160,120 Z" />
+                  </g>
+                  <g className="perm-sg2">
+                    <path className="perm-draw perm-sp2" d="M 180,370 Q 180,420 230,420 Q 180,420 180,470 Q 180,420 130,420 Q 180,420 180,370 Z" />
+                  </g>
+                  <g className="perm-sg3">
+                    <path className="perm-draw perm-sp3" d="M 280,150 Q 280,300 430,300 Q 280,300 280,450 Q 280,300 130,300 Q 280,300 280,150 Z" />
+                  </g>
+                </svg>
               </motion.div>
 
               {/* Title + subtitle */}
@@ -796,9 +840,11 @@ export default function AuthWelcomePage() {
                     width: 46, height: 46, borderRadius: 13, flexShrink: 0,
                     background: '#D5EDD5',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 22,
                   }}>
-                    📷
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3D6B3E" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{
@@ -839,9 +885,11 @@ export default function AuthWelcomePage() {
                     width: 46, height: 46, borderRadius: 13, flexShrink: 0,
                     background: '#FDE8C8',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 22,
                   }}>
-                    🔔
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B6E3A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{
