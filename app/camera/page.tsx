@@ -214,7 +214,6 @@ function CameraPageInner() {
   // ── Cut stamp from current photo + transform ──────────
   const handleCut = useCallback(async () => {
     if (!selectedImage) return
-    setStage('processing')
 
     const img = new Image()
     img.src = selectedImage
