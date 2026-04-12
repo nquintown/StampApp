@@ -67,6 +67,7 @@ function CameraPageInner() {
   const [selectedCollectionId, setSelectedCollectionId] = useState('all')
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
   const [photoPickerOpen, setPhotoPickerOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Auto-open gallery if coming from ?source=gallery
   useEffect(() => {
@@ -265,7 +266,8 @@ function CameraPageInner() {
 
   // ── Save stamp ────────────────────────────────────────
   const handleSave = async () => {
-    if (!capturedImage || !title.trim()) return
+    if (!capturedImage || !title.trim() || isSaving) return
+    setIsSaving(true)
     const today = todayISO()
     const id = `stamp-cam-${Date.now()}`
     const stamp: Stamp = {
@@ -283,9 +285,10 @@ function CameraPageInner() {
       favorite:     false,
       location:     location ?? undefined,
     }
-    addStamp(stamp)
 
     if (isDaily && user) {
+      // Await stamp insert so the DB row exists before the journal FK ref
+      await addStamp(stamp)
       try {
         await upsertJournalEntry({
           userId: user.id,
@@ -301,6 +304,7 @@ function CameraPageInner() {
       localStorage.setItem(`stamply_daily_ok_${today}`, 'true')
       router.push('/journal')
     } else {
+      addStamp(stamp)
       router.push('/')
     }
   }
@@ -703,19 +707,19 @@ function CameraPageInner() {
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSave}
-                disabled={!title.trim()}
+                disabled={!title.trim() || isSaving}
                 style={{
                   width: '100%', padding: '16px', borderRadius: 50,
-                  backgroundColor: title.trim() ? '#1E1E1C' : '#E7E1D5',
-                  border: 'none', color: title.trim() ? '#F7F4ED' : '#6B6B67',
+                  backgroundColor: title.trim() && !isSaving ? '#1E1E1C' : '#E7E1D5',
+                  border: 'none', color: title.trim() && !isSaving ? '#F7F4ED' : '#6B6B67',
                   fontSize: 16, fontWeight: 700,
-                  cursor: title.trim() ? 'pointer' : 'default',
+                  cursor: title.trim() && !isSaving ? 'pointer' : 'default',
                   letterSpacing: '-0.2px', WebkitTapHighlightColor: 'transparent',
                   transition: 'background-color 0.25s, color 0.25s',
                   fontFamily: 'inherit',
                 }}
               >
-                Enregistrer le stamp
+                {isSaving ? 'Enregistrement…' : 'Enregistrer le stamp'}
               </motion.button>
             </motion.div>
 
