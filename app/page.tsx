@@ -579,7 +579,7 @@ export default function HomePage() {
 
       <FAB
         onCamera={() => router.push('/camera')}
-        onGallery={() => router.push('/create')}
+        onGallery={() => router.push('/camera?source=gallery')}
       />
     </div>
   )

@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { Playfair_Display } from 'next/font/google'
 
@@ -32,16 +31,10 @@ function CameraIcon() {
 
 export default function DailyStampPage() {
   const router = useRouter()
-  const [pickerOpen, setPickerOpen] = useState(false)
 
   const skip = () => {
     markDailyOk()
     router.replace('/')
-  }
-
-  const openCamera = () => {
-    setPickerOpen(false)
-    router.push('/camera?daily=true')
   }
 
   return (
@@ -51,7 +44,6 @@ export default function DailyStampPage() {
       transition: 'background-color 0.25s ease',
       overflow: 'hidden',
     }}>
-      {/* Welcome */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -126,7 +118,7 @@ export default function DailyStampPage() {
         >
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => setPickerOpen(true)}
+            onClick={() => router.push('/camera?daily=true')}
             style={{
               width: '100%', padding: '15px 0', borderRadius: 14,
               background: 'var(--text-primary)', color: 'var(--bg)',
@@ -137,7 +129,7 @@ export default function DailyStampPage() {
             }}
           >
             <CameraIcon />
-            Ajouter une photo
+            Créer mon stamp du jour
           </motion.button>
           <button
             onClick={skip}
@@ -152,51 +144,6 @@ export default function DailyStampPage() {
           </button>
         </motion.div>
       </motion.div>
-
-      {/* Photo picker bottom sheet */}
-      <AnimatePresence>
-        {pickerOpen && (
-          <>
-            <motion.div
-              key="overlay"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setPickerOpen(false)}
-              style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(0,0,0,0.35)' }}
-            />
-            <motion.div
-              key="sheet"
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
-              style={{
-                position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 11,
-                background: 'var(--surface)', borderRadius: '20px 20px 0 0',
-                paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
-                boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
-              }}
-            >
-              <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--border)', margin: '12px auto 20px' }} />
-              {[
-                { label: 'Prendre une photo', action: openCamera },
-                { label: 'Depuis la galerie',  action: openCamera },
-              ].map(({ label, action }) => (
-                <motion.button
-                  key={label} whileTap={{ scale: 0.98 }} onClick={action}
-                  style={{
-                    width: '100%', padding: '16px 24px',
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    textAlign: 'left', fontSize: 16, fontWeight: 500,
-                    color: 'var(--text-primary)', fontFamily: 'inherit',
-                    transition: 'color 0.25s ease',
-                  }}
-                >
-                  {label}
-                </motion.button>
-              ))}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

@@ -60,6 +60,13 @@ export default function CameraPage() {
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
   const [photoPickerOpen, setPhotoPickerOpen] = useState(false)
 
+  // Auto-open gallery if coming from ?source=gallery
+  useEffect(() => {
+    if (searchParams.get('source') === 'gallery') {
+      const t = setTimeout(() => fileInputRef.current?.click(), 300)
+      return () => clearTimeout(t)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Photo transform — ref is the source of truth for touch handlers (avoids stale closures)
   const transformRef = useRef<PhotoTransform>({ x: 0, y: 0, scale: 1, rotation: 0 })
