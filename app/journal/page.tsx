@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import TabBar from '@/components/TabBar'
+import StampShape from '@/components/StampShape'
 import {
   getJournalEntriesForYear,
   upsertJournalEntry,
@@ -568,21 +569,26 @@ function EntrySheet({ dateStr, entry, onClose, onSave, onDelete }: EntrySheetPro
               transition: 'border-color 0.2s ease, background-color 0.25s ease',
             }}
           >
-            {/* Thumbnail */}
+            {/* Stamp-shaped thumbnail */}
             <div style={{
-              width: 72, height: 72, flexShrink: 0,
-              backgroundColor: entry?.stampDominantColor ?? 'var(--border)',
-              overflow: 'hidden',
+              width: 72, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '10px 8px 10px 12px',
             }}>
               {entry?.stampThumbnailUrl ? (
-                <img
-                  src={entry.stampThumbnailUrl}
-                  alt="Stamp du jour"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                <StampShape
+                  imageUrl={entry.stampThumbnailUrl}
+                  width={52}
+                  height={62}
                 />
               ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <div style={{
+                  width: 52, height: 62,
+                  backgroundColor: 'var(--surface2)',
+                  borderRadius: 8, border: '1.5px dashed var(--border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M12 5v14M5 12h14" stroke="var(--text-secondary)" strokeWidth="1.8" strokeLinecap="round"/>
                   </svg>
                 </div>
