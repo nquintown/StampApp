@@ -145,9 +145,10 @@ interface YearGridProps {
   entries: Map<string, JournalEntry>
   today: string
   onDayPress: (dateStr: string, entry: JournalEntry | null) => void
+  showAll: boolean
 }
 
-function YearGrid({ year, entries, today, onDayPress }: YearGridProps) {
+function YearGrid({ year, entries, today, onDayPress, showAll }: YearGridProps) {
   const todayDate = new Date()
   const todayYear = todayDate.getFullYear()
   const todayMonth = todayDate.getMonth()
@@ -160,6 +161,9 @@ function YearGrid({ year, entries, today, onDayPress }: YearGridProps) {
         const offset = getFirstDayOffset(year, monthIdx)
         const isCurrentMonth = year === todayYear && monthIdx === todayMonth
         const isPastMonth = year < todayYear || (year === todayYear && monthIdx < todayMonth)
+
+        // Hide past months unless showAll is true
+        if (isPastMonth && !showAll) return null
 
         return (
           <motion.div
@@ -719,6 +723,7 @@ export default function JournalPage() {
   const [entries, setEntries] = useState<Map<string, JournalEntry>>(new Map())
   const [loading, setLoading] = useState(true)
   const [sheetDate, setSheetDate] = useState<string | null>(null)
+  const [showAllMonths, setShowAllMonths] = useState(false)
   const today = todayLocal()
 
   // Load entries for current year
@@ -747,12 +752,21 @@ export default function JournalPage() {
 
   const handleDayPress = useCallback((dateStr: string, entry: JournalEntry | null) => {
     const today = todayLocal()
+    if (dateStr > today) return  // future: nothing
+
+    if (dateStr === today) {
+      // Today: full access (edit + delete)
+      if (!entry) {
+        router.push('/camera?daily=true')
+      } else {
+        setSheetDate(dateStr)
+      }
+      return
+    }
+
+    // Past days: read-only — view stamp only
     if (entry?.stampId) {
       router.push(`/stamps/${entry.stampId}`)
-    } else if (!entry && dateStr === today) {
-      router.push('/camera?daily=true')
-    } else {
-      setSheetDate(dateStr)
     }
   }, [router])
 
@@ -811,30 +825,39 @@ export default function JournalPage() {
               </p>
             )}
           </div>
-          {/* Progress ring */}
+          {/* Progress ring — click to show/hide past months */}
           {!loading && (
-            <div style={{ position: 'relative', width: 44, height: 44 }}>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowAllMonths(v => !v)}
+              style={{
+                position: 'relative', width: 44, height: 44,
+                background: 'none', border: 'none', padding: 0,
+                cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
+              }}
+            >
               <svg width="44" height="44" viewBox="0 0 44 44">
                 <circle cx="22" cy="22" r="18" fill="none" stroke="var(--border)" strokeWidth="3" />
                 <circle
                   cx="22" cy="22" r="18" fill="none"
-                  stroke="var(--text-primary)" strokeWidth="3"
+                  stroke={showAllMonths ? 'var(--text-secondary)' : 'var(--text-primary)'}
+                  strokeWidth="3"
                   strokeDasharray={`${2 * Math.PI * 18}`}
                   strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
                   strokeLinecap="round"
                   transform="rotate(-90 22 22)"
-                  style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+                  style={{ transition: 'stroke-dashoffset 0.6s ease, stroke 0.25s ease' }}
                 />
               </svg>
               <div style={{
                 position: 'absolute', inset: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: showAllMonths ? 'var(--text-secondary)' : 'var(--text-primary)', transition: 'color 0.25s ease' }}>
                   {progress}%
                 </span>
               </div>
-            </div>
+            </motion.button>
           )}
         </div>
 
@@ -878,6 +901,7 @@ export default function JournalPage() {
             entries={entries}
             today={today}
             onDayPress={handleDayPress}
+            showAll={showAllMonths}
           />
         )}
       </div>
