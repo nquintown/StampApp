@@ -741,7 +741,7 @@ export default function JournalPage() {
     if (entry?.stampId) {
       router.push(`/stamps/${entry.stampId}`)
     } else if (!entry && dateStr === today) {
-      router.push('/daily-stamp')
+      router.push('/camera?daily=true')
     } else {
       setSheetDate(dateStr)
     }
@@ -841,7 +841,7 @@ export default function JournalPage() {
             <TodayCard
               todayEntry={todayEntry}
               onPress={() => {
-                if (!todayEntry) router.push('/daily-stamp')
+                if (!todayEntry) router.push('/camera?daily=true')
                 else setSheetDate(today)
               }}
             />

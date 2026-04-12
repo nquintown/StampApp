@@ -298,6 +298,7 @@ function CameraPageInner() {
         localStorage.setItem(`stamply_daily_ok_${today}`, 'true')
       } catch (_) {}
       router.push('/journal')
+      router.refresh()
     } else {
       router.push('/')
     }
