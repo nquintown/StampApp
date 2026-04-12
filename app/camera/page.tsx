@@ -37,6 +37,14 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
 
 // ─────────────────────────────────────────────────────────
 export default function CameraPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <CameraPageInner />
+    </React.Suspense>
+  )
+}
+
+function CameraPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isDaily = searchParams.get('daily') === 'true'
