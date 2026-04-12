@@ -12,12 +12,6 @@ import TabBar from '@/components/TabBar'
 import { preGrantGyroPermission } from '@/lib/gyro'
 import { getPendingCount, getFriends, type FriendUser } from '@/lib/friends-db'
 import { getReceivedShares, type SharedStampRecord } from '@/lib/sharing-db'
-import { getJournalEntryForDate } from '@/lib/journal-db'
-
-function todayISO(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 
 const containerVariants = {
   hidden: {},
@@ -175,24 +169,6 @@ export default function HomePage() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (!user || loading) return
-    const today = todayISO()
-    const key = `stamply_daily_ok_${today}`
-    if (localStorage.getItem(key)) return
-    getJournalEntryForDate(user.id, today)
-      .then((entry) => {
-        if (entry) {
-          localStorage.setItem(key, 'true')
-        } else {
-          router.replace('/daily-stamp')
-        }
-      })
-      .catch(() => {
-        // If check fails, don't redirect (fail silently)
-        localStorage.setItem(key, 'true')
-      })
-  }, [user, loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (user) {
