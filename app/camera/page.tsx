@@ -68,6 +68,7 @@ function CameraPageInner() {
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
   const [photoPickerOpen, setPhotoPickerOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [dailyNote, setDailyNote] = useState('')
 
   // Auto-open gallery if coming from ?source=gallery
   useEffect(() => {
@@ -294,7 +295,7 @@ function CameraPageInner() {
           userId: user.id,
           entryDate: today,
           stampId: id,
-          note: null,
+          note: dailyNote.trim() || null,
           stampThumbnailUrl: capturedThumbnail ?? capturedImage,
           stampDominantColor: '#60A5FA',
         })
@@ -654,8 +655,34 @@ function CameraPageInner() {
                   </motion.div>
                 )}
 
+                {/* Daily note (only in daily mode) */}
+                {isDaily && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+                    <p style={{ fontSize: 12, color: '#6B6B67', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
+                      Une phrase sur ce jour
+                    </p>
+                    <textarea
+                      value={dailyNote}
+                      onChange={(e) => setDailyNote(e.target.value.slice(0, 140))}
+                      placeholder="Ce que tu retiens de ce jour…"
+                      rows={3}
+                      style={{
+                        width: '100%', padding: '14px 16px', borderRadius: 14,
+                        backgroundColor: '#FFFFFF', border: '1.5px solid #E7E1D5',
+                        color: '#1E1E1C', fontSize: 15, outline: 'none',
+                        fontFamily: 'inherit', boxSizing: 'border-box',
+                        resize: 'none', lineHeight: 1.5,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      }}
+                    />
+                    <div style={{ textAlign: 'right', fontSize: 11, color: '#6B6B67', marginTop: 4 }}>
+                      {dailyNote.length}/140
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Tags */}
-                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: isDaily ? 0.44 : 0.38 }}>
                   <p style={{ fontSize: 12, color: '#6B6B67', letterSpacing: '0.07em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
                     Tags
                   </p>
