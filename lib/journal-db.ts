@@ -78,3 +78,19 @@ export async function deleteJournalEntry(
 
   if (error) throw error
 }
+
+export async function getJournalEntryForDate(
+  userId: string,
+  date: string, // 'YYYY-MM-DD'
+): Promise<JournalEntry | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('journal_entries')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('entry_date', date)
+    .maybeSingle()
+
+  if (error) throw error
+  return data ? toEntry(data as Record<string, unknown>) : null
+}

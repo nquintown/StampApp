@@ -714,6 +714,7 @@ function EntrySheet({ dateStr, entry, onClose, onSave, onDelete }: EntrySheetPro
 
 export default function JournalPage() {
   const { user } = useStore()
+  const router = useRouter()
   const [year] = useState(() => new Date().getFullYear())
   const [entries, setEntries] = useState<Map<string, JournalEntry>>(new Map())
   const [loading, setLoading] = useState(true)
@@ -735,9 +736,16 @@ export default function JournalPage() {
 
   const todayEntry = entries.get(today) ?? null
 
-  const handleDayPress = useCallback((dateStr: string, _entry: JournalEntry | null) => {
-    setSheetDate(dateStr)
-  }, [])
+  const handleDayPress = useCallback((dateStr: string, entry: JournalEntry | null) => {
+    const today = todayLocal()
+    if (entry?.stampId) {
+      router.push(`/stamps/${entry.stampId}`)
+    } else if (!entry && dateStr === today) {
+      router.push('/daily-stamp')
+    } else {
+      setSheetDate(dateStr)
+    }
+  }, [router])
 
   const handleSave = useCallback((saved: JournalEntry) => {
     setEntries((prev) => {
@@ -832,7 +840,10 @@ export default function JournalPage() {
           ) : (
             <TodayCard
               todayEntry={todayEntry}
-              onPress={() => setSheetDate(today)}
+              onPress={() => {
+                if (!todayEntry) router.push('/daily-stamp')
+                else setSheetDate(today)
+              }}
             />
           )}
         </div>
