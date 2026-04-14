@@ -105,22 +105,27 @@ export default function TabBar({ active }: TabBarProps) {
                 position: 'relative',
               }}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="tab-indicator"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: 32,
-                    height: 2.5,
-                    borderRadius: 2,
-                    backgroundColor: 'var(--text-primary)',
-                  }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+              }}>
+                {isActive && (
+                  <motion.div
+                    layoutId="tab-indicator"
+                    style={{
+                      width: 32,
+                      height: 2.5,
+                      borderRadius: 2,
+                      backgroundColor: 'var(--text-primary)',
+                    }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </div>
               {tab.icon(isActive)}
               <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500, letterSpacing: '0.02em' }}>
                 {tab.label}
