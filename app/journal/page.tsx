@@ -204,7 +204,10 @@ function YearGrid({ year, entries, today, onDayPress, showAll }: YearGridProps) 
             }}>
               {DAY_NAMES.map((name, i) => (
                 <div key={i} style={{
-                  textAlign: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  aspectRatio: '1',
                   fontSize: 9,
                   fontWeight: 600,
                   color: 'var(--text-secondary)',
@@ -269,8 +272,8 @@ function YearGrid({ year, entries, today, onDayPress, showAll }: YearGridProps) 
                   >
                     {entry ? (
                       /* Has entry: show custom icon */
-                      <div style={{ color, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <JournalIcon dateStr={dateStr} size={18} />
+                      <div style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                        <JournalIcon dateStr={dateStr} size={28} />
                       </div>
                     ) : isToday ? (
                       /* Today empty: show day number */
