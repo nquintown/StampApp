@@ -228,12 +228,6 @@ export default function SupportPage() {
                 onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--text-primary)' }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)' }}
               />
-              <p style={{
-                margin: '8px 0 0',
-                fontSize: 12, color: 'var(--text-secondary)',
-              }}>
-                Envoyé à quintown.n@gmail.com via ton application mail.
-              </p>
             </motion.div>
 
             {/* Send button */}
