@@ -71,36 +71,63 @@ export default function ReviewPage() {
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, type: 'spring', stiffness: 260, damping: 22 }}
-              style={{ display: 'flex', justifyContent: 'center', marginBottom: 32, marginTop: 16 }}
+              style={{ display: 'flex', justifyContent: 'center', marginBottom: 24, marginTop: 8 }}
             >
-              <div style={{
-                width: 90, height: 110,
-                position: 'relative',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg width="90" height="110" viewBox="0 0 90 110" fill="none"
-                  style={{ position: 'absolute', top: 0, left: 0 }}>
-                  <path
-                    d="M8 8 Q8 0 16 0 L74 0 Q82 0 82 8 L82 8
-                       Q90 8 90 16 Q90 24 82 24 Q82 32 90 32 Q90 40 82 40
-                       Q82 48 90 48 Q90 56 82 56 Q82 64 90 64 Q90 72 82 72
-                       Q82 80 90 80 Q90 88 82 88 Q82 96 90 96 Q90 104 82 104
-                       L82 102 Q82 110 74 110 L16 110 Q8 110 8 102
-                       Q0 102 0 94 Q0 86 8 86 Q8 78 0 78 Q0 70 8 70
-                       Q8 62 0 62 Q0 54 8 54 Q8 46 0 46 Q0 38 8 38
-                       Q8 30 0 30 Q0 22 8 22 Q8 14 0 14 Q0 6 8 6 Z"
-                    fill="var(--surface)"
-                    stroke="var(--border)"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-                <svg width="48" height="48" viewBox="0 0 100 100" fill="none"
-                  stroke="var(--text-primary)" strokeWidth="3.5"
-                  strokeLinecap="round" strokeLinejoin="round"
-                  style={{ position: 'relative', zIndex: 1 }}>
-                  <path d="M50 15 L60 38 L85 40 L67 57 L72 82 L50 70 L28 82 L33 57 L15 40 L40 38 Z" />
-                </svg>
-              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 600" width="180" height="216">
+                <defs>
+                  <style>{`
+                    .stamp-container {
+                      transform-origin: 250px 300px;
+                      animation: jerkySwing 7s step-end infinite;
+                    }
+                    @keyframes jerkySwing {
+                      0%      { transform: rotate(-3deg); }
+                      14.28%  { transform: rotate(3deg); }
+                      42.85%  { transform: rotate(-3deg); }
+                      85.71%  { transform: rotate(3deg); }
+                      100%    { transform: rotate(-3deg); }
+                    }
+                    .draw {
+                      fill: none;
+                      stroke: black;
+                      stroke-width: 14;
+                      stroke-linecap: round;
+                      stroke-linejoin: round;
+                      stroke-dasharray: 100;
+                      stroke-dashoffset: 100;
+                    }
+                    @keyframes drawInOut {
+                      0%   { stroke-dashoffset: 100; }
+                      15%  { stroke-dashoffset: 0; }
+                      85%  { stroke-dashoffset: 0; }
+                      100% { stroke-dashoffset: 100; }
+                    }
+                    @keyframes bubbleFloat {
+                      0%   { transform: rotate(-4deg); }
+                      50%  { transform: rotate(4deg); }
+                      100% { transform: rotate(-4deg); }
+                    }
+                    .bubble-draw { animation: drawInOut 10s ease-in-out infinite 0s; }
+                    .star-draw   { animation: drawInOut 10s ease-in-out infinite 0.5s; }
+                    .pop-draw    { animation: drawInOut 10s ease-in-out infinite 1s; }
+                    .bubble-container {
+                      transform-origin: 180px 420px;
+                      animation: bubbleFloat 4s ease-in-out infinite;
+                    }
+                  `}</style>
+                </defs>
+                <g className="stamp-container">
+                  <g fill="white" stroke="black" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M 100,100 Q 125,65 150,100 Q 175,65 200,100 Q 225,65 250,100 Q 275,65 300,100 Q 325,65 350,100 Q 375,65 400,100 Q 435,125 400,150 Q 435,175 400,200 Q 435,225 400,250 Q 435,275 400,300 Q 435,325 400,350 Q 435,375 400,400 Q 435,425 400,450 Q 435,475 400,500 Q 375,535 350,500 Q 325,535 300,500 Q 275,535 250,500 Q 225,535 200,500 Q 175,535 150,500 Q 125,535 100,500 Q 65,475 100,450 Q 65,425 100,400 Q 65,375 100,350 Q 65,325 100,300 Q 65,275 100,250 Q 65,225 100,200 Q 65,175 100,150 Q 65,125 100,100 Z" />
+                    <path d="M 130,135 Q 250,145 375,145 Q 365,300 360,470 Q 240,465 125,455 Q 125,300 130,135 Z" strokeWidth="14" />
+                  </g>
+                  <g className="bubble-container">
+                    <path className="draw pop-draw" pathLength="100" d="M 150,190 L 170,210 M 250,150 L 250,180 M 350,190 L 330,210" />
+                    <path className="draw bubble-draw" pathLength="100" d="M 180, 240 Q 180, 210 210, 210 L 290, 210 Q 320, 210 320, 240 L 320, 330 Q 320, 360 290, 360 L 220, 360 L 180, 410 L 200, 360 Q 180, 360 180, 330 Z" />
+                    <path className="draw star-draw" pathLength="100" d="M 250,235 L 260,265 L 290,265 L 265,285 L 275,315 L 250,300 L 225,315 L 235,285 L 210,265 L 240,265 Z" />
+                  </g>
+                </g>
+              </svg>
             </motion.div>
 
             {/* Title */}
