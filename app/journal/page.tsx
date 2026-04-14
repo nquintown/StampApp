@@ -204,10 +204,8 @@ function YearGrid({ year, entries, today, onDayPress, showAll }: YearGridProps) 
             }}>
               {DAY_NAMES.map((name, i) => (
                 <div key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  aspectRatio: '1',
+                  textAlign: 'center',
+                  padding: '3px 0',
                   fontSize: 9,
                   fontWeight: 600,
                   color: 'var(--text-secondary)',
@@ -250,19 +248,14 @@ function YearGrid({ year, entries, today, onDayPress, showAll }: YearGridProps) 
                     style={{
                       aspectRatio: '1',
                       borderRadius: 8,
-                      backgroundColor: entry
-                        ? 'transparent'
-                        : isToday
-                          ? 'var(--surface2)'
-                          : 'transparent',
-                      border: isToday && !entry
+                      background: isToday ? 'var(--surface2)' : 'none',
+                      border: isToday
                         ? '1.5px solid var(--text-primary)'
                         : '1px solid transparent',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: isFuture ? 'default' : 'pointer',
-                      background: 'none',
                       padding: 0,
                       WebkitTapHighlightColor: 'transparent',
                       opacity: isFuture ? 0.2 : 1,
