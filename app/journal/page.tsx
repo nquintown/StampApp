@@ -258,7 +258,7 @@ function YearGrid({ year, entries, today, onDayPress, showAll }: YearGridProps) 
                       cursor: isFuture ? 'default' : 'pointer',
                       padding: 0,
                       WebkitTapHighlightColor: 'transparent',
-                      opacity: isFuture ? 0.2 : 1,
+                      opacity: isFuture ? 0.35 : 1,
                       transition: 'opacity 0.2s ease',
                       position: 'relative',
                     }}
