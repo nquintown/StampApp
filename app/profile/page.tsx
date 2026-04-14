@@ -724,12 +724,12 @@ export default function ProfilePage() {
           <SettingRow
             iconBg="var(--icon-yellow-bg)"
             iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-yellow)' }}><path d="M9 2L11 7H16.5L12 10.5L14 16L9 12.5L4 16L6 10.5L1.5 7H7L9 2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
-            label="Donner un avis" onPress={() => {}}
+            label="Donner un avis" onPress={() => router.push('/profile/review')}
           />
           <SettingRow
             iconBg="var(--icon-purple-bg)"
             iconEl={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--icon-purple)' }}><path d="M2 3.5C2 2.67 2.67 2 3.5 2H14.5C15.33 2 16 2.67 16 3.5V11.5C16 12.33 15.33 13 14.5 13H10L6 16V13H3.5C2.67 13 2 12.33 2 11.5V3.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg>}
-            label="Support" onPress={() => {}} isLast
+            label="Support" onPress={() => router.push('/profile/support')} isLast
           />
         </Section>
 
