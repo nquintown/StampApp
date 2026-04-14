@@ -76,19 +76,45 @@ export default function SupportPage() {
               transition={{ delay: 0.08 }}
               style={{ marginBottom: 32, marginTop: 8 }}
             >
-              <div style={{
-                width: 52, height: 52, borderRadius: 16,
-                backgroundColor: 'var(--surface)',
-                border: '1.5px solid var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: 18,
-              }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                    stroke="var(--text-primary)" strokeWidth="1.6"
-                    strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="80" height="80" style={{ marginBottom: 18 }}>
+                <defs>
+                  <style>{`
+                    .chat-draw {
+                      fill: none;
+                      stroke: var(--text-primary);
+                      stroke-width: 20;
+                      stroke-linecap: round;
+                      stroke-linejoin: round;
+                      stroke-dasharray: 100;
+                      stroke-dashoffset: 100;
+                    }
+                    @keyframes chatDrawInOut {
+                      0%   { stroke-dashoffset: 100; }
+                      15%  { stroke-dashoffset: 0; }
+                      85%  { stroke-dashoffset: 0; }
+                      100% { stroke-dashoffset: 100; }
+                    }
+                    @keyframes chatJerkyFloat {
+                      0%   { transform: translateY(0) rotate(-2deg); }
+                      20%  { transform: translateY(-5px) rotate(2deg); }
+                      40%  { transform: translateY(-10px) rotate(-1deg); }
+                      60%  { transform: translateY(-5px) rotate(3deg); }
+                      80%  { transform: translateY(0) rotate(-3deg); }
+                      100% { transform: translateY(0) rotate(-2deg); }
+                    }
+                    .chat-bubble-outline { animation: chatDrawInOut 10s ease-in-out infinite 0s; }
+                    .chat-bubble-dots    { animation: chatDrawInOut 10s ease-in-out infinite 0.6s; }
+                    .chat-container {
+                      transform-origin: 250px 350px;
+                      animation: chatJerkyFloat 4s step-end infinite;
+                    }
+                  `}</style>
+                </defs>
+                <g className="chat-container">
+                  <path className="chat-draw chat-bubble-outline" pathLength="100" d="M 100,220 C 100,100 400,100 400,220 C 400,340 250,340 200,340 L 120,410 L 150,310 C 115,280 100,250 100,220 Z" />
+                  <path className="chat-draw chat-bubble-dots" pathLength="100" d="M 175,220 L 185,220 M 245,220 L 255,220 M 315,220 L 325,220" />
+                </g>
+              </svg>
               <h2 style={{
                 margin: 0, fontSize: 22, fontWeight: 800,
                 color: 'var(--text-primary)', letterSpacing: '-0.4px',
