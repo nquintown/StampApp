@@ -281,9 +281,10 @@ export default function ProfilePage() {
   const previewBadges = ACHIEVEMENTS.slice(0, 3)
 
   const notifSublabel =
-    notifState === 'denied'      ? 'Bloquées — modifie les réglages du navigateur' :
+    notifState === 'denied'      ? 'Bloquées — modifie les réglages de l\'app' :
     notifState === 'unsupported' ? 'Non supporté sur cet appareil' :
-    'Rappel quotidien à 11h'
+    notifState === 'granted'     ? 'Rappel entre 11h et 21h activé ✓' :
+    'Rappel quotidien entre 11h et 21h'
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 48, transition: 'background-color 0.25s ease' }}>
