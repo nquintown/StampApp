@@ -266,7 +266,7 @@ function YearGrid({ year, entries, today, onDayPress, showAll }: YearGridProps) 
                     {entry ? (
                       /* Has entry: show custom icon */
                       <div style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <JournalIcon dateStr={dateStr} size={28} />
+                        <JournalIcon dateStr={dateStr} size={38} />
                       </div>
                     ) : isToday ? (
                       /* Today empty: show day number */
