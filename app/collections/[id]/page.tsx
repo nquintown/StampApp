@@ -15,8 +15,10 @@ import {
   fetchCollectionOwner,
   insertCollectionMember,
   removeCollectionMember,
+  fetchCollectionAllStamps,
   type CollectionMember,
 } from '@/lib/stamps-db'
+import type { Stamp } from '@/lib/types'
 import { getFriends, type FriendUser } from '@/lib/friends-db'
 
 const containerVariants = {
@@ -382,10 +384,11 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
   const router  = useRouter()
   const { user, collections, stamps, loading, loadStamps, renameCollection, deleteCollection } = useStore()
 
-  const [menuOpen,    setMenuOpen]    = useState(false)
-  const [renameOpen,  setRenameOpen]  = useState(false)
-  const [membersOpen, setMembersOpen] = useState(false)
-  const [isDeleting,  setIsDeleting]  = useState(false)
+  const [menuOpen,        setMenuOpen]        = useState(false)
+  const [renameOpen,      setRenameOpen]      = useState(false)
+  const [membersOpen,     setMembersOpen]     = useState(false)
+  const [isDeleting,      setIsDeleting]      = useState(false)
+  const [allStamps,       setAllStamps]       = useState<Stamp[] | null>(null)
 
   // Load stamps if not yet loaded (direct URL access / page refresh)
   useEffect(() => {
@@ -394,9 +397,24 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const collection       = collections.find((c) => c.id === id)
-  const collectionStamps = stamps.filter((s) => s.collectionId === id || id === 'all')
-  const isVirtual        = id === 'all'
+  const collection = collections.find((c) => c.id === id)
+  const isVirtual  = id === 'all'
+
+  // For specific (non-virtual) collections, fetch ALL members' stamps via DB
+  useEffect(() => {
+    if (isVirtual) { setAllStamps(null); return }
+    fetchCollectionAllStamps(id).then(setAllStamps)
+  }, [id, isVirtual])
+
+  // Refresh when own stamps change (e.g. new stamp added)
+  useEffect(() => {
+    if (isVirtual) return
+    fetchCollectionAllStamps(id).then(setAllStamps)
+  }, [stamps.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const collectionStamps = isVirtual
+    ? stamps                                              // "All stamps" = own stamps only
+    : (allStamps ?? stamps.filter((s) => s.collectionId === id)) // shared collection = DB fetch
 
   const menuItems = [
     {

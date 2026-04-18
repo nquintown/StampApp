@@ -176,6 +176,39 @@ export async function updateCollection(
   if (error) throw error
 }
 
+// ── All stamps in a collection (own + members') ───────────
+
+export async function fetchCollectionAllStamps(collectionId: string): Promise<Stamp[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('stamps')
+      .select('*')
+      .eq('collection_id', collectionId)
+      .order('created_at', { ascending: false })
+
+    if (error || !data) return []
+
+    return data.map((r) => ({
+      id:             r.id,
+      title:          r.title,
+      imageUrl:       r.image_url,
+      thumbnailUrl:   r.thumbnail_url ?? r.image_url,
+      createdAt:      r.created_at,
+      sourceType:     r.source_type,
+      sourceLabel:    r.source_label ?? undefined,
+      collectionId:   r.collection_id,
+      tags:           r.tags ?? [],
+      dominantColor:  r.dominant_color ?? undefined,
+      favorite:       r.favorite ?? false,
+      location:       r.location ?? undefined,
+      photoTransform: r.photo_transform ?? undefined,
+    }))
+  } catch {
+    return []
+  }
+}
+
 // ── Public stats for a friend ─────────────────────────────
 
 export async function fetchFriendPublicStats(friendUserId: string): Promise<{
