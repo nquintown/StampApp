@@ -570,29 +570,28 @@ export default function StampDetailPage() {
             </span>
           </motion.button>
 
-          {/* Partager */}
+          {/* Envoyer — paper plane */}
           <motion.button
             whileTap={{ scale: 0.93 }}
             onClick={() => setShareOpen(true)}
             style={{
-              flex: 1.4, padding: '13px 0', borderRadius: 14,
+              width: 50, height: 50, borderRadius: 25, flexShrink: 0,
               backgroundColor: 'var(--text-primary)',
               border: 'none',
               cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               WebkitTapHighlightColor: 'transparent',
               transition: 'background-color 0.25s ease',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path
-                d="M11.5 2.5L14.5 5.5L11.5 8.5V6.5C7 6.5 5 8 4.5 12C4 9 5 4.5 11.5 4.5V2.5Z"
-                stroke="var(--bg)" strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round"
+                d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"
+                stroke="var(--bg)" strokeWidth="1.7"
+                strokeLinecap="round" strokeLinejoin="round"
               />
             </svg>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--bg)' }}>
-              Partager
-            </span>
           </motion.button>
         </motion.div>
 

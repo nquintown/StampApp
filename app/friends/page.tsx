@@ -225,6 +225,7 @@ export default function FriendsPage() {
             </svg>
           </div>
           <input
+            id="friend-search-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher par email ou username…"
@@ -353,28 +354,64 @@ export default function FriendsPage() {
                     ))}
                   </Card>
                 ) : friends.length === 0 ? (
-                  <div style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center',
-                    padding: '32px 20px', gap: 10, textAlign: 'center',
-                    backgroundColor: 'var(--surface)', borderRadius: 18,
-                    border: '1px solid var(--border)',
-                  }}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      backgroundColor: 'var(--surface)', borderRadius: 18,
+                      border: '1px solid var(--border)',
+                      padding: '28px 20px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      gap: 12, textAlign: 'center',
+                    }}
+                  >
                     <div style={{
-                      width: 56, height: 56, borderRadius: '50%',
+                      width: 60, height: 60, borderRadius: 18,
                       backgroundColor: 'var(--surface2)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="9" cy="8" r="3.5" /><path d="M2 20c0-3.5 3.1-6 7-6M16 11v6M13 14h6" />
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="7" r="3.5" />
+                        <path d="M2 20c0-3.5 3.1-6 7-6" />
+                        <circle cx="17" cy="15" r="3.5" />
+                        <path d="M17 11v8M13 15h8" />
                       </svg>
                     </div>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: 0, transition: 'color 0.25s ease' }}>
-                      Aucun ami pour l'instant
-                    </p>
-                    <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0, transition: 'color 0.25s ease' }}>
-                      Recherche des amis pour les ajouter à ta liste
-                    </p>
-                  </div>
+                    <div>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', transition: 'color 0.25s ease' }}>
+                        Aucun ami pour l&apos;instant
+                      </p>
+                      <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5, transition: 'color 0.25s ease' }}>
+                        Ajoute des amis pour partager tes stamps et voir les leurs.
+                      </p>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => {
+                        const el = document.getElementById('friend-search-input')
+                        el?.focus()
+                        el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                      }}
+                      style={{
+                        marginTop: 4,
+                        padding: '11px 24px',
+                        borderRadius: 14,
+                        backgroundColor: 'var(--text-primary)',
+                        color: 'var(--bg)',
+                        fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                        border: 'none', cursor: 'pointer',
+                        WebkitTapHighlightColor: 'transparent',
+                        display: 'flex', alignItems: 'center', gap: 7,
+                      }}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
+                        <circle cx="9" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M2 18c0-3.5 3.1-6 7-6M14 10v6M11 13h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      </svg>
+                      Ajouter des amis
+                    </motion.button>
+                  </motion.div>
                 ) : (
                   <Card>
                     {friends.map((fr, i) => (

@@ -65,6 +65,18 @@ function MoonIcon() {
   )
 }
 
+// ── Bell icon (notifications) ────────────────────────────
+function BellIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M9 2C6.24 2 4 4.24 4 7V11L2 13H16L14 11V7C14 4.24 11.76 2 9 2Z"
+        stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M7 13C7 14.1 7.9 15 9 15C10.1 15 11 14.1 11 13"
+        stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  )
+}
+
 // ── User icon ─────────────────────────────────────────────
 function UserIcon() {
   return (
@@ -216,7 +228,7 @@ export default function HomePage() {
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', paddingBottom: 160 }}>
         <TopBar
           title="Stamply"
-          leftSlot={<IconButton label="Nouvelle collection" onClick={() => {}}><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /></svg></IconButton>}
+          leftSlot={<IconButton label="Notifications" onClick={() => {}}><BellIcon /></IconButton>}
           rightSlot={<IconButton label="Profil" onClick={() => router.push('/profile')}><UserIcon /></IconButton>}
         />
         <div style={{ padding: '8px 20px 0' }}>
@@ -252,41 +264,25 @@ export default function HomePage() {
       <TopBar
         title="Stamply"
         leftSlot={
-          <IconButton
-            label="Nouvelle collection"
-            onClick={() => router.push('/collections/new')}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M2 4.5C2 3.67 2.67 3 3.5 3H7.5L9 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M9 8.5V11.5M7.5 10H10.5"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-              />
-            </svg>
-          </IconButton>
-        }
-        rightSlot={
           <div style={{ position: 'relative' }}>
-            <IconButton label="Profil" onClick={() => router.push('/profile')}>
-              <UserIcon />
+            <IconButton label="Notifications" onClick={() => router.push('/friends/inbox')}>
+              <BellIcon />
             </IconButton>
-            {pendingCount > 0 && (
+            {(unseenMap.size + pendingCount) > 0 && (
               <div style={{
                 position: 'absolute', top: 0, right: 0,
-                width: 10, height: 10, borderRadius: '50%',
+                minWidth: 10, height: 10, borderRadius: 5,
                 backgroundColor: '#EF4444',
                 border: '1.5px solid var(--bg)',
                 pointerEvents: 'none',
               }} />
             )}
           </div>
+        }
+        rightSlot={
+          <IconButton label="Profil" onClick={() => router.push('/profile')}>
+            <UserIcon />
+          </IconButton>
         }
       />
 
@@ -553,7 +549,10 @@ export default function HomePage() {
 
       <TabBar active="stamps" />
 
-      <FAB onCamera={() => router.push('/camera')} />
+      <FAB
+        onCamera={() => router.push('/camera')}
+        onCollection={() => router.push('/collections/new')}
+      />
     </div>
   )
 }
