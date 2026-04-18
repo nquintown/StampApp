@@ -582,7 +582,7 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
           )}
         </div>
 
-        <FAB onCamera={() => router.push('/camera')} />
+        <FAB onCamera={() => router.push(isVirtual ? '/camera' : `/camera?collectionId=${id}`)} />
 
         {/* Action sheet */}
         <ContextMenuSheet

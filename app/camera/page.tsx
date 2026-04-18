@@ -64,7 +64,9 @@ function CameraPageInner() {
   const [title, setTitle]   = useState('')
   const [tags, setTags]     = useState<string[]>([])
   const [location, setLocation] = useState<StampLocation | null>(null)
-  const [selectedCollectionId, setSelectedCollectionId] = useState('all')
+  const [selectedCollectionId, setSelectedCollectionId] = useState(
+    () => searchParams.get('collectionId') ?? 'all'
+  )
   const [collectionPickerOpen, setCollectionPickerOpen] = useState(false)
   const [photoPickerOpen, setPhotoPickerOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
