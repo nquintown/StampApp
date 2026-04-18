@@ -34,9 +34,10 @@ const itemVariants = {
 
 // ── Small avatar ──────────────────────────────────────────
 function MemberAvatar({ member, size = 44 }: { member: CollectionMember | FriendUser; size?: number }) {
-  const name   = ('username' in member ? member.username : null) || ('fullName' in member ? member.fullName : null) || 'U'
-  const letter = typeof name === 'string' ? name.charAt(0).toUpperCase() : 'U'
-  const url    = 'avatarUrl' in member ? member.avatarUrl : null
+  const email  = 'email' in member ? member.email : null
+  const name   = member.username || member.fullName || (email ? email.split('@')[0] : null) || 'U'
+  const letter = name.charAt(0).toUpperCase()
+  const url    = member.avatarUrl
 
   return url ? (
     <img src={url} alt={String(name)} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
@@ -120,6 +121,7 @@ function MembersSheet({
         username:  friend.username ?? null,
         fullName:  friend.fullName ?? null,
         avatarUrl: friend.avatarUrl ?? null,
+        email:     friend.email ?? null,
         invitedBy: meId,
       }
       setMembers((prev) => [...prev, newMember])
@@ -130,7 +132,7 @@ function MembersSheet({
   }
 
   const memberName = (m: CollectionMember) =>
-    m.username || m.fullName || 'Utilisateur'
+    m.username || m.fullName || (m.email ? m.email.split('@')[0] : 'Utilisateur')
 
   const friendName = (f: FriendUser) =>
     f.username || f.fullName || f.email?.split('@')[0] || 'Utilisateur'

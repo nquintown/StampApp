@@ -291,6 +291,7 @@ export interface CollectionMember {
   username:  string | null
   fullName:  string | null
   avatarUrl: string | null
+  email:     string | null
   invitedBy: string
 }
 
@@ -310,18 +311,21 @@ export async function fetchCollectionMembersWithProfiles(
     const userIds = data.map((r: { user_id: string }) => r.user_id)
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url')
+      .select('id, username, full_name, avatar_url, email')
       .in('id', userIds)
 
-    const profileMap = new Map((profiles ?? []).map((p: { id: string; username: string | null; full_name: string | null; avatar_url: string | null }) => [p.id, p]))
+    const profileMap = new Map(
+      (profiles ?? []).map((p: { id: string; username: string | null; full_name: string | null; avatar_url: string | null; email: string | null }) => [p.id, p])
+    )
 
     return data.map((r: { user_id: string; invited_by: string }) => {
       const p = profileMap.get(r.user_id)
       return {
         userId:    r.user_id,
-        username:  p?.username  ?? null,
-        fullName:  p?.full_name ?? null,
+        username:  p?.username   ?? null,
+        fullName:  p?.full_name  ?? null,
         avatarUrl: p?.avatar_url ?? null,
+        email:     p?.email      ?? null,
         invitedBy: r.invited_by,
       }
     })
