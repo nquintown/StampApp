@@ -569,31 +569,42 @@ export default function StampDetailPage() {
               {stamp.favorite ? 'Sauvegardé' : 'Favori'}
             </span>
           </motion.button>
-
-          {/* Envoyer — paper plane */}
-          <motion.button
-            whileTap={{ scale: 0.93 }}
-            onClick={() => setShareOpen(true)}
-            style={{
-              width: 50, height: 50, borderRadius: 25, flexShrink: 0,
-              backgroundColor: 'var(--text-primary)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              WebkitTapHighlightColor: 'transparent',
-              transition: 'background-color 0.25s ease',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"
-                stroke="var(--bg)" strokeWidth="1.7"
-                strokeLinecap="round" strokeLinejoin="round"
-              />
-            </svg>
-          </motion.button>
         </motion.div>
+
+        {/* ── FAB partage — fixed bottom right ─────────── */}
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.35 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setShareOpen(true)}
+          aria-label="Envoyer"
+          style={{
+            position: 'fixed',
+            bottom: 'calc(max(28px, env(safe-area-inset-bottom, 28px)) + 12px)',
+            right: 24,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: 'var(--text-primary)',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            WebkitTapHighlightColor: 'transparent',
+            boxShadow: '0 6px 24px rgba(0,0,0,0.32), 0 2px 6px rgba(0,0,0,0.18)',
+            zIndex: 100,
+            color: 'var(--bg)',
+            transition: 'background-color 0.25s ease',
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"
+              stroke="currentColor" strokeWidth="1.8"
+              strokeLinecap="round" strokeLinejoin="round"
+            />
+          </svg>
+        </motion.button>
 
         {/* ── Sheets ──────────────────────────────────── */}
         <ContextMenuSheet
