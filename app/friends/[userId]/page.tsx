@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, use } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
@@ -71,8 +71,8 @@ function SectionTitle({ title }: { title: string }) {
 }
 
 // ── Main page ─────────────────────────────────────────────
-export default function FriendProfilePage({ params }: { params: Promise<{ userId: string }> }) {
-  const { userId } = use(params)
+export default function FriendProfilePage({ params }: { params: { userId: string } }) {
+  const { userId } = params
   const router  = useRouter()
   const me      = useStore((s) => s.user)
 
