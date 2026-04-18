@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface FABProps {
@@ -11,19 +11,11 @@ interface FABProps {
 export default function FAB({ onCamera, onCollection }: FABProps) {
   const [open, setOpen] = useState(false)
 
-  // Close menu on outside tap
-  useEffect(() => {
-    if (!open) return
-    const handler = () => setOpen(false)
-    document.addEventListener('pointerdown', handler)
-    return () => document.removeEventListener('pointerdown', handler)
-  }, [open])
-
   const bottom = 'calc(60px + max(28px, env(safe-area-inset-bottom, 28px)))'
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — cliquable pour fermer */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -32,9 +24,11 @@ export default function FAB({ onCamera, onCollection }: FABProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
+            onClick={() => setOpen(false)}
             style={{
               position: 'fixed', inset: 0, zIndex: 98,
               backgroundColor: 'rgba(0,0,0,0.18)',
+              cursor: 'default',
             }}
           />
         )}
@@ -53,15 +47,13 @@ export default function FAB({ onCamera, onCollection }: FABProps) {
               position: 'fixed',
               bottom: `calc(${bottom} + 68px)`,
               right: 16,
-              zIndex: 99,
+              zIndex: 100,
               display: 'flex',
               flexDirection: 'column',
               gap: 10,
               alignItems: 'flex-end',
             }}
-            onPointerDown={(e) => e.stopPropagation()}
           >
-            {/* Créer une collection */}
             <ActionItem
               label="Créer une collection"
               icon={
@@ -73,8 +65,6 @@ export default function FAB({ onCamera, onCollection }: FABProps) {
               }
               onClick={() => { setOpen(false); onCollection?.() }}
             />
-
-            {/* Prendre une photo */}
             <ActionItem
               label="Prendre une photo"
               icon={
@@ -90,7 +80,7 @@ export default function FAB({ onCamera, onCollection }: FABProps) {
         )}
       </AnimatePresence>
 
-      {/* Main FAB */}
+      {/* Main FAB — zIndex 101 pour être au-dessus du backdrop */}
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1, rotate: open ? 45 : 0 }}
@@ -100,7 +90,6 @@ export default function FAB({ onCamera, onCollection }: FABProps) {
           rotate: { type: 'spring', stiffness: 400, damping: 28 },
         }}
         whileTap={{ scale: 0.9 }}
-        onPointerDown={(e) => e.stopPropagation()}
         onClick={() => setOpen((v) => !v)}
         aria-label="Actions"
         style={{
@@ -117,7 +106,7 @@ export default function FAB({ onCamera, onCollection }: FABProps) {
           justifyContent: 'center',
           cursor: 'pointer',
           boxShadow: '0 6px 24px rgba(0,0,0,0.32), 0 2px 6px rgba(0,0,0,0.18)',
-          zIndex: 100,
+          zIndex: 101,
           WebkitTapHighlightColor: 'transparent',
           color: 'var(--bg)',
           transition: 'background-color 0.25s ease',
