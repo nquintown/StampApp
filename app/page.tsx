@@ -355,7 +355,20 @@ export default function HomePage() {
                     key={friend.userId}
                     friend={friend}
                     shareId={shareId}
-                    onClick={() => router.push(`/friends/${friend.userId}`)}
+                    onClick={() => {
+                      if (shareId) {
+                        // Badge bleu → ouvrir le stamp reçu + effacer le badge immédiatement
+                        setUnseenMap((prev) => {
+                          const next = new Map(prev)
+                          next.delete(friend.userId)
+                          return next
+                        })
+                        router.push(`/friends/inbox/${shareId}`)
+                      } else {
+                        // Pas de badge → profil de l'ami
+                        router.push(`/friends/${friend.userId}`)
+                      }
+                    }}
                   />
                 )
               })}
