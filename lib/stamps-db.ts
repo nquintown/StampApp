@@ -176,6 +176,61 @@ export async function updateCollection(
   if (error) throw error
 }
 
+// ── Public stats for a friend ─────────────────────────────
+
+export async function fetchFriendPublicStats(friendUserId: string): Promise<{
+  stampCount:      number
+  collectionCount: number
+}> {
+  try {
+    const supabase = createClient()
+    const [stampsRes, colsRes] = await Promise.all([
+      supabase.from('stamps').select('id', { count: 'exact', head: true }).eq('user_id', friendUserId),
+      supabase.from('collections').select('id', { count: 'exact', head: true }).eq('user_id', friendUserId),
+    ])
+    return {
+      stampCount:      stampsRes.count  ?? 0,
+      collectionCount: colsRes.count    ?? 0,
+    }
+  } catch {
+    return { stampCount: 0, collectionCount: 0 }
+  }
+}
+
+/** Collections shared between two users (one is owner, other is member or vice-versa) */
+export async function fetchCommonCollections(
+  myId: string,
+  friendId: string,
+): Promise<RawCollection[]> {
+  try {
+    const supabase = createClient()
+    // Collections owned by friend that I'm a member of
+    const { data: asGuest } = await supabase
+      .from('collection_members')
+      .select('collection_id, collections(id, name, created_at)')
+      .eq('user_id', myId)
+
+    // Collections I own that friend is a member of
+    const { data: asHost } = await supabase
+      .from('collection_members')
+      .select('collection_id, collections(id, name, created_at)')
+      .eq('user_id', friendId)
+      .eq('invited_by', myId)
+
+    const all = [...(asGuest ?? []), ...(asHost ?? [])]
+    const seen = new Set<string>()
+    return all
+      .map((row: Record<string, unknown>) => {
+        const col = row.collections as Record<string, unknown> | null
+        if (!col) return null
+        return { id: col.id as string, name: col.name as string, createdAt: col.created_at as string }
+      })
+      .filter((c): c is RawCollection => c !== null && !seen.has(c.id) && (seen.add(c.id), true))
+  } catch {
+    return []
+  }
+}
+
 // ── Collection members (shared collections) ───────────────
 
 /** Add a member to a collection. `invitedBy` must be the collection owner's userId. */

@@ -118,6 +118,66 @@ export async function getReceivedShares(userId: string): Promise<SharedStampReco
   }
 }
 
+// ── Stamps shared between two specific users ─────────────
+
+export async function getSharedStampsBetweenUsers(
+  myId:     string,
+  friendId: string,
+): Promise<SharedStampRecord[]> {
+  try {
+    const supabase = createClient()
+
+    const { data: rows, error } = await supabase
+      .from('shared_stamps')
+      .select('*')
+      .or(
+        `and(sender_id.eq.${myId},recipient_id.eq.${friendId}),and(sender_id.eq.${friendId},recipient_id.eq.${myId})`,
+      )
+      .order('created_at', { ascending: false })
+
+    if (error || !rows || rows.length === 0) return []
+
+    // Fetch involved profiles
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, email')
+      .in('id', [myId, friendId])
+
+    const profileMap = new Map<string, { username: string | null; full_name: string | null; avatar_url: string | null; email: string | null }>()
+    for (const p of profiles ?? []) {
+      profileMap.set(p.id, { username: p.username, full_name: p.full_name, avatar_url: p.avatar_url, email: p.email ?? null })
+    }
+
+    return rows.map((r) => {
+      const sender = profileMap.get(r.sender_id)
+      let tags: string[] | null = null
+      try { if (r.stamp_tags) tags = JSON.parse(r.stamp_tags) } catch { tags = null }
+      return {
+        id:                   r.id,
+        senderId:             r.sender_id,
+        recipientId:          r.recipient_id,
+        stampId:              r.stamp_id,
+        stampTitle:           r.stamp_title          ?? null,
+        stampThumbnailUrl:    r.stamp_thumbnail_url  ?? null,
+        stampImageUrl:        r.stamp_image_url      ?? null,
+        stampDominantColor:   r.stamp_dominant_color ?? null,
+        stampCreatedAt:       r.stamp_created_at     ?? null,
+        stampLocation:        r.stamp_location       ?? null,
+        stampTags:            tags,
+        message:              r.message              ?? null,
+        seen:                 r.seen                 ?? false,
+        createdAt:            r.created_at,
+        senderUsername:       sender?.username       ?? null,
+        senderFullName:       sender?.full_name      ?? null,
+        senderAvatarUrl:      sender?.avatar_url     ?? null,
+        senderEmail:          sender?.email          ?? null,
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
 export async function markShareSeen(shareId: string): Promise<void> {
   try {
     const supabase = createClient()

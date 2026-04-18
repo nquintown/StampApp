@@ -420,6 +420,7 @@ export default function FriendsPage() {
                         fr={fr}
                         isLast={i === friends.length - 1}
                         onDelete={() => handleDelete(fr)}
+                        onProfile={() => router.push(`/friends/${fr.friend.userId}`)}
                         type="friend"
                       />
                     ))}
@@ -532,13 +533,14 @@ function SearchRow({
 
 // ── Friendship row ────────────────────────────────────────
 function FriendshipRow({
-  fr, isLast, type, onAccept, onDelete,
+  fr, isLast, type, onAccept, onDelete, onProfile,
 }: {
-  fr:       FriendRequest
-  isLast:   boolean
-  type:     'friend' | 'received' | 'sent'
-  onAccept?: () => void
-  onDelete?: () => void
+  fr:        FriendRequest
+  isLast:    boolean
+  type:      'friend' | 'received' | 'sent'
+  onAccept?:  () => void
+  onDelete?:  () => void
+  onProfile?: () => void
 }) {
   const name = displayName(fr.friend)
   return (
@@ -547,7 +549,16 @@ function FriendshipRow({
       padding: '12px 16px',
       borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <motion.div
+        whileTap={type === 'friend' ? { scale: 0.97 } : undefined}
+        onClick={type === 'friend' ? onProfile : undefined}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          cursor: type === 'friend' ? 'pointer' : 'default',
+          flex: 1, minWidth: 0,
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
         <Avatar user={fr.friend} />
         <div>
           <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', margin: 0, transition: 'color 0.25s ease' }}>
@@ -559,7 +570,12 @@ function FriendshipRow({
             </p>
           )}
         </div>
-      </div>
+        {type === 'friend' && (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, color: 'var(--text-secondary)', marginLeft: 4 }}>
+            <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </motion.div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {type === 'received' && onAccept && (
