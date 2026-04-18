@@ -325,10 +325,7 @@ export default function HomePage() {
                     key={friend.userId}
                     friend={friend}
                     shareId={shareId}
-                    onClick={() => {
-                      if (shareId) router.push(`/friends/inbox/${shareId}`)
-                      else router.push('/friends/inbox')
-                    }}
+                    onClick={() => router.push(`/friends/${friend.userId}`)}
                   />
                 )
               })}

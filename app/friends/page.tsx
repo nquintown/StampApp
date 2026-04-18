@@ -543,41 +543,55 @@ function FriendshipRow({
   onProfile?: () => void
 }) {
   const name = displayName(fr.friend)
+
+  const rowContent = (
+    <>
+      <Avatar user={fr.friend} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', margin: 0, transition: 'color 0.25s ease' }}>
+          {name}
+        </p>
+        {type === 'friend' && (
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '1px 0 0', transition: 'color 0.25s ease' }}>
+            {fr.friend.stampCount} stamp{fr.friend.stampCount !== 1 ? 's' : ''}
+          </p>
+        )}
+      </div>
+    </>
+  )
+
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '12px 16px',
       borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
-      <motion.div
-        whileTap={type === 'friend' ? { scale: 0.97 } : undefined}
-        onClick={type === 'friend' ? onProfile : undefined}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          cursor: type === 'friend' ? 'pointer' : 'default',
+      {/* Left — tappable for friends */}
+      {type === 'friend' ? (
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={onProfile}
+          style={{
+            flex: 1, minWidth: 0,
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '12px 16px',
+            background: 'none', border: 'none', cursor: 'pointer',
+            textAlign: 'left', fontFamily: 'inherit',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          {rowContent}
+        </motion.button>
+      ) : (
+        <div style={{
           flex: 1, minWidth: 0,
-          WebkitTapHighlightColor: 'transparent',
-        }}
-      >
-        <Avatar user={fr.friend} />
-        <div>
-          <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', margin: 0, transition: 'color 0.25s ease' }}>
-            {name}
-          </p>
-          {type === 'friend' && (
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '1px 0 0', transition: 'color 0.25s ease' }}>
-              {fr.friend.stampCount} stamp{fr.friend.stampCount !== 1 ? 's' : ''}
-            </p>
-          )}
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '12px 16px',
+        }}>
+          {rowContent}
         </div>
-        {type === 'friend' && (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, color: 'var(--text-secondary)', marginLeft: 4 }}>
-            <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </motion.div>
+      )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingRight: 12, flexShrink: 0 }}>
         {type === 'received' && onAccept && (
           <motion.button whileTap={{ scale: 0.93 }} onClick={onAccept}
             style={{
