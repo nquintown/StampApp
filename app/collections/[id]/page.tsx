@@ -139,33 +139,38 @@ function MembersSheet({
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — z-index above FAB (101) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
         style={{
-          position: 'fixed', inset: 0, zIndex: 98,
+          position: 'fixed', inset: 0, zIndex: 200,
           backgroundColor: 'rgba(0,0,0,0.4)',
         }}
       />
 
-      {/* Sheet */}
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 380, damping: 36 }}
-        style={{
-          position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-          width: '100%', maxWidth: 430,
-          backgroundColor: 'var(--surface)',
-          borderRadius: '24px 24px 0 0',
-          zIndex: 99,
-          paddingBottom: 'max(28px, env(safe-area-inset-bottom, 28px))',
-          maxHeight: '80vh',
-          display: 'flex', flexDirection: 'column',
+      {/* Centering wrapper — avoids transform conflict with framer-motion y */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        display: 'flex', justifyContent: 'center',
+        zIndex: 201, pointerEvents: 'none',
+      }}>
+        {/* Sheet */}
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', stiffness: 380, damping: 36 }}
+          style={{
+            width: '100%', maxWidth: 430,
+            backgroundColor: 'var(--surface)',
+            borderRadius: '24px 24px 0 0',
+            paddingBottom: 'max(28px, env(safe-area-inset-bottom, 28px))',
+            maxHeight: '80vh',
+            display: 'flex', flexDirection: 'column',
+            pointerEvents: 'auto',
         }}
       >
         {/* Handle */}
@@ -362,7 +367,8 @@ function MembersSheet({
             </div>
           )}
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
       <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}`}</style>
     </>
   )
