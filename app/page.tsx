@@ -318,6 +318,36 @@ export default function HomePage() {
               scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
             }}>
               <style>{`.friends-row::-webkit-scrollbar { display: none }`}</style>
+              {/* Add friend button — first */}
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={() => router.push('/friends')}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  WebkitTapHighlightColor: 'transparent', flexShrink: 0, width: 66,
+                }}
+              >
+                <div style={{
+                  width: 56, height: 56, borderRadius: '50%',
+                  border: '2px dashed var(--border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'border-color 0.25s ease',
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 4V16M4 10H16" stroke="var(--text-secondary)" strokeWidth="1.8" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <span style={{
+                  fontSize: 11, fontWeight: 500,
+                  color: 'var(--text-secondary)',
+                  maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  transition: 'color 0.25s ease',
+                }}>
+                  Ajouter
+                </span>
+              </motion.button>
+
               {friends.map((friend) => {
                 const shareId = unseenMap.get(friend.userId) ?? null
                 return (

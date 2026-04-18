@@ -105,7 +105,7 @@ export default function FriendProfilePage({ params }: { params: { userId: string
   )
 
   const streak      = profile?.streak ?? 0
-  const displayName = profile?.fullName || profile?.username || '…'
+  const displayName = profile?.fullName || profile?.username || 'Utilisateur'
   const previewBadges = showAllBadges ? ACHIEVEMENTS : ACHIEVEMENTS.slice(0, 3)
 
   return (
@@ -122,7 +122,7 @@ export default function FriendProfilePage({ params }: { params: { userId: string
           </svg>
         </IconButton>
         <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.2px', transition: 'color 0.25s ease' }}>
-          {profile?.username ? `@${profile.username}` : displayName}
+          {loading ? '' : (profile?.username ? `@${profile.username}` : displayName)}
         </span>
         <div style={{ width: 36 }} />
       </div>
