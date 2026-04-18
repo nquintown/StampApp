@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import React, { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import TopBar, { IconButton } from '@/components/TopBar'
@@ -10,6 +10,14 @@ import FAB from '@/components/FAB'
 import ContextMenuSheet from '@/components/ContextMenuSheet'
 import RenameSheet from '@/components/RenameSheet'
 import { preGrantGyroPermission } from '@/lib/gyro'
+import {
+  fetchCollectionMembersWithProfiles,
+  fetchCollectionOwner,
+  insertCollectionMember,
+  removeCollectionMember,
+  type CollectionMember,
+} from '@/lib/stamps-db'
+import { getFriends, type FriendUser } from '@/lib/friends-db'
 
 const containerVariants = {
   hidden: {},
@@ -24,14 +32,352 @@ const itemVariants = {
   },
 }
 
+// ── Small avatar ──────────────────────────────────────────
+function MemberAvatar({ member, size = 44 }: { member: CollectionMember | FriendUser; size?: number }) {
+  const name   = ('username' in member ? member.username : null) || ('fullName' in member ? member.fullName : null) || 'U'
+  const letter = typeof name === 'string' ? name.charAt(0).toUpperCase() : 'U'
+  const url    = 'avatarUrl' in member ? member.avatarUrl : null
+
+  return url ? (
+    <img src={url} alt={String(name)} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+  ) : (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      backgroundColor: 'var(--text-primary)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0, color: 'var(--bg)',
+      fontSize: size * 0.38, fontWeight: 700, lineHeight: 1,
+      transition: 'background-color 0.25s ease',
+    }}>
+      {letter}
+    </div>
+  )
+}
+
+// ── Members sheet ─────────────────────────────────────────
+function MembersSheet({
+  visible,
+  onClose,
+  collectionId,
+  collectionName,
+  meId,
+}: {
+  visible:        boolean
+  onClose:        () => void
+  collectionId:   string
+  collectionName: string
+  meId:           string
+}) {
+  const [members,    setMembers]    = useState<CollectionMember[]>([])
+  const [ownerId,    setOwnerId]    = useState<string | null>(null)
+  const [friends,    setFriends]    = useState<FriendUser[]>([])
+  const [showInvite, setShowInvite] = useState(false)
+  const [loading,    setLoading]    = useState(true)
+  const [removing,   setRemoving]   = useState<string | null>(null)
+  const [adding,     setAdding]     = useState<string | null>(null)
+
+  const isOwner = ownerId === meId
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    const [mems, owner, friendList] = await Promise.all([
+      fetchCollectionMembersWithProfiles(collectionId),
+      fetchCollectionOwner(collectionId),
+      getFriends(meId),
+    ])
+    setMembers(mems)
+    setOwnerId(owner)
+    // Filter out friends who are already members
+    const memberIds = new Set(mems.map((m) => m.userId))
+    setFriends(friendList.filter((f) => !memberIds.has(f.userId)))
+    setLoading(false)
+  }, [collectionId, meId])
+
+  useEffect(() => {
+    if (visible) { load(); setShowInvite(false) }
+  }, [visible, load])
+
+  const handleRemove = async (userId: string) => {
+    setRemoving(userId)
+    try {
+      await removeCollectionMember(collectionId, userId)
+      setMembers((prev) => prev.filter((m) => m.userId !== userId))
+      setFriends((prev) => {
+        // Re-add to friends list if they're a friend
+        return prev
+      })
+    } finally {
+      setRemoving(null)
+    }
+  }
+
+  const handleAdd = async (friend: FriendUser) => {
+    setAdding(friend.userId)
+    try {
+      await insertCollectionMember(collectionId, friend.userId, meId)
+      const newMember: CollectionMember = {
+        userId:    friend.userId,
+        username:  friend.username ?? null,
+        fullName:  friend.fullName ?? null,
+        avatarUrl: friend.avatarUrl ?? null,
+        invitedBy: meId,
+      }
+      setMembers((prev) => [...prev, newMember])
+      setFriends((prev) => prev.filter((f) => f.userId !== friend.userId))
+    } finally {
+      setAdding(null)
+    }
+  }
+
+  const memberName = (m: CollectionMember) =>
+    m.username || m.fullName || 'Utilisateur'
+
+  const friendName = (f: FriendUser) =>
+    f.username || f.fullName || f.email?.split('@')[0] || 'Utilisateur'
+
+  if (!visible) return null
+
+  return (
+    <>
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 98,
+          backgroundColor: 'rgba(0,0,0,0.4)',
+        }}
+      />
+
+      {/* Sheet */}
+      <motion.div
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', stiffness: 380, damping: 36 }}
+        style={{
+          position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+          width: '100%', maxWidth: 430,
+          backgroundColor: 'var(--surface)',
+          borderRadius: '24px 24px 0 0',
+          zIndex: 99,
+          paddingBottom: 'max(28px, env(safe-area-inset-bottom, 28px))',
+          maxHeight: '80vh',
+          display: 'flex', flexDirection: 'column',
+        }}
+      >
+        {/* Handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: 'var(--border)' }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ padding: '8px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 2px', transition: 'color 0.25s ease' }}>
+              Membres
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0, transition: 'color 0.25s ease' }}>
+              {collectionName}
+            </p>
+          </div>
+          {isOwner && !showInvite && friends.length > 0 && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowInvite(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', borderRadius: 12,
+                backgroundColor: 'var(--text-primary)', color: 'var(--bg)',
+                border: 'none', cursor: 'pointer',
+                fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+                WebkitTapHighlightColor: 'transparent',
+                transition: 'background-color 0.25s ease',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                <circle cx="7" cy="6" r="2.8" stroke="currentColor" strokeWidth="1.4" />
+                <path d="M1.5 16c0-3 2.6-5 5.5-5M13 9v6M10 12h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              Inviter
+            </motion.button>
+          )}
+          {showInvite && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowInvite(false)}
+              style={{
+                padding: '8px 14px', borderRadius: 12,
+                backgroundColor: 'var(--surface2)', color: 'var(--text-secondary)',
+                border: '1px solid var(--border)', cursor: 'pointer',
+                fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              Retour
+            </motion.button>
+          )}
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px' }}>
+          {loading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 20 }}>
+              {[0, 1, 2].map((i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', backgroundColor: 'var(--surface2)', animation: 'pulse 1.4s ease-in-out infinite', flexShrink: 0 }} />
+                  <div style={{ flex: 1, height: 14, borderRadius: 7, backgroundColor: 'var(--surface2)', animation: 'pulse 1.4s ease-in-out infinite' }} />
+                </div>
+              ))}
+            </div>
+          ) : showInvite ? (
+            /* ── Invite view ─────────────────────── */
+            <div style={{ paddingBottom: 20 }}>
+              {friends.length === 0 ? (
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', textAlign: 'center', padding: '20px 0' }}>
+                  Tous tes amis sont déjà membres.
+                </p>
+              ) : (
+                <div style={{
+                  backgroundColor: 'var(--bg)', borderRadius: 16,
+                  border: '1px solid var(--border)', overflow: 'hidden',
+                  transition: 'background-color 0.25s ease, border-color 0.25s ease',
+                }}>
+                  {friends.map((f, i) => (
+                    <div key={f.userId} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '12px 16px',
+                      borderBottom: i < friends.length - 1 ? '1px solid var(--border)' : 'none',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <MemberAvatar member={f} />
+                        <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', margin: 0, transition: 'color 0.25s ease' }}>
+                          {friendName(f)}
+                        </p>
+                      </div>
+                      <motion.button
+                        whileTap={{ scale: 0.93 }}
+                        onClick={() => handleAdd(f)}
+                        disabled={adding === f.userId}
+                        style={{
+                          padding: '7px 14px', borderRadius: 10, border: 'none',
+                          backgroundColor: adding === f.userId ? 'var(--surface2)' : 'var(--text-primary)',
+                          color: adding === f.userId ? 'var(--text-secondary)' : 'var(--bg)',
+                          fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                          WebkitTapHighlightColor: 'transparent',
+                          transition: 'background-color 0.2s',
+                        }}
+                      >
+                        {adding === f.userId ? '…' : 'Ajouter'}
+                      </motion.button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* ── Members list ────────────────────── */
+            <div style={{ paddingBottom: 20 }}>
+              {members.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                  <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 16px' }}>
+                    Aucun membre pour l&apos;instant.
+                  </p>
+                  {isOwner && friends.length > 0 && (
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => setShowInvite(true)}
+                      style={{
+                        padding: '11px 24px', borderRadius: 14,
+                        backgroundColor: 'var(--text-primary)', color: 'var(--bg)',
+                        border: 'none', fontSize: 14, fontWeight: 700,
+                        cursor: 'pointer', fontFamily: 'inherit',
+                        WebkitTapHighlightColor: 'transparent',
+                        transition: 'background-color 0.25s ease',
+                      }}
+                    >
+                      Inviter des amis
+                    </motion.button>
+                  )}
+                </div>
+              ) : (
+                <div style={{
+                  backgroundColor: 'var(--bg)', borderRadius: 16,
+                  border: '1px solid var(--border)', overflow: 'hidden',
+                  transition: 'background-color 0.25s ease, border-color 0.25s ease',
+                }}>
+                  <AnimatePresence initial={false}>
+                    {members.map((m, i) => (
+                      <motion.div
+                        key={m.userId}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '12px 16px',
+                          borderBottom: i < members.length - 1 ? '1px solid var(--border)' : 'none',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <MemberAvatar member={m} />
+                          <div>
+                            <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', margin: 0, transition: 'color 0.25s ease' }}>
+                              {memberName(m)}
+                            </p>
+                            {m.username && m.fullName && (
+                              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '1px 0 0', transition: 'color 0.25s ease' }}>
+                                @{m.username}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Remove button — only for owner */}
+                        {isOwner && (
+                          <motion.button
+                            whileTap={{ scale: 0.93 }}
+                            onClick={() => handleRemove(m.userId)}
+                            disabled={removing === m.userId}
+                            style={{
+                              padding: '7px 12px', borderRadius: 10, border: 'none',
+                              backgroundColor: 'transparent', color: '#EF4444',
+                              fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              WebkitTapHighlightColor: 'transparent',
+                              opacity: removing === m.userId ? 0.5 : 1,
+                            }}
+                          >
+                            {removing === m.userId ? '…' : 'Retirer'}
+                          </motion.button>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
+      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}`}</style>
+    </>
+  )
+}
+
+// ── Main page ─────────────────────────────────────────────
 export default function CollectionPage({ params }: { params: { id: string } }) {
   const { id } = params
   const router  = useRouter()
-  const { collections, stamps, loading, loadStamps, renameCollection, deleteCollection } = useStore()
+  const { user, collections, stamps, loading, loadStamps, renameCollection, deleteCollection } = useStore()
 
-  const [menuOpen,   setMenuOpen]   = useState(false)
-  const [renameOpen, setRenameOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [menuOpen,    setMenuOpen]    = useState(false)
+  const [renameOpen,  setRenameOpen]  = useState(false)
+  const [membersOpen, setMembersOpen] = useState(false)
+  const [isDeleting,  setIsDeleting]  = useState(false)
 
   // Load stamps if not yet loaded (direct URL access / page refresh)
   useEffect(() => {
@@ -42,9 +388,22 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
 
   const collection       = collections.find((c) => c.id === id)
   const collectionStamps = stamps.filter((s) => s.collectionId === id || id === 'all')
-  const isVirtual        = id === 'all'   // "All stamps" cannot be renamed/deleted
+  const isVirtual        = id === 'all'
 
   const menuItems = [
+    {
+      label: 'Membres',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="7" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M1.5 15C1.5 12.5 4 10.5 7 10.5C10 10.5 12.5 12.5 12.5 15" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <circle cx="13.5" cy="7" r="2" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M14 11C15.5 11.2 16.5 12.5 16.5 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      ),
+      noAutoClose: true,
+      onPress: () => { setMenuOpen(false); setTimeout(() => setMembersOpen(true), 220) },
+    },
     {
       label: 'Renommer',
       icon: (
@@ -117,6 +476,7 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
   }
 
   return (
+    <>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: isDeleting ? 0 : 1, y: isDeleting ? -20 : 0 }}
@@ -214,10 +574,7 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
           )}
         </div>
 
-        <FAB
-          onCamera={() => router.push('/camera')}
-          
-        />
+        <FAB onCamera={() => router.push('/camera')} />
 
         {/* Action sheet */}
         <ContextMenuSheet
@@ -238,5 +595,19 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
 
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
       </motion.div>
+
+      {/* Members sheet — outside motion.div to avoid z-index issues */}
+      <AnimatePresence>
+        {membersOpen && (
+          <MembersSheet
+            visible={membersOpen}
+            onClose={() => setMembersOpen(false)}
+            collectionId={id}
+            collectionName={collection?.name ?? 'Collection'}
+            meId={user?.id ?? ''}
+          />
+        )}
+      </AnimatePresence>
+    </>
   )
 }

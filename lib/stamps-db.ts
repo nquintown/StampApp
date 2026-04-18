@@ -285,3 +285,79 @@ export async function fetchCollectionMembers(
   if (error) return []
   return (data ?? []).map((r: { user_id: string }) => r.user_id)
 }
+
+export interface CollectionMember {
+  userId:    string
+  username:  string | null
+  fullName:  string | null
+  avatarUrl: string | null
+  invitedBy: string
+}
+
+/** Fetch members of a collection with their profile info. */
+export async function fetchCollectionMembersWithProfiles(
+  collectionId: string,
+): Promise<CollectionMember[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('collection_members')
+      .select('user_id, invited_by')
+      .eq('collection_id', collectionId)
+
+    if (error || !data || data.length === 0) return []
+
+    const userIds = data.map((r: { user_id: string }) => r.user_id)
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url')
+      .in('id', userIds)
+
+    const profileMap = new Map((profiles ?? []).map((p: { id: string; username: string | null; full_name: string | null; avatar_url: string | null }) => [p.id, p]))
+
+    return data.map((r: { user_id: string; invited_by: string }) => {
+      const p = profileMap.get(r.user_id)
+      return {
+        userId:    r.user_id,
+        username:  p?.username  ?? null,
+        fullName:  p?.full_name ?? null,
+        avatarUrl: p?.avatar_url ?? null,
+        invitedBy: r.invited_by,
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
+/** Get the owner (user_id) of a collection. */
+export async function fetchCollectionOwner(
+  collectionId: string,
+): Promise<string | null> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('collections')
+      .select('user_id')
+      .eq('id', collectionId)
+      .single()
+    if (error || !data) return null
+    return (data as { user_id: string }).user_id
+  } catch {
+    return null
+  }
+}
+
+/** Remove a member from a collection. */
+export async function removeCollectionMember(
+  collectionId: string,
+  userId: string,
+): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('collection_members')
+    .delete()
+    .eq('collection_id', collectionId)
+    .eq('user_id', userId)
+  if (error) throw error
+}
