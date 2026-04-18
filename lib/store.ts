@@ -69,7 +69,7 @@ interface StampStore {
   renameStamp:       (id: string, newTitle: string) => Promise<void>
   moveToCollection:  (stampId: string, collectionId: string) => Promise<void>
   toggleFavorite:    (stampId: string) => Promise<void>
-  addCollection:     (name: string) => Promise<void>
+  addCollection:     (name: string, memberIds?: string[]) => Promise<void>
   renameCollection:  (id: string, newName: string) => Promise<void>
   deleteCollection:  (id: string) => Promise<void>
   toggleDark:        () => void
@@ -112,11 +112,15 @@ export const useStore = create<StampStore>((set, get) => ({
   loadStamps: async () => {
     set({ loading: true })
     try {
-      const [rawCols, stamps] = await Promise.all([
+      const [ownedCols, sharedCols, stamps] = await Promise.all([
         db.fetchCollections(),
+        db.fetchSharedCollections().catch(() => [] as db.RawCollection[]),
         db.fetchStamps(),
       ])
-      const collections = buildCollections(rawCols, stamps)
+      // Merge owned + shared (deduplicated by id)
+      const allColIds = new Set(ownedCols.map((c) => c.id))
+      const merged = [...ownedCols, ...sharedCols.filter((c) => !allColIds.has(c.id))]
+      const collections = buildCollections(merged, stamps)
       set({ stamps, collections, loading: false })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
@@ -235,7 +239,7 @@ export const useStore = create<StampStore>((set, get) => ({
   },
 
   // ── Add collection → optimistic + insert ─────────────
-  addCollection: async (name) => {
+  addCollection: async (name, memberIds = []) => {
     const { user } = get()
     if (!user) return
 
@@ -254,6 +258,13 @@ export const useStore = create<StampStore>((set, get) => ({
 
     try {
       await db.insertCollection(id, name, user.id)
+
+      // Invite members in parallel
+      if (memberIds.length > 0) {
+        await Promise.all(
+          memberIds.map((uid) => db.insertCollectionMember(id, uid, user.id)),
+        )
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
       console.error('addCollection error:', err)

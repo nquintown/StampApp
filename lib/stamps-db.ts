@@ -175,3 +175,58 @@ export async function updateCollection(
   const { error } = await supabase.from('collections').update(updates).eq('id', id)
   if (error) throw error
 }
+
+// ── Collection members (shared collections) ───────────────
+
+/** Add a member to a collection. `invitedBy` must be the collection owner's userId. */
+export async function insertCollectionMember(
+  collectionId: string,
+  userId: string,
+  invitedBy: string,
+): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('collection_members').insert({
+    collection_id: collectionId,
+    user_id:       userId,
+    invited_by:    invitedBy,
+  })
+  // Ignore duplicate (user already member)
+  if (error && !error.message.includes('unique')) throw error
+}
+
+/** Fetch collections the current user is a member of (not owner of). */
+export async function fetchSharedCollections(): Promise<RawCollection[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('collection_members')
+    .select('collection_id, collections(id, name, created_at)')
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+
+  return (data ?? [])
+    .map((row: Record<string, unknown>) => {
+      const col = row.collections as Record<string, unknown> | null
+      if (!col) return null
+      return {
+        id:        col.id as string,
+        name:      col.name as string,
+        createdAt: col.created_at as string,
+      }
+    })
+    .filter((c): c is RawCollection => c !== null)
+}
+
+/** Get member user IDs for a collection. */
+export async function fetchCollectionMembers(
+  collectionId: string,
+): Promise<string[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('collection_members')
+    .select('user_id')
+    .eq('collection_id', collectionId)
+
+  if (error) return []
+  return (data ?? []).map((r: { user_id: string }) => r.user_id)
+}

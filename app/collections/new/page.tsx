@@ -9,7 +9,8 @@ import { getFriends, type FriendUser } from '@/lib/friends-db'
 
 export default function NewCollectionPage() {
   const router = useRouter()
-  const { user, addCollection } = useStore((s) => ({ user: s.user, addCollection: s.addCollection }))
+  const user          = useStore((s) => s.user)
+  const addCollection = useStore((s) => s.addCollection)
 
   const [step,     setStep]     = useState<1 | 2>(1)
   const [name,     setName]     = useState('')
@@ -22,7 +23,7 @@ export default function NewCollectionPage() {
 
   const handleCreate = () => {
     if (!name.trim()) return
-    addCollection(name.trim())
+    addCollection(name.trim(), Array.from(invited))
     router.back()
   }
 
