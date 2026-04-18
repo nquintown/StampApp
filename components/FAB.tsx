@@ -100,7 +100,8 @@ export default function FAB({ onCamera, onCollection }: FABProps) {
           rotate: { type: 'spring', stiffness: 400, damping: 28 },
         }}
         whileTap={{ scale: 0.9 }}
-        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={() => setOpen((v) => !v)}
         aria-label="Actions"
         style={{
           position: 'fixed',
