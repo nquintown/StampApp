@@ -384,13 +384,20 @@ export async function fetchSharedCollectionsWithMembers(): Promise<SharedCollect
       .select('collection_id, collections(id, name, created_at)')
     if (!memberRows || memberRows.length === 0) return []
 
+    // Deduplicate by collection id — the RLS policy returns one row per member
+    // (user_id = me OR invited_by = me), so a collection with N invitees yields N rows.
+    const seenColIds = new Set<string>()
     const cols = memberRows
       .map((r: Record<string, unknown>) => {
         const c = r.collections as Record<string, unknown> | null
         if (!c) return null
         return { id: c.id as string, name: c.name as string, createdAt: c.created_at as string }
       })
-      .filter((c): c is { id: string; name: string; createdAt: string } => c !== null)
+      .filter((c): c is { id: string; name: string; createdAt: string } => {
+        if (!c || seenColIds.has(c.id)) return false
+        seenColIds.add(c.id)
+        return true
+      })
 
     if (cols.length === 0) return []
 
