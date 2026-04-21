@@ -5,6 +5,7 @@ export interface Profile {
   username:      string | null
   fullName:      string | null
   avatarUrl:     string | null
+  email:         string | null
   streak:        number
   lastStampDate: string | null
   createdAt:     string
@@ -15,7 +16,7 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
     const supabase = createClient()
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url, streak, last_stamp_date, created_at')
+      .select('id, username, full_name, avatar_url, email, streak, last_stamp_date, created_at')
       .eq('id', userId)
       .single()
 
@@ -26,6 +27,7 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
       username:      data.username        ?? null,
       fullName:      data.full_name       ?? null,
       avatarUrl:     data.avatar_url      ?? null,
+      email:         data.email           ?? null,
       streak:        data.streak          ?? 0,
       lastStampDate: data.last_stamp_date ?? null,
       createdAt:     data.created_at,

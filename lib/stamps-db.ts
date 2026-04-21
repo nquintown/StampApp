@@ -211,6 +211,8 @@ export async function fetchCollectionAllStamps(collectionId: string): Promise<St
 }
 
 // ── Public stats for a friend ─────────────────────────────
+// Uses a SECURITY DEFINER RPC to bypass RLS and count any user's stamps/collections.
+// Run supabase/migrations/20260421_public_stats_rpc.sql first.
 
 export async function fetchFriendPublicStats(friendUserId: string): Promise<{
   stampCount:      number
@@ -218,13 +220,11 @@ export async function fetchFriendPublicStats(friendUserId: string): Promise<{
 }> {
   try {
     const supabase = createClient()
-    const [stampsRes, colsRes] = await Promise.all([
-      supabase.from('stamps').select('id', { count: 'exact', head: true }).eq('user_id', friendUserId),
-      supabase.from('collections').select('id', { count: 'exact', head: true }).eq('user_id', friendUserId),
-    ])
+    const { data, error } = await supabase.rpc('get_user_public_stats', { p_user_id: friendUserId })
+    if (error || !data) return { stampCount: 0, collectionCount: 0 }
     return {
-      stampCount:      stampsRes.count  ?? 0,
-      collectionCount: colsRes.count    ?? 0,
+      stampCount:      (data as { stamp_count: number; collection_count: number }).stamp_count      ?? 0,
+      collectionCount: (data as { stamp_count: number; collection_count: number }).collection_count ?? 0,
     }
   } catch {
     return { stampCount: 0, collectionCount: 0 }
