@@ -467,7 +467,7 @@ export default function HomePage() {
                 margin: 0,
               }}
             >
-              Collections
+              Mes collections
             </h2>
             <motion.button
               whileTap={{ scale: 0.95 }}
@@ -493,7 +493,11 @@ export default function HomePage() {
             animate="show"
             style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
           >
-            {collections.filter((c) => c.id !== 'all').length === 0 ? (
+            {/* Exclude shared collections — they already appear in "Collections partagées" */}
+            {(() => {
+              const sharedIds = new Set(sharedCols.map((c) => c.id))
+              const ownCols   = collections.filter((c) => c.id !== 'all' && !sharedIds.has(c.id))
+              return ownCols.length === 0 ? (
               /* ── Empty state: no collections yet ── */
               <motion.div variants={itemVariants}>
                 <motion.button
@@ -578,18 +582,19 @@ export default function HomePage() {
                   </div>
                 </motion.button>
               </motion.div>
-            ) : (
-              collections.filter((c) => c.id !== 'all').map((collection) => (
-                <motion.div key={collection.id} variants={itemVariants}>
-                  <CollectionCard
-                    collection={collection}
-                    stamps={stamps}
-                    onClick={() => router.push(`/collections/${collection.id}`)}
-                    onStampClick={async (id) => { await preGrantGyroPermission(); router.push(`/stamps/${id}`) }}
-                  />
-                </motion.div>
-              ))
-            )}
+              ) : (
+                ownCols.map((collection) => (
+                  <motion.div key={collection.id} variants={itemVariants}>
+                    <CollectionCard
+                      collection={collection}
+                      stamps={stamps}
+                      onClick={() => router.push(`/collections/${collection.id}`)}
+                      onStampClick={async (id) => { await preGrantGyroPermission(); router.push(`/stamps/${id}`) }}
+                    />
+                  </motion.div>
+                ))
+              )
+            })()}
           </motion.div>
         </motion.div>
 
