@@ -389,6 +389,7 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
   const [membersOpen,     setMembersOpen]     = useState(false)
   const [isDeleting,      setIsDeleting]      = useState(false)
   const [allStamps,       setAllStamps]       = useState<Stamp[] | null>(null)
+  const [memberProfiles,  setMemberProfiles]  = useState<Map<string, { username: string | null; fullName: string | null; avatarUrl: string | null; email: string | null }>>(new Map())
 
   // Load stamps if not yet loaded (direct URL access / page refresh)
   useEffect(() => {
@@ -404,6 +405,10 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     if (isVirtual) { setAllStamps(null); return }
     fetchCollectionAllStamps(id).then(setAllStamps)
+    fetchCollectionMembersWithProfiles(id).then((members) => {
+      const map = new Map(members.map((m) => [m.userId, { username: m.username, fullName: m.fullName, avatarUrl: m.avatarUrl, email: m.email }]))
+      setMemberProfiles(map)
+    })
   }, [id, isVirtual])
 
   // Refresh when own stamps change (e.g. new stamp added)
@@ -554,7 +559,7 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
               style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}
             >
               {collectionStamps.map((stamp) => (
-                <motion.div key={stamp.id} variants={itemVariants} style={{ display: 'flex', justifyContent: 'center' }}>
+                <motion.div key={stamp.id} variants={itemVariants} style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
                   <StampCard
                     stamp={stamp}
                     size="small"
@@ -562,6 +567,27 @@ export default function CollectionPage({ params }: { params: { id: string } }) {
                     onClick={async () => { await preGrantGyroPermission(); router.push(`/stamps/${stamp.id}`) }}
                     layoutId={`stamp-col-${stamp.id}`}
                   />
+                  {stamp.ownerId && stamp.ownerId !== user?.id && (() => {
+                    const p = memberProfiles.get(stamp.ownerId)
+                    const name = p?.username || p?.fullName || (p?.email ? p.email.split('@')[0] : '?')
+                    return (
+                      <div style={{
+                        position: 'absolute', top: 6, right: 6,
+                        width: 22, height: 22, borderRadius: '50%',
+                        backgroundColor: 'var(--text-primary)',
+                        border: '2px solid var(--bg)',
+                        overflow: 'hidden',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                        zIndex: 2,
+                      }}>
+                        {p?.avatarUrl
+                          ? <img src={p.avatarUrl} alt={String(name)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--bg)', lineHeight: 1 }}>{String(name).charAt(0).toUpperCase()}</span>
+                        }
+                      </div>
+                    )
+                  })()}
                 </motion.div>
               ))}
             </motion.div>

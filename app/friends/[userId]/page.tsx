@@ -93,6 +93,13 @@ export default function FriendProfilePage({ params }: { params: { userId: string
     })
   }, [me, userId])
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchFriendPublicStats(userId).then(setStats)
+    }, 30_000)
+    return () => clearInterval(interval)
+  }, [userId])
+
   // Count-based badge unlocking
   const fakeStamps = Array.from(
     { length: stats?.stampCount ?? 0 },
@@ -335,12 +342,17 @@ export default function FriendProfilePage({ params }: { params: { userId: string
                   transition: 'background-color 0.25s ease, border-color 0.25s ease',
                 }}>
                   {commonCols.map((col, i) => (
-                    <div
+                    <motion.button
                       key={col.id}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => router.push(`/collections/${col.id}`)}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
+                        width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                         padding: '13px 16px',
                         borderBottom: i < commonCols.length - 1 ? '1px solid var(--border)' : 'none',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        textAlign: 'left', fontFamily: 'inherit',
+                        WebkitTapHighlightColor: 'transparent',
                         transition: 'border-color 0.25s ease',
                       }}
                     >
@@ -355,10 +367,11 @@ export default function FriendProfilePage({ params }: { params: { userId: string
                             stroke="var(--text-secondary)" strokeWidth="1.4" strokeLinejoin="round" />
                         </svg>
                       </div>
-                      <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', transition: 'color 0.25s ease' }}>
-                        {col.name}
-                      </span>
-                    </div>
+                      <span style={{ flex: 1, fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', transition: 'color 0.25s ease' }}>{col.name}</span>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, color: 'var(--text-secondary)' }}>
+                        <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </motion.button>
                   ))}
                 </div>
               </div>

@@ -203,6 +203,7 @@ export async function fetchCollectionAllStamps(collectionId: string): Promise<St
       favorite:       r.favorite ?? false,
       location:       r.location ?? undefined,
       photoTransform: r.photo_transform ?? undefined,
+      ownerId:        r.user_id ?? undefined,
     }))
   } catch {
     return []
@@ -362,6 +363,73 @@ export async function fetchCollectionMembersWithProfiles(
         invitedBy: r.invited_by,
       }
     })
+  } catch {
+    return []
+  }
+}
+
+export interface SharedCollectionWithMembers {
+  id:        string
+  name:      string
+  createdAt: string
+  members:   Array<{ userId: string; username: string | null; fullName: string | null; avatarUrl: string | null; email: string | null }>
+}
+
+export async function fetchSharedCollectionsWithMembers(): Promise<SharedCollectionWithMembers[]> {
+  try {
+    const supabase = createClient()
+    // 1. Get collections the user is a member of
+    const { data: memberRows } = await supabase
+      .from('collection_members')
+      .select('collection_id, collections(id, name, created_at)')
+    if (!memberRows || memberRows.length === 0) return []
+
+    const cols = memberRows
+      .map((r: Record<string, unknown>) => {
+        const c = r.collections as Record<string, unknown> | null
+        if (!c) return null
+        return { id: c.id as string, name: c.name as string, createdAt: c.created_at as string }
+      })
+      .filter((c): c is { id: string; name: string; createdAt: string } => c !== null)
+
+    if (cols.length === 0) return []
+
+    const colIds = cols.map((c) => c.id)
+
+    // 2. Get all members for those collections
+    const { data: allMembers } = await supabase
+      .from('collection_members')
+      .select('collection_id, user_id')
+      .in('collection_id', colIds)
+
+    if (!allMembers) return cols.map((c) => ({ ...c, members: [] }))
+
+    const allUserIds = [...new Set(allMembers.map((r: { user_id: string }) => r.user_id))]
+
+    // 3. Fetch profiles
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, email')
+      .in('id', allUserIds)
+
+    const profileMap = new Map((profiles ?? []).map((p: Record<string, unknown>) => [p.id as string, p]))
+
+    // 4. Group members by collection
+    const membersByCol = new Map<string, SharedCollectionWithMembers['members']>()
+    for (const r of allMembers as { collection_id: string; user_id: string }[]) {
+      const list = membersByCol.get(r.collection_id) ?? []
+      const p = profileMap.get(r.user_id)
+      list.push({
+        userId:    r.user_id,
+        username:  (p?.username as string) ?? null,
+        fullName:  (p?.full_name as string) ?? null,
+        avatarUrl: (p?.avatar_url as string) ?? null,
+        email:     (p?.email as string) ?? null,
+      })
+      membersByCol.set(r.collection_id, list)
+    }
+
+    return cols.map((c) => ({ ...c, members: membersByCol.get(c.id) ?? [] }))
   } catch {
     return []
   }

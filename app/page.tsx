@@ -12,6 +12,7 @@ import TabBar from '@/components/TabBar'
 import { preGrantGyroPermission } from '@/lib/gyro'
 import { getPendingCount, getFriends, type FriendUser } from '@/lib/friends-db'
 import { getReceivedShares, type SharedStampRecord } from '@/lib/sharing-db'
+import { fetchSharedCollectionsWithMembers, type SharedCollectionWithMembers } from '@/lib/stamps-db'
 
 const containerVariants = {
   hidden: {},
@@ -173,6 +174,7 @@ export default function HomePage() {
   const [pendingCount, setPendingCount] = useState(0)
   const [friends,      setFriends]      = useState<FriendUser[]>([])
   const [unseenMap,    setUnseenMap]    = useState<Map<string, string>>(new Map()) // senderId → shareId
+  const [sharedCols,   setSharedCols]   = useState<SharedCollectionWithMembers[]>([])
 
   useEffect(() => {
     // New user flag: clean up legacy key (flow now goes through daily-stamp)
@@ -190,8 +192,10 @@ export default function HomePage() {
       Promise.all([
         getFriends(user.id),
         getReceivedShares(user.id),
-      ]).then(([friendList, shares]) => {
+        fetchSharedCollectionsWithMembers(),
+      ]).then(([friendList, shares, sCols]) => {
         setFriends(friendList)
+        setSharedCols(sCols)
         // Build map: senderId → most recent unseen shareId
         const map = new Map<string, string>()
         for (const s of shares) {
@@ -372,6 +376,67 @@ export default function HomePage() {
                   />
                 )
               })}
+            </div>
+          </motion.div>
+        )}
+
+        {sharedCols.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ marginBottom: 28 }}
+          >
+            <div style={{ padding: '0 20px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
+                Collections partagées
+              </h2>
+            </div>
+            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingLeft: 20, paddingRight: 20, paddingBottom: 4, scrollbarWidth: 'none' }}>
+              {sharedCols.map((col) => (
+                <motion.button
+                  key={col.id}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => router.push(`/collections/${col.id}`)}
+                  style={{
+                    flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8,
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    borderRadius: 16, padding: '14px 16px', cursor: 'pointer',
+                    minWidth: 140, textAlign: 'left', fontFamily: 'inherit',
+                    WebkitTapHighlightColor: 'transparent',
+                    transition: 'background-color 0.25s ease, border-color 0.25s ease',
+                  }}
+                >
+                  {/* Avatar stack — up to 3 members */}
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {col.members.slice(0, 3).map((m, mi) => {
+                      const name = m.username || m.fullName || (m.email ? m.email.split('@')[0] : 'U')
+                      return (
+                        <div
+                          key={m.userId}
+                          style={{
+                            width: 28, height: 28, borderRadius: '50%',
+                            backgroundColor: 'var(--text-primary)',
+                            border: '2px solid var(--surface)',
+                            marginLeft: mi > 0 ? -8 : 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            overflow: 'hidden', flexShrink: 0, zIndex: 3 - mi,
+                            position: 'relative', transition: 'background-color 0.25s ease',
+                          }}
+                        >
+                          {m.avatarUrl
+                            ? <img src={m.avatarUrl} alt={String(name)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--bg)', lineHeight: 1 }}>{String(name).charAt(0).toUpperCase()}</span>
+                          }
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3, transition: 'color 0.25s ease' }}>
+                    {col.name}
+                  </span>
+                </motion.button>
+              ))}
             </div>
           </motion.div>
         )}

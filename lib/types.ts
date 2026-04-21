@@ -25,6 +25,7 @@ export type Stamp = {
   favorite?: boolean
   location?: StampLocation
   photoTransform?: PhotoTransform   // pan/zoom/rotate saved at cut time
+  ownerId?: string   // set when stamp belongs to another user (shared collection)
 }
 
 export type Collection = {
