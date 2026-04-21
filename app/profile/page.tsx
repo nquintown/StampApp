@@ -163,6 +163,14 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       profileDb.fetchProfile(user.id).then((p) => {
+        if (p && p.streak > 0) {
+          const effective = profileDb.computeEffectiveStreak(p.streak, p.lastStampDate)
+          if (effective === 0) {
+            // Streak expired — reset in DB silently
+            profileDb.resetStreak(user.id)
+            p = { ...p, streak: 0 }
+          }
+        }
         setProfile(p)
         setAvatarUrl(p?.avatarUrl ?? null)
       })
@@ -270,7 +278,7 @@ export default function ProfilePage() {
 
   const displayName = profile?.fullName || profile?.username || user?.email?.split('@')[0] || 'Utilisateur'
   const initial     = displayName.charAt(0).toUpperCase()
-  const streak      = profile?.streak ?? 0
+  const streak      = profileDb.computeEffectiveStreak(profile?.streak ?? 0, profile?.lastStampDate ?? null)
   const userCols    = collections.filter((c) => c.id !== 'all')
 
   const unlockedIds = new Set(

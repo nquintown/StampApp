@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { IconButton } from '@/components/TopBar'
-import { fetchProfile, type Profile } from '@/lib/profile-db'
+import { fetchProfile, computeEffectiveStreak, type Profile } from '@/lib/profile-db'
 import { fetchFriendPublicStats, fetchCommonCollections, type RawCollection } from '@/lib/stamps-db'
 import { getSharedStampsBetweenUsers, type SharedStampRecord } from '@/lib/sharing-db'
 import { ACHIEVEMENTS } from '@/lib/achievements'
@@ -111,7 +111,8 @@ export default function FriendProfilePage({ params }: { params: { userId: string
       .map((a) => a.id),
   )
 
-  const streak      = profile?.streak ?? 0
+  // Effective streak — 0 if the friend missed a day
+  const streak      = computeEffectiveStreak(profile?.streak ?? 0, profile?.lastStampDate ?? null)
   // Fallback chain: fullName → username → email prefix → 'Utilisateur'
   const displayName = profile?.fullName || profile?.username || profile?.email?.split('@')[0] || 'Utilisateur'
   const previewBadges = showAllBadges ? ACHIEVEMENTS : ACHIEVEMENTS.slice(0, 3)

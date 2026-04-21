@@ -83,6 +83,24 @@ function localYesterdayStr(): string {
   return localDateStr(d)
 }
 
+// ── Effective streak (client-side — accounts for missed days) ──
+// A streak is still alive if the user stamped today OR yesterday.
+// If the last stamp is older than that, the streak is 0.
+export function computeEffectiveStreak(streak: number, lastStampDate: string | null): number {
+  if (!lastStampDate || streak === 0) return 0
+  const today     = localDateStr()
+  const yesterday = localYesterdayStr()
+  return (lastStampDate === today || lastStampDate === yesterday) ? streak : 0
+}
+
+// ── Reset a stale streak to 0 in the DB ───────────────────
+export async function resetStreak(userId: string): Promise<void> {
+  try {
+    const supabase = createClient()
+    await supabase.from('profiles').update({ streak: 0 }).eq('id', userId)
+  } catch { /* best-effort */ }
+}
+
 // ── Update streak when a stamp is created ─────────────────
 export async function updateStreak(userId: string): Promise<number> {
   try {
